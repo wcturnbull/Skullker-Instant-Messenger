@@ -28,7 +28,7 @@ public class Server {
         serverThread.run();
     }
 
-    public void addChat(Chat chat) {
+    public synchronized void addChat(Chat chat) {
         chats.add(chat);
     }
 
