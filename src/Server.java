@@ -32,6 +32,10 @@ public class Server {
         chats.add(chat);
     }
 
+    public synchronized void writeMessage(Message message) {
+
+    }
+
     class ClientThread extends Thread {
         private Socket socket;
         private BufferedReader in;
@@ -49,9 +53,14 @@ public class Server {
 
         @Override
         public void run() {
+            String input = "";
             do {
-
-            } while (true);
+                try {
+                    input = in.readLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } while (input != null);
         }
 
     }
