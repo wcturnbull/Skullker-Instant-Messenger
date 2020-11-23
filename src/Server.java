@@ -5,6 +5,7 @@ import java.net.*;
 public class Server {
     private ArrayList<Chat> chats;
     private ArrayList<Account> users;
+    private ArrayList<Message> messages;
     private ServerThread serverThread;
 
     public Server() {
@@ -24,8 +25,11 @@ public class Server {
 
             }
         }**/
+        messages = new ArrayList<Message>();
         ServerThread serverThread = new ServerThread();
-        serverThread.run();
+        serverThread.start();
+
+        System.out.println("Deploying server thread...");
     }
 
     public synchronized void addChat(Chat chat) {
@@ -33,19 +37,32 @@ public class Server {
     }
 
     public synchronized void writeMessage(Message message) {
+        messages.add(message);
+    }
 
+    public synchronized ArrayList<Message> getMessages() {
+        for (Message m : messages) {
+            System.out.println(m.getMessage());
+        }
+        return messages;
     }
 
     class ClientThread extends Thread {
         private Socket socket;
         private BufferedReader in;
         private PrintWriter out;
+        private ObjectInputStream ois;
+        private ObjectOutputStream oos;
 
         public ClientThread(Socket socket) {
             this.socket = socket;
             try {
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream());
+
+                oos = new ObjectOutputStream(socket.getOutputStream());
+                ois = new ObjectInputStream(socket.getInputStream());
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -53,14 +70,22 @@ public class Server {
 
         @Override
         public void run() {
-            String input = "";
+            System.out.println("Client thread deployed!");
+            Message message = new Message("");
             do {
                 try {
-                    input = in.readLine();
+                    message = (Message) ois.readObject();
+                    System.out.println(message.getMessage());
+                    writeMessage(message);
+                    oos.writeObject(getMessages());
+                    oos.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                    message = null;
                 }
-            } while (input != null);
+            } while (message != null);
         }
 
     }
@@ -73,27 +98,34 @@ public class Server {
         public ServerThread() {
             clientSockets = new ArrayList<Socket>();
             clientThreads = new ArrayList<ClientThread>();
-        }
-
-        @Override
-        public void run() {
+            System.out.println("Server thread deployed!");
             try {
                 serverSocket = new ServerSocket(0xBEEF);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        @Override
+        public void run() {
             while (true) {
                 try {
                     Socket socket = serverSocket.accept();
+                    System.out.println("Client accepted!");
                     clientSockets.add(socket);
                     ClientThread clientThread = new ClientThread(socket);
                     clientThreads.add(clientThread);
-                    clientThread.run();
+                    System.out.println("Deploying client thread...");
+                    clientThread.start();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    public static void main(String[] args) {
+        Server serv = new Server();
     }
 }
 

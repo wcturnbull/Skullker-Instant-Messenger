@@ -3,7 +3,7 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
-public class Client implements Runnable {
+public class Client extends Thread {
     /**
      * add functionality so that client starts a socket that can
      * connect to the server.
@@ -21,23 +21,39 @@ public class Client implements Runnable {
     private Account acc;
     private ArrayList<Chat> chats;
 
-    public void run() {
-
+    public static void main(String[] args) {
         try {
             Socket socket = new Socket("localhost", 0xBEEF);
+            System.out.println("Connection accepted!");
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(socket.getOutputStream());
 
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+
             //All the TO DO's are mentioned above
+            System.out.println("Beginning to take messages...");
+            Scanner in = new Scanner(System.in);
+            while (true) {
+                Message message = new Message(in.nextLine());
+                oos.writeObject(message);
+                oos.flush();
+                ArrayList<Message> messages = (ArrayList<Message>) ois.readObject();
+                for (Message m : messages) {
+                    System.out.println(m.getMessage());
+                }
+            }
             
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
 
-    }
+    }/**
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Client());
-    }
+    }**/
 
 
 }
