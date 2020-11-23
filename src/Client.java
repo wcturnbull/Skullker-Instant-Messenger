@@ -38,9 +38,9 @@ public class Client extends Thread {
                 Message message = new Message(in.nextLine());
                 oos.writeObject(message);
                 oos.flush();
-                ArrayList<Message> messages = (ArrayList<Message>) ois.readObject();
-                for (Message m : messages) {
-                    System.out.println(m.getMessage());
+                int size = ois.readInt();
+                for (int i = 0; i < size; i ++) {
+                    System.out.println(((Message) ois.readObject()).getMessage());
                 }
             }
             

@@ -77,7 +77,11 @@ public class Server {
                     message = (Message) ois.readObject();
                     System.out.println(message.getMessage());
                     writeMessage(message);
-                    oos.writeObject(getMessages());
+                    oos.writeInt(getMessages().size());
+                    for (Message m : getMessages()) {
+                        oos.writeObject(m);
+                    }
+                    //oos.writeObject(getMessages());
                     oos.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
