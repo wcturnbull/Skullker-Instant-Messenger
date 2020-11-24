@@ -3,7 +3,7 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
-public class Client extends Thread {
+public class Client extends Thread implements Constants {
     /**
      * add functionality so that client starts a socket that can
      * connect to the server.

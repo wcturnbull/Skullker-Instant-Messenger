@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.io.*;
 import java.net.*;
 
-public class Server {
+public class Server implements Constants {
     private ArrayList<Chat> chats;
     private ArrayList<Account> users;
     private ArrayList<Message> messages;
