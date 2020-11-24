@@ -41,9 +41,6 @@ public class Server implements Constants {
     }
 
     public synchronized ArrayList<Message> getMessages() {
-        for (Message m : messages) {
-            System.out.println(m.getMessage());
-        }
         return messages;
     }
 
@@ -81,7 +78,6 @@ public class Server implements Constants {
                     for (Message m : getMessages()) {
                         oos.writeObject(m);
                     }
-                    //oos.writeObject(getMessages());
                     oos.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
