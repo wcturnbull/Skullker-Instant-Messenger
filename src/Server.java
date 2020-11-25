@@ -8,6 +8,11 @@ public class Server implements Constants {
     private ArrayList<Message> messages;
     private ServerThread serverThread;
 
+    // multi-thread gatekeepers
+    private final Object CHAT_SYNC;
+    private final Object USER_SYNC;
+    private final Object MESSAGE_SYNC;
+
     public Server() {
         /**
         chats = new ArrayList<Chat>(0);
@@ -25,6 +30,10 @@ public class Server implements Constants {
 
             }
         }**/
+        CHAT_SYNC = new Object();
+        USER_SYNC = new Object();
+        MESSAGE_SYNC = new Object();
+
         messages = new ArrayList<Message>();
         ServerThread serverThread = new ServerThread();
         serverThread.start();
@@ -32,16 +41,32 @@ public class Server implements Constants {
         System.out.println("Deploying server thread...");
     }
 
-    public synchronized void addChat(Chat chat) {
-        chats.add(chat);
+    public void addChat(Chat chat) {
+        synchronized (CHAT_SYNC) {
+            chats.add(chat);
+        }
     }
 
-    public synchronized void writeMessage(Message message) {
-        messages.add(message);
+    public void writeMessage(Chat chat, Message message) {
+        Chat currentChat = fetchChat(chat);
+        synchronized (CHAT_SYNC) {
+            currentChat.sendMessage(message);
+        }
     }
 
-    public synchronized ArrayList<Message> getMessages() {
-        return messages;
+    public ArrayList<Message> getMessages(Chat chat) {
+        return fetchChat(chat).getMessages();
+    }
+
+    public Chat fetchChat(Chat clientChat) {
+        synchronized (CHAT_SYNC) {
+            for (Chat chat : chats) {
+                if (chat.equals(clientChat)) {
+                    return chat;
+                }
+            }
+        }
+        return clientChat;
     }
 
     class ClientThread extends Thread {
@@ -68,24 +93,31 @@ public class Server implements Constants {
         @Override
         public void run() {
             System.out.println("Client thread deployed!");
-            Message message = new Message("");
+            byte choice = 0;
             do {
                 try {
-                    message = (Message) ois.readObject();
-                    System.out.println(message.getMessage());
-                    writeMessage(message);
-                    oos.writeInt(getMessages().size());
-                    for (Message m : getMessages()) {
-                        oos.writeObject(m);
+                    choice = ois.readByte();
+                    Chat currentChat = (Chat) ois.readObject();
+                    switch (choice) {
+                        case SEND_MESSAGE:
+                            Message message = (Message) ois.readObject();
+                            System.out.println(message.getMessage());
+                            writeMessage(currentChat, message);
+                            oos.writeInt(getMessages(currentChat).size());
+                            break;
+                        case CREATE_CHAT:
+                            Chat chat = (Chat) ois.readObject();
+                            addChat(chat);
+                            break;
                     }
+                    oos.writeUnshared(getMessages(currentChat));
                     oos.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
-                    message = null;
                 }
-            } while (message != null);
+            } while (choice != CLIENT_DISCONNECT);
         }
 
     }

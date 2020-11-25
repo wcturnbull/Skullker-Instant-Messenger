@@ -30,4 +30,6 @@ public interface Constants {
     byte ADD_USER_TO_CHAT   = 0x3a;
     byte CREATE_CHAT        = 0x3c;
     byte DELETE_CHAT        = 0x3d;
+
+    byte CLIENT_DISCONNECT  = 0xd;
 }
