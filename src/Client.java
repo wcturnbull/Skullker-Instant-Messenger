@@ -111,7 +111,6 @@ public class Client extends Thread implements Constants {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
         /*
         SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -138,14 +137,20 @@ public class Client extends Thread implements Constants {
         ActionListener actionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //Sign In Button
                 if (e.getSource() == signInButton) {
                     new AppGUI(new Account("Wes", "123")).setVisible(true);
                     dispose();
+                }
+                //TODO: Add SignUp Button functionality
+                if (e.getSource() == signUpButton) {
+
                 }
             }
         };
 
         public WelcomeGUI() {
+            //TODO: Make it look good
             mainPanel = new JPanel();
             signInButton = new JButton("Sign In");
             signInButton.addActionListener(actionListener);
