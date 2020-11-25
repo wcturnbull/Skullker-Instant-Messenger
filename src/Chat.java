@@ -25,7 +25,7 @@ public class Chat implements Serializable {
         users.add(user);
     }
 
-    public ArrayList<Account> getUsers() {
+    public synchronized ArrayList<Account> getUsers() {
         return users;
     }
 

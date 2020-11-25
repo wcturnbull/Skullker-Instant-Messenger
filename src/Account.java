@@ -1,8 +1,10 @@
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Account implements Serializable {
     private String userName;    //Username for a password
     private String password;    //Password for an account
+    private ArrayList<Chat> chats;
 
     public Account(String userName, String password) {
         this.userName = userName;
@@ -26,7 +28,7 @@ public class Account implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public synchronized boolean equals(Object o) {
         if (o == null) {
             return false;
         }

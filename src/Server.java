@@ -14,22 +14,6 @@ public class Server implements Constants {
     private final Object MESSAGE_SYNC;
 
     public Server() {
-        /**
-        chats = new ArrayList<Chat>(0);
-        File[] chatFiles = new File("../chats/").listFiles();
-        for (File chatFile : chatFiles) {
-            try (BufferedReader in = new BufferedReader(new FileReader(chatFile))) {
-                chats.add(new Chat(chats.size()));
-                Chat chat = new Chat(chats.size() + 1);
-                for (int i = 0; i < Integer.parseInt(in.readLine()); i++) {
-
-                }
-            } catch (FileNotFoundException e) {
-
-            } catch (IOException e) {
-
-            }
-        }**/
         CHAT_SYNC = new Object();
         USER_SYNC = new Object();
         MESSAGE_SYNC = new Object();
@@ -115,7 +99,6 @@ public class Server implements Constants {
             do {
                 try {
                     choice = ois.readByte();
-                    //Chat currentChat = (Chat) ois.readObject();
                     switch (choice) {
                         case SEND_MESSAGE:
                             Message message = (Message) ois.readObject();
@@ -158,7 +141,6 @@ public class Server implements Constants {
                 }
             } while (choice != CLIENT_DISCONNECT);
         }
-
     }
 
     class ServerThread extends Thread {

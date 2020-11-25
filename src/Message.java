@@ -15,16 +15,20 @@ public class Message implements Serializable {
         this.message = message;
     }
 
-    public Account getSender() {
+    public synchronized Account getSender() {
         return sender;
     }
 
-    public String getMessage() {
+    public synchronized String getMessage() {
         return message;
     }
 
-    public void editMessage(String message) {
+    public synchronized void editMessage(String message) {
         this.message = message;
+    }
+
+    public synchronized Chat getChat() {
+        return chat;
     }
 
     @Override
@@ -38,7 +42,8 @@ public class Message implements Serializable {
         if (o instanceof Message) {
             Message message = (Message) o;
             return (this.message.equals(message.getMessage()) &&
-                    this.sender.equals(message.getSender()));
+                    this.sender.equals(message.getSender()) &&
+                    this.chat.equals(message.getChat()));
         }
         return false;
     }
