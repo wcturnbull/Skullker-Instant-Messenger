@@ -71,6 +71,25 @@ public class Server implements Constants {
             Message message = new Message("");
             do {
                 try {
+                    String choice = in.readLine();
+                    if (choice.equals("1")) {
+                        String userName = in.readLine();
+                        String password = in.readLine();
+                        boolean found = false;
+                        for (Account acc : users) {
+                            if (acc.getUserName().equals(userName) && acc.getPassword().equals(password)) {
+                                oos.writeBoolean(true);
+                                oos.writeObject(acc);
+                                found = true;
+                            }
+                        }
+                        if (!found) {
+                            oos.writeBoolean(false);
+                        }
+                    } else if (choice.equals("2")) {
+                        Account acc = (Account) ois.readObject();
+                        users.add(acc);
+                    }
                     message = (Message) ois.readObject();
                     System.out.println(message.getMessage());
                     writeMessage(message);
