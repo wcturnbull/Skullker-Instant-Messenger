@@ -26,10 +26,12 @@ public interface Constants {
     byte REGISTER_ACCOUNT   = 0x2a;
     byte LOG_IN             = 0x2b;
     byte INVALID_ACCOUNT    = 0x2c;
+    byte FOUND_ACCOUNT      = 0x2f;
 
     byte ADD_USER_TO_CHAT   = 0x3a;
     byte CREATE_CHAT        = 0x3c;
     byte DELETE_CHAT        = 0x3d;
 
+    byte CONFIRMATION = 0xc;
     byte CLIENT_DISCONNECT  = 0xd;
 }

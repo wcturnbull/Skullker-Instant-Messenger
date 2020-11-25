@@ -66,8 +66,26 @@ public class Server implements Constants {
                 }
             }
         }
-        return clientChat;
+        return null;
     }
+
+    public void addUser(Account newAcc) {
+        synchronized (USER_SYNC) {
+            users.add(newAcc);
+        }
+    }
+
+    public Account fetchAccount(Account clientAcc) {
+        synchronized (USER_SYNC) {
+            for (Account acc : users) {
+                if (acc.equals(clientAcc)) {
+                    return acc;
+                }
+            }
+        }
+        return null;
+    }
+
 
     class ClientThread extends Thread {
         private Socket socket;
@@ -97,7 +115,7 @@ public class Server implements Constants {
             do {
                 try {
                     choice = ois.readByte();
-                    Chat currentChat = (Chat) ois.readObject();
+                    //Chat currentChat = (Chat) ois.readObject();
                     switch (choice) {
                         case SEND_MESSAGE:
                             Message message = (Message) ois.readObject();
@@ -109,7 +127,28 @@ public class Server implements Constants {
                             Chat chat = (Chat) ois.readObject();
                             addChat(chat);
                             break;
+                        case LOG_IN:
+                            Account acc = fetchAccount((Account) ois.readObject());
+                            if (acc == null) {
+                                oos.writeByte(INVALID_ACCOUNT);
+                            } else {
+                                oos.writeByte(CONFIRMATION);
+                                oos.writeUnshared(acc);
+                            }
+                            break;
+                        case REGISTER_ACCOUNT:
+                            Account newAcc = (Account) ois.readObject();
+                            if (fetchAccount(newAcc) == null) {
+                                addUser(newAcc);
+                                oos.writeByte(CONFIRMATION);
+                            } else {
+                                oos.writeByte(INVALID_ACCOUNT);
+                            }
+                            break;
                     }
+                    message = (Message) ois.readObject();
+                    System.out.println(message.getMessage());
+                    writeMessage(message);
                     oos.writeUnshared(getMessages(currentChat));
                     oos.flush();
                 } catch (IOException e) {
