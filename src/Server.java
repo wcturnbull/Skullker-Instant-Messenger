@@ -103,13 +103,13 @@ public class Server implements Constants {
                     choice = ois.readByte();
                     currentChat = (Chat) ois.readObject();
                     switch (choice) {
-
                         case LOG_IN:
                             Account acc = fetchAccount((Account) ois.readObject());
                             if (acc == null) {
                                 oos.writeByte(INVALID_ACCOUNT);
                             } else {
                                 oos.writeByte(CONTINUE);
+                                System.out.println("Successful log-in!");
                                 client = acc;
                                 oos.writeUnshared(acc);
                             }
@@ -118,6 +118,7 @@ public class Server implements Constants {
                             Account newAcc = (Account) ois.readObject();
                             if (fetchAccount(newAcc) == null) {
                                 addUser(newAcc);
+                                System.out.println("Successful registration!");
                                 oos.writeByte(CONTINUE);
                                 client = newAcc;
                             } else {
