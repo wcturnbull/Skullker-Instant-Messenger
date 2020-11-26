@@ -182,7 +182,7 @@ public class Client extends Thread implements Constants {
                         byte status = ois.readByte();
                         if (status == CONTINUE) {
                             account = (Account) ois.readObject();
-                            oos.writeByte(0);
+                            oos.writeByte(NO_REQUEST);
                             SwingUtilities.invokeLater(new Runnable() {
                                 @Override
                                 public void run() {
@@ -210,7 +210,7 @@ public class Client extends Thread implements Constants {
 
                         if (status == CONTINUE) {
                             account = newAccount;
-                            oos.writeByte(0);
+                            oos.writeByte(NO_REQUEST);
                             SwingUtilities.invokeLater(new Runnable() {
                                 @Override
                                 public void run() {
@@ -281,10 +281,10 @@ public class Client extends Thread implements Constants {
             mainPanel.add(passwordPanel);
             mainPanel.add(buttonPanel);
 
+            setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             setTitle("Messaging App");
             setBackground(Color.WHITE);
             setSize(new Dimension(600, 400));
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
             getContentPane().add(mainPanel);
             setLocationRelativeTo(null);
@@ -318,8 +318,6 @@ public class Client extends Thread implements Constants {
         JLabel newUserLabel;
         JTextField newUser;
         JButton addUserButton;
-
-
 
         public AppGUI(Account user) {
             setTitle("Messaging App");
@@ -356,49 +354,6 @@ public class Client extends Thread implements Constants {
 
             //setting up the split pane
             setPreferredSize(new Dimension(600, 400));
-
-            addWindowListener(new WindowListener() {
-                @Override
-                public void windowOpened(WindowEvent e) {
-
-                }
-
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    try {
-                        oos.writeByte(CLIENT_DISCONNECT);
-                        oos.writeObject(null);
-                        dispose();
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void windowClosed(WindowEvent e) {
-
-                }
-
-                @Override
-                public void windowIconified(WindowEvent e) {
-
-                }
-
-                @Override
-                public void windowDeiconified(WindowEvent e) {
-
-                }
-
-                @Override
-                public void windowActivated(WindowEvent e) {
-
-                }
-
-                @Override
-                public void windowDeactivated(WindowEvent e) {
-
-                }
-            });
 
             getContentPane().setLayout(new GridLayout());
             getContentPane().add(splitPane);
@@ -449,7 +404,7 @@ public class Client extends Thread implements Constants {
                 }
                 if (e.getSource() == createChatButton) {
                     //TODO: Create the chat, then allow a user to add additional users
-
+                    //TODO: add "Add User" button
                     JPanel newChat = new JPanel();
                     JLabel chatLabel = new JLabel(" User1 and User2 ");
                     JButton openChatButton = new JButton("Open Chat");

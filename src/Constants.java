@@ -32,6 +32,7 @@ public interface Constants {
     byte CREATE_CHAT        = 0x3c;
     byte DELETE_CHAT        = 0x3d;
 
+    byte NO_REQUEST         = 0x0;
     byte REQUEST_DATA       = 0xa;
     byte CONTINUE           = 0xc;
     byte CLIENT_DISCONNECT  = 0xd;

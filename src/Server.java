@@ -153,6 +153,8 @@ public class Server implements Constants {
                         oos.writeUnshared(getMessages(currentChat));
                         oos.flush();
                     }
+                } catch (EOFException e) {
+                    break;
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
