@@ -30,8 +30,38 @@ public class Client extends Thread implements Constants {
      * gui aspect, so my final question is, should i just write this class to be run through the intellij terminal and then
      * later we will shift everything to gui's?
      */
+    private Account account;
+    private ArrayList<Chat> chats;
+    private Socket socket;
+    private BufferedReader br;
+    private PrintWriter pw;
+    private ObjectOutputStream oos;
+    private ObjectInputStream ois;
+    private WelcomeGUI client;
 
-    public static void main(String[] args) {
+    public Client() throws IOException {
+        client = new WelcomeGUI();
+        socket = new Socket("localhost", 0xBEEF);
+        br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        pw = new PrintWriter(socket.getOutputStream());
+        oos = new ObjectOutputStream(socket.getOutputStream());
+        ois = new ObjectInputStream(socket.getInputStream());
+    }
+
+    public WelcomeGUI getWelcomeGUI() {
+        return client;
+    }
+
+    public static void main(String[] args) throws IOException {
+        Client client = new Client();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                client.getWelcomeGUI().setVisible(true);
+            }
+        });
+
+        /*
         try {
             Account acc;
             ArrayList<Chat> chats;
@@ -117,17 +147,12 @@ public class Client extends Thread implements Constants {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        /*
-        SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    new WelcomeGUI().setVisible(true);
-                }
-            });
+
          */
+
     }
 
-    public static class WelcomeGUI extends JFrame {
+    public class WelcomeGUI extends JFrame {
         public final JTextField userName;
         public final JPasswordField password;
         private final JPanel mainPanel;
@@ -145,12 +170,42 @@ public class Client extends Thread implements Constants {
             public void actionPerformed(ActionEvent e) {
                 //Sign In Button
                 if (e.getSource() == signInButton) {
-                    new AppGUI(new Account("Wes", "123")).setVisible(true);
-                    dispose();
+                    try {
+                        oos.writeByte(LOG_IN);
+                        oos.writeUnshared(new Account(userName.getText(), String.valueOf(password.getPassword())));
+
+                        byte status = ois.readByte();
+                        if (status == CONTINUE) {
+                            account = (Account) ois.readObject();
+                            new AppGUI(account).setVisible(true);
+                            dispose();
+                        } else if (status == INVALID_ACCOUNT) {
+                            JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (IOException | ClassNotFoundException ioException) {
+                        ioException.printStackTrace();
+                    }
                 }
                 //TODO: Add SignUp Button functionality
                 if (e.getSource() == signUpButton) {
+                    try {
+                        oos.writeByte(REGISTER_ACCOUNT);
+                        //Add popup
+                        Account newAccount = new Account(userName.getText(), String.valueOf(password.getPassword()));
+                        oos.writeUnshared(newAccount);
+                        byte status = ois.readByte();
 
+                        if (status == CONTINUE) {
+                            account = newAccount;
+                            new AppGUI(account).setVisible(true);
+                        } else if (status == INVALID_ACCOUNT) {
+                            JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                 }
             }
         };
@@ -214,14 +269,6 @@ public class Client extends Thread implements Constants {
             getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
             getContentPane().add(mainPanel);
             setLocationRelativeTo(null);
-        }
-
-        public String getUserName() {
-            return this.userName.toString();
-        }
-
-        public String getPassword() {
-            return this.password.toString();
         }
     }
 
