@@ -4,10 +4,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.io.*;
@@ -38,6 +35,7 @@ public class Client extends Thread implements Constants {
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     private WelcomeGUI client;
+    private AppGUI app;
 
     public Client() throws IOException {
         client = new WelcomeGUI();
@@ -50,6 +48,10 @@ public class Client extends Thread implements Constants {
 
     public WelcomeGUI getWelcomeGUI() {
         return client;
+    }
+
+    public AppGUI getAppGUI() {
+        return app;
     }
 
     public static void main(String[] args) throws IOException {
@@ -165,6 +167,7 @@ public class Client extends Thread implements Constants {
         private final JPanel passwordPanel;
         private final JLabel userNameLabel;
         private final JLabel passwordLabel;
+
         ActionListener actionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -178,7 +181,12 @@ public class Client extends Thread implements Constants {
                         byte status = ois.readByte();
                         if (status == CONTINUE) {
                             account = (Account) ois.readObject();
-                            new AppGUI(account).setVisible(true);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    getAppGUI().setVisible(true);
+                                }
+                            });
                             dispose();
                         } else if (status == INVALID_ACCOUNT) {
                             JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
@@ -200,7 +208,13 @@ public class Client extends Thread implements Constants {
 
                         if (status == CONTINUE) {
                             account = newAccount;
-                            new AppGUI(account).setVisible(true);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    getAppGUI().setVisible(true);
+                                }
+                            });
+                            dispose();
                         } else if (status == INVALID_ACCOUNT) {
                             JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
                                     JOptionPane.ERROR_MESSAGE);
@@ -235,7 +249,7 @@ public class Client extends Thread implements Constants {
 
             if (logo == null) {
                 try {
-                    logo = ImageIO.read(new File("../download.jpg"));
+                    logo = ImageIO.read(new File("download.jpg"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -275,7 +289,7 @@ public class Client extends Thread implements Constants {
     }
 
 
-    public static class AppGUI extends JFrame {
+    public class AppGUI extends JFrame {
         private final JSplitPane splitPane;             //splits the window
         private final JPanel chatSelectorPanel;         //panel that holds all of the chats a user is in
         private final JPanel chatPanel;                 //panel that holds the content of a chat
@@ -301,6 +315,7 @@ public class Client extends Thread implements Constants {
         JLabel newUserLabel;
         JTextField newUser;
         JButton addUserButton;
+
 
 
         public AppGUI(Account user) {
@@ -338,7 +353,49 @@ public class Client extends Thread implements Constants {
 
             //setting up the split pane
             setPreferredSize(new Dimension(600, 400));
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+            addWindowListener(new WindowListener() {
+                @Override
+                public void windowOpened(WindowEvent e) {
+
+                }
+
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    try {
+                        oos.writeByte(CLIENT_DISCONNECT);
+                        dispose();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void windowClosed(WindowEvent e) {
+
+                }
+
+                @Override
+                public void windowIconified(WindowEvent e) {
+
+                }
+
+                @Override
+                public void windowDeiconified(WindowEvent e) {
+
+                }
+
+                @Override
+                public void windowActivated(WindowEvent e) {
+
+                }
+
+                @Override
+                public void windowDeactivated(WindowEvent e) {
+
+                }
+            });
+
             getContentPane().setLayout(new GridLayout());
             getContentPane().add(splitPane);
 
