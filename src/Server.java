@@ -77,6 +77,7 @@ public class Server implements Constants {
         private PrintWriter out;
         private ObjectInputStream ois;
         private ObjectOutputStream oos;
+        private Account client;
 
         public ClientThread(Socket socket) {
             this.socket = socket;
@@ -96,26 +97,20 @@ public class Server implements Constants {
         public void run() {
             System.out.println("Client thread deployed!");
             byte choice = 0;
+            Chat currentChat;
             do {
                 try {
                     choice = ois.readByte();
+                    currentChat = (Chat) ois.readObject();
                     switch (choice) {
-                        case SEND_MESSAGE:
-                            Message message = (Message) ois.readObject();
-                            System.out.println(message.getMessage());
-                            writeMessage(currentChat, message);
-                            oos.writeInt(getMessages(currentChat).size());
-                            break;
-                        case CREATE_CHAT:
-                            Chat chat = (Chat) ois.readObject();
-                            addChat(chat);
-                            break;
+
                         case LOG_IN:
                             Account acc = fetchAccount((Account) ois.readObject());
                             if (acc == null) {
                                 oos.writeByte(INVALID_ACCOUNT);
                             } else {
                                 oos.writeByte(CONTINUE);
+                                client = acc;
                                 oos.writeUnshared(acc);
                             }
                             break;
@@ -124,10 +119,21 @@ public class Server implements Constants {
                             if (fetchAccount(newAcc) == null) {
                                 addUser(newAcc);
                                 oos.writeByte(CONTINUE);
+                                client = newAcc;
                             } else {
                                 oos.writeByte(INVALID_ACCOUNT);
                             }
+                            break;/**
+                        case SEND_MESSAGE:
+                            Message message = (Message) ois.readObject();
+                            System.out.println(message.getMessage());
+                            writeMessage(currentChat, message);
+                            oos.writeUnshared(getMessages(currentChat));
                             break;
+                        case CREATE_CHAT:
+                            Chat chat = (Chat) ois.readObject();
+                            addChat(chat);
+                            break;**/
                     }
                     if (ois.readByte() == REQUEST_DATA) {
                         oos.writeUnshared(getMessages(currentChat));

@@ -14,6 +14,8 @@ import java.io.*;
 import java.net.*;
 
 public class Client extends Thread implements Constants {
+
+
     /**
      * add functionality so that client starts a socket that can
      * connect to the server.
@@ -51,6 +53,7 @@ public class Client extends Thread implements Constants {
             if (choice.equals("1")) {
                 do {
                     oos.writeByte(LOG_IN);
+                    oos.writeObject(null);
                     System.out.println("Please enter your username");
                     String userName = in.nextLine();
                     System.out.println("Please enter your password");
@@ -69,6 +72,7 @@ public class Client extends Thread implements Constants {
             } else if (choice.equals("2")) {
                 do {
                     oos.writeByte(REGISTER_ACCOUNT);
+                    oos.writeObject(null);
                     System.out.println("Please enter a username");
                     String userName = in.nextLine();
                     boolean confirmed = false;
