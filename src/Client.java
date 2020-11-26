@@ -39,6 +39,7 @@ public class Client extends Thread implements Constants {
 
     public Client() throws IOException {
         client = new WelcomeGUI();
+        app = new AppGUI(account);
         socket = new Socket("localhost", 0xBEEF);
         br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         pw = new PrintWriter(socket.getOutputStream());
@@ -181,6 +182,7 @@ public class Client extends Thread implements Constants {
                         byte status = ois.readByte();
                         if (status == CONTINUE) {
                             account = (Account) ois.readObject();
+                            oos.writeByte(0);
                             SwingUtilities.invokeLater(new Runnable() {
                                 @Override
                                 public void run() {
@@ -208,6 +210,7 @@ public class Client extends Thread implements Constants {
 
                         if (status == CONTINUE) {
                             account = newAccount;
+                            oos.writeByte(0);
                             SwingUtilities.invokeLater(new Runnable() {
                                 @Override
                                 public void run() {
@@ -249,7 +252,7 @@ public class Client extends Thread implements Constants {
 
             if (logo == null) {
                 try {
-                    logo = ImageIO.read(new File("download.jpg"));
+                    logo = ImageIO.read(new File("../download.jpg"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -364,6 +367,7 @@ public class Client extends Thread implements Constants {
                 public void windowClosing(WindowEvent e) {
                     try {
                         oos.writeByte(CLIENT_DISCONNECT);
+                        oos.writeObject(null);
                         dispose();
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
