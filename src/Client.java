@@ -172,6 +172,7 @@ public class Client extends Thread implements Constants {
                 if (e.getSource() == signInButton) {
                     try {
                         oos.writeByte(LOG_IN);
+                        oos.writeUnshared(null);
                         oos.writeUnshared(new Account(userName.getText(), String.valueOf(password.getPassword())));
 
                         byte status = ois.readByte();
@@ -191,6 +192,7 @@ public class Client extends Thread implements Constants {
                 if (e.getSource() == signUpButton) {
                     try {
                         oos.writeByte(REGISTER_ACCOUNT);
+                        oos.writeUnshared(null);
                         //Add popup
                         Account newAccount = new Account(userName.getText(), String.valueOf(password.getPassword()));
                         oos.writeUnshared(newAccount);
@@ -233,7 +235,7 @@ public class Client extends Thread implements Constants {
 
             if (logo == null) {
                 try {
-                    logo = ImageIO.read(new File("download.jpg"));
+                    logo = ImageIO.read(new File("../download.jpg"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

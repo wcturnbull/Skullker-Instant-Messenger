@@ -18,6 +18,8 @@ public class Server implements Constants {
         USER_SYNC = new Object();
         MESSAGE_SYNC = new Object();
 
+        users = new ArrayList<Account>();
+        chats = new ArrayList<Chat>();
         messages = new ArrayList<Message>();
         ServerThread serverThread = new ServerThread();
         serverThread.start();
