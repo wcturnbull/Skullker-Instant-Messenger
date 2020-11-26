@@ -178,6 +178,7 @@ public class Client extends Thread implements Constants {
                         oos.writeByte(LOG_IN);
                         oos.writeUnshared(null);
                         oos.writeUnshared(new Account(userName.getText(), String.valueOf(password.getPassword())));
+                        oos.flush();
 
                         byte status = ois.readByte();
                         if (status == CONTINUE) {
@@ -203,11 +204,12 @@ public class Client extends Thread implements Constants {
                     try {
                         oos.writeByte(REGISTER_ACCOUNT);
                         oos.writeUnshared(null);
-                        //Add popup
+                        // TODO: Add popup
                         Account newAccount = new Account(userName.getText(), String.valueOf(password.getPassword()));
                         oos.writeUnshared(newAccount);
-                        byte status = ois.readByte();
+                        oos.flush();
 
+                        byte status = ois.readByte();
                         if (status == CONTINUE) {
                             account = newAccount;
                             oos.writeByte(NO_REQUEST);

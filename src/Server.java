@@ -115,6 +115,7 @@ public class Server implements Constants {
                                 client = acc;
                                 oos.writeUnshared(acc);
                             }
+                            oos.flush();
                             break;
                         case REGISTER_ACCOUNT:
                             Account newAcc = (Account) ois.readObject();
@@ -126,6 +127,7 @@ public class Server implements Constants {
                             } else {
                                 oos.writeByte(INVALID_ACCOUNT);
                             }
+                            oos.flush();
                             break;/**
                         case SEND_MESSAGE:
                             Message message = (Message) ois.readObject();
