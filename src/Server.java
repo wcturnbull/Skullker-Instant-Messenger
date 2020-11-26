@@ -137,6 +137,17 @@ public class Server implements Constants {
                             Chat chat = (Chat) ois.readObject();
                             addChat(chat);
                             break;**/
+                            /*
+                            TODO: send message
+                            TODO: create chat
+                            TODO: delete account
+                            TODO: delete message
+                            TODO: edit message
+                            TODO: edit account
+                            TODO: server persistence
+                            TODO: add user to chat
+                            TODO: delete chat
+                             */
                     }
                     if (ois.readByte() == REQUEST_DATA) {
                         oos.writeUnshared(getMessages(currentChat));
