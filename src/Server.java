@@ -115,7 +115,7 @@ public class Server implements Constants {
                             if (acc == null) {
                                 oos.writeByte(INVALID_ACCOUNT);
                             } else {
-                                oos.writeByte(CONFIRMATION);
+                                oos.writeByte(CONTINUE);
                                 oos.writeUnshared(acc);
                             }
                             break;
@@ -123,17 +123,16 @@ public class Server implements Constants {
                             Account newAcc = (Account) ois.readObject();
                             if (fetchAccount(newAcc) == null) {
                                 addUser(newAcc);
-                                oos.writeByte(CONFIRMATION);
+                                oos.writeByte(CONTINUE);
                             } else {
                                 oos.writeByte(INVALID_ACCOUNT);
                             }
                             break;
                     }
-                    message = (Message) ois.readObject();
-                    System.out.println(message.getMessage());
-                    writeMessage(message);
-                    oos.writeUnshared(getMessages(currentChat));
-                    oos.flush();
+                    if (ois.readByte() == REQUEST_DATA) {
+                        oos.writeUnshared(getMessages(currentChat));
+                        oos.flush();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {

@@ -50,12 +50,12 @@ public class Client extends Thread implements Constants {
                     oos.flush();
                     System.out.println("Confirming credentials");
                     status = ois.readByte();
-                    if (status == CONFIRMATION) {
+                    if (status == CONTINUE) {
                         acc = (Account) ois.readObject();
                     } else if (status == INVALID_ACCOUNT) {
                         System.out.println("Invalid Credentials! Please try again");
                     }
-                } while (status != CONFIRMATION)
+                } while (status != CONTINUE)
             } else if (choice.equals("2")) {
                 do {
                     oos.writeByte(REGISTER_ACCOUNT);
@@ -77,15 +77,17 @@ public class Client extends Thread implements Constants {
                     Account newAcc = new Account(userName, password);
                     oos.writeObject(newAcc);
                     status = ois.readByte();
-                    if (status == CONFIRMATION) {
+                    if (status == CONTINUE) {
                         acc = newAcc;
                     } else if (status == INVALID_ACCOUNT) {
                         System.out.println("An account with those credentials already exists!");
                     }
-                } while (status != CONFIRMATION);
+                } while (status != CONTINUE);
             }
             System.out.println("Beginning to take messages...");
 
+            status = 0;
+            Chat currentChat = null;
             while (true) {
                 Message message = new Message(in.nextLine());
                 oos.writeObject(message);
