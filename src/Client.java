@@ -207,6 +207,7 @@ public class Client extends Thread implements Constants {
                         } else if (status == INVALID_ACCOUNT) {
                             JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
                                     JOptionPane.ERROR_MESSAGE);
+                            oos.writeByte(NO_REQUEST);
                         }
                     } catch (IOException | ClassNotFoundException ioException) {
                         ioException.printStackTrace();
