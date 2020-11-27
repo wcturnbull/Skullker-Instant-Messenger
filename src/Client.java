@@ -315,9 +315,13 @@ public class Client extends Thread implements Constants {
 
             if (logo == null) {
                 try {
-                    logo = ImageIO.read(new File("../download.jpg"));
+                    logo = ImageIO.read(new File("download.jpg"));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    try {
+                        logo = ImageIO.read(new File("../download.jpg"));
+                    } catch (IOException ignored) {
+                        e.printStackTrace();
+                    }
                 }
             }
             logoLabel = new JLabel(new ImageIcon(logo));
