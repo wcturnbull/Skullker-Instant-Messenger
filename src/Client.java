@@ -168,6 +168,19 @@ public class Client extends Thread implements Constants {
         private final JPanel passwordPanel;
         private final JLabel userNameLabel;
         private final JLabel passwordLabel;
+        private final JPanel welcomeContentPanel;
+
+        private JFrame registrationFrame;
+        private JPanel registrationInformationPane;
+        private JPanel registrationContentPane;
+        private JLabel registrationLabel;
+        private JLabel userNameRegisterLabel;
+        private JTextField userNameRegisterTextField;
+        private JLabel passwordRegisterLabel;
+        private JPasswordField passwordRegisterTextField;
+        private JLabel confirmPasswordLabel;
+        private JPasswordField confirmPasswordTextField;
+        private JButton registerButton;
 
         ActionListener actionListener = new ActionListener() {
             @Override
@@ -201,28 +214,36 @@ public class Client extends Thread implements Constants {
                 }
                 //TODO: Add SignUp Button functionality
                 if (e.getSource() == signUpButton) {
+                    //createRegistrationWindow();
+
                     try {
                         oos.writeByte(REGISTER_ACCOUNT);
                         oos.writeUnshared(null);
                         // TODO: Add popup
-                        Account newAccount = new Account(userName.getText(), String.valueOf(password.getPassword()));
-                        oos.writeUnshared(newAccount);
-                        oos.flush();
-
-                        byte status = ois.readByte();
-                        if (status == CONTINUE) {
-                            account = newAccount;
-                            oos.writeByte(NO_REQUEST);
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    getAppGUI().setVisible(true);
-                                }
-                            });
-                            dispose();
-                        } else if (status == INVALID_ACCOUNT) {
+                        if (userName.getText().equals("") || String.valueOf(password.getPassword()).equals("")) {
                             JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
                                     JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            Account newAccount = new Account(userName.getText(),
+                                    String.valueOf(password.getPassword()));
+                            oos.writeUnshared(newAccount);
+                            oos.flush();
+                            byte status = ois.readByte();
+
+                            if (status == CONTINUE) {
+                                account = newAccount;
+                                oos.writeByte(NO_REQUEST);
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        getAppGUI().setVisible(true);
+                                    }
+                                });
+                                dispose();
+                            } else if (status == INVALID_ACCOUNT) {
+                                JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
                         }
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
@@ -231,9 +252,49 @@ public class Client extends Thread implements Constants {
             }
         };
 
+
+
+        public void createRegistrationWindow() {
+            registrationFrame = new JFrame("Register");
+            registrationFrame.setSize(new Dimension(400, 300));
+            registrationFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            registrationContentPane = new JPanel();
+            registrationContentPane.setLayout(new BoxLayout(registrationContentPane, BoxLayout.Y_AXIS));
+            registrationInformationPane = new JPanel();
+            registrationInformationPane.setLayout(new GridLayout(3, 2, 1, 0));
+
+            registrationLabel = new JLabel("Register New Account");
+
+            userNameRegisterLabel = new JLabel("Username: ");
+            passwordRegisterLabel = new JLabel("Password: ");
+            confirmPasswordLabel = new JLabel("Confirm Password: ");
+            userNameRegisterTextField = new JTextField();
+            passwordRegisterTextField = new JPasswordField();
+            confirmPasswordTextField = new JPasswordField();
+            registerButton = new JButton("Register");
+
+            registrationInformationPane.add(userNameRegisterLabel);
+            registrationInformationPane.add(userNameRegisterTextField);
+            registrationInformationPane.add(passwordRegisterLabel);
+            registrationInformationPane.add(passwordRegisterTextField);
+            registrationInformationPane.add(confirmPasswordLabel);
+            registrationInformationPane.add(confirmPasswordTextField);
+
+            registrationContentPane.add(registrationLabel);
+            registrationContentPane.add(registrationInformationPane);
+            registrationContentPane.add(registerButton);
+
+            registrationFrame.add(registrationInformationPane);
+            registrationFrame.setVisible(true);
+            registrationFrame.pack();
+            registrationFrame.setLocationRelativeTo(null);
+        }
+
+
         public WelcomeGUI() {
             //TODO: Make it look good
             mainPanel = new JPanel();
+            welcomeContentPanel = new JPanel();
             signInButton = new JButton("Sign In");
             signInButton.addActionListener(actionListener);
             signUpButton = new JButton("Sign Up");
@@ -278,9 +339,19 @@ public class Client extends Thread implements Constants {
             passwordPanel.add(password);
 
             mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+            welcomeContentPanel.setLayout(new GridLayout(2,2));
+            welcomeContentPanel.setSize(50, 50);
+            welcomeContentPanel.add(userNameLabel);
+            welcomeContentPanel.add(userName);
+            welcomeContentPanel.add(passwordLabel);
+            welcomeContentPanel.add(password);
+            userNameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
             mainPanel.add(logoLabel);
-            mainPanel.add(userNamePanel);
-            mainPanel.add(passwordPanel);
+            //mainPanel.add(userNamePanel);
+            //mainPanel.add(passwordPanel);
+            mainPanel.add(welcomeContentPanel);
             mainPanel.add(buttonPanel);
 
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -504,14 +575,18 @@ public class Client extends Thread implements Constants {
             sendMessage.setText("");
         }
 
-        public void loadMessages(Account user) {
+        public void loadMessages(Account user) throws IOException, ClassNotFoundException {
             //TODO: Add the messages from a chat to the right panel
+            user.getChats();
+
 
         }
 
-        public void addChats(Account user) {
+        public void addChats(Account user) throws IOException, ClassNotFoundException {
             //TODO: Add all of the chats that a given user is in to the left panel
-
+            oos.writeByte(REQUEST_DATA);
+            oos.flush();
+            ois.readObject();
         }
     }
 }

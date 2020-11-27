@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Account implements Serializable {
@@ -25,6 +26,10 @@ public class Account implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public ArrayList<Chat> getChats() {
+        return chats;
     }
 
     @Override
