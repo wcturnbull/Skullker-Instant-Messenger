@@ -301,17 +301,13 @@ public class Client extends Thread implements Constants {
             signUpButton.addActionListener(actionListener);
             buttonPanel = new JPanel();
 
-            userName = new JTextField();
+            userName = new JTextField(15);
             userNamePanel = new JPanel();
-            userNameLabel = new JLabel("Username: ");
-            userName.setMaximumSize(new Dimension(200, 20));
+            userNameLabel = new JLabel("Username:", SwingConstants.CENTER);
 
-
-            password = new JPasswordField();
+            password = new JPasswordField(15);
             passwordPanel = new JPanel();
-            passwordLabel = new JLabel("Password:  ");
-            password.setMaximumSize(new Dimension(200, 20));
-
+            passwordLabel = new JLabel("Password:", SwingConstants.CENTER);
 
             if (logo == null) {
                 try {
@@ -324,6 +320,11 @@ public class Client extends Thread implements Constants {
                     }
                 }
             }
+
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+
             logoLabel = new JLabel(new ImageIcon(logo));
             logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -344,19 +345,23 @@ public class Client extends Thread implements Constants {
 
             mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-            welcomeContentPanel.setLayout(new GridLayout(2,2));
+            welcomeContentPanel.setLayout(new GridBagLayout());
             welcomeContentPanel.setSize(50, 50);
-            welcomeContentPanel.add(userNameLabel);
-            welcomeContentPanel.add(userName);
-            welcomeContentPanel.add(passwordLabel);
-            welcomeContentPanel.add(password);
-            userNameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+            welcomeContentPanel.add(userNameLabel, gbc);
+            gbc.gridx = 1;
+            welcomeContentPanel.add(userName, gbc);
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            welcomeContentPanel.add(passwordLabel, gbc);
+            gbc.gridx = 1;
+            welcomeContentPanel.add(password, gbc);
 
             mainPanel.add(logoLabel);
             //mainPanel.add(userNamePanel);
             //mainPanel.add(passwordPanel);
             mainPanel.add(welcomeContentPanel);
             mainPanel.add(buttonPanel);
+            mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             setTitle("Messaging App");
