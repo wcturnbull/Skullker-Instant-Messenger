@@ -156,20 +156,20 @@ public class Client extends Thread implements Constants {
     }
 
     public class WelcomeGUI extends JFrame {
-        public final JTextField userName;
-        public final JPasswordField password;
-        private final JPanel mainPanel;
-        private final JButton signInButton;
-        private final JButton signUpButton;
-        private BufferedImage logo;
-        private final JLabel logoLabel;
-        private final JPanel buttonPanel;
-        private final JPanel userNamePanel;
-        private final JPanel passwordPanel;
+        //Welcome panel fields
+        public final JTextField userName;           //Sign in username input
+        public final JPasswordField password;       //Sign in password input
+        private final JPanel mainPanel;             //main welcome panel
+        private final JButton signInButton;         //sign in button
+        private final JButton signUpButton;         //sign up button
+        private BufferedImage logo;                 //logo for app
+        private final JLabel logoLabel;             //allows the logo to show up
+        private final JPanel buttonPanel;           //panel that holds sign in/sign up buttons
         private final JLabel userNameLabel;
         private final JLabel passwordLabel;
         private final JPanel welcomeContentPanel;
 
+        //Registration panel fields
         private JFrame registrationFrame;
         private JPanel registrationInformationPane;
         private JPanel registrationContentPane;
@@ -212,20 +212,28 @@ public class Client extends Thread implements Constants {
                         ioException.printStackTrace();
                     }
                 }
-                //TODO: Add SignUp Button functionality
                 if (e.getSource() == signUpButton) {
-                    //createRegistrationWindow();
-
                     try {
                         oos.writeByte(REGISTER_ACCOUNT);
                         oos.writeUnshared(null);
-                        // TODO: Add popup
-                        if (userName.getText().equals("") || String.valueOf(password.getPassword()).equals("")) {
+                        createRegistrationWindow(userName.getText(), String.valueOf(password.getPassword()));
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+                if (e.getSource() == registerButton) {
+                    try {
+                        if (userNameRegisterTextField.getText().equals("") ||
+                                String.valueOf(passwordRegisterTextField.getPassword()).equals("")) {
                             JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
                                     JOptionPane.ERROR_MESSAGE);
+                        } else if (!String.valueOf(passwordRegisterTextField.getPassword()).
+                                equals(String.valueOf(confirmPasswordTextField.getPassword()))) {
+                            JOptionPane.showMessageDialog(null, "Passwords did not match", "Messaging App",
+                                    JOptionPane.ERROR_MESSAGE);
                         } else {
-                            Account newAccount = new Account(userName.getText(),
-                                    String.valueOf(password.getPassword()));
+                            Account newAccount = new Account(userNameRegisterTextField.getText(),
+                                    String.valueOf(passwordRegisterTextField.getPassword()));
                             oos.writeUnshared(newAccount);
                             oos.flush();
                             byte status = ois.readByte();
@@ -239,6 +247,7 @@ public class Client extends Thread implements Constants {
                                         getAppGUI().setVisible(true);
                                     }
                                 });
+                                registrationFrame.dispose();
                                 dispose();
                             } else if (status == INVALID_ACCOUNT) {
                                 JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
@@ -254,37 +263,66 @@ public class Client extends Thread implements Constants {
 
 
 
-        public void createRegistrationWindow() {
+        public void createRegistrationWindow(String userName, String password) {
             registrationFrame = new JFrame("Register");
-            registrationFrame.setSize(new Dimension(400, 300));
             registrationFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            registrationContentPane = new JPanel();
-            registrationContentPane.setLayout(new BoxLayout(registrationContentPane, BoxLayout.Y_AXIS));
             registrationInformationPane = new JPanel();
-            registrationInformationPane.setLayout(new GridLayout(3, 2, 1, 0));
+            registrationInformationPane.setLayout(new GridBagLayout());
 
             registrationLabel = new JLabel("Register New Account");
 
-            userNameRegisterLabel = new JLabel("Username: ");
-            passwordRegisterLabel = new JLabel("Password: ");
-            confirmPasswordLabel = new JLabel("Confirm Password: ");
-            userNameRegisterTextField = new JTextField();
-            passwordRegisterTextField = new JPasswordField();
-            confirmPasswordTextField = new JPasswordField();
+            userNameRegisterLabel = new JLabel("Username: ", SwingConstants.RIGHT);
+            passwordRegisterLabel = new JLabel("Password: ", SwingConstants.RIGHT);
+            confirmPasswordLabel = new JLabel("Confirm Password: ", SwingConstants.RIGHT);
+            userNameRegisterTextField = new JTextField(userName, 15);
+            passwordRegisterTextField = new JPasswordField(password, 15);
+            confirmPasswordTextField = new JPasswordField(15);
             registerButton = new JButton("Register");
+            registerButton.addActionListener(actionListener);
 
-            registrationInformationPane.add(userNameRegisterLabel);
-            registrationInformationPane.add(userNameRegisterTextField);
-            registrationInformationPane.add(passwordRegisterLabel);
-            registrationInformationPane.add(passwordRegisterTextField);
-            registrationInformationPane.add(confirmPasswordLabel);
-            registrationInformationPane.add(confirmPasswordTextField);
+            Insets leftSpace = new Insets(5, 15, 0, 0);
+            Insets rightSpace = new Insets(5, 0, 0, 15);
 
-            registrationContentPane.add(registrationLabel);
-            registrationContentPane.add(registrationInformationPane);
-            registrationContentPane.add(registerButton);
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.anchor = GridBagConstraints.PAGE_START;
+            gbc.insets = new Insets(5, 0, 15, 0);
+            gbc.gridwidth = 2;
+            registrationInformationPane.add(registrationLabel, gbc);
+            gbc.weighty = 0.2;
+            gbc.anchor = GridBagConstraints.CENTER;
+            gbc.insets = leftSpace;
+            gbc.gridwidth = 1;
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            registrationInformationPane.add(userNameRegisterLabel, gbc);
+            gbc.insets = rightSpace;
+            gbc.gridx = 1;
+            registrationInformationPane.add(userNameRegisterTextField, gbc);
+            gbc.insets = leftSpace;
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            registrationInformationPane.add(passwordRegisterLabel, gbc);
+            gbc.insets = rightSpace;
+            gbc.gridx = 1;
+            registrationInformationPane.add(passwordRegisterTextField, gbc);
+            gbc.insets = leftSpace;
+            gbc.gridx = 0;
+            gbc.gridy = 3;
+            registrationInformationPane.add(confirmPasswordLabel, gbc);
+            gbc.insets = rightSpace;
+            gbc.gridx = 1;
+            registrationInformationPane.add(confirmPasswordTextField, gbc);
+            gbc.gridwidth = 2;
+            gbc.gridx = 0;
+            gbc.gridy = 4;
+            gbc.insets = new Insets(15, 0, 5, 0);
+            gbc.anchor = GridBagConstraints.PAGE_END;
+            registrationInformationPane.add(registerButton, gbc);
 
             registrationFrame.add(registrationInformationPane);
+            registrationFrame.setSize(new Dimension(400, 300));
             registrationFrame.setVisible(true);
             registrationFrame.pack();
             registrationFrame.setLocationRelativeTo(null);
@@ -292,7 +330,7 @@ public class Client extends Thread implements Constants {
 
 
         public WelcomeGUI() {
-            //TODO: Make it look good
+            //TODO: Add actual logo/welcoming info
             mainPanel = new JPanel();
             welcomeContentPanel = new JPanel();
             signInButton = new JButton("Sign In");
@@ -302,12 +340,10 @@ public class Client extends Thread implements Constants {
             buttonPanel = new JPanel();
 
             userName = new JTextField(15);
-            userNamePanel = new JPanel();
-            userNameLabel = new JLabel("Username:", SwingConstants.CENTER);
+            userNameLabel = new JLabel("Username: ", SwingConstants.CENTER);
 
             password = new JPasswordField(15);
-            passwordPanel = new JPanel();
-            passwordLabel = new JLabel("Password:", SwingConstants.CENTER);
+            passwordLabel = new JLabel("Password: ", SwingConstants.CENTER);
 
             if (logo == null) {
                 try {
@@ -333,16 +369,6 @@ public class Client extends Thread implements Constants {
             buttonPanel.add(signUpButton);
             buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-            userNamePanel.setLayout(new BoxLayout(userNamePanel, BoxLayout.X_AXIS));
-            userNamePanel.add(userNameLabel);
-            userName.setAlignmentX(Component.CENTER_ALIGNMENT);
-            userNamePanel.add(userName);
-
-            passwordPanel.setLayout(new BoxLayout(passwordPanel, BoxLayout.X_AXIS));
-            passwordPanel.add(passwordLabel);
-            password.setAlignmentX(Component.CENTER_ALIGNMENT);
-            passwordPanel.add(password);
-
             mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
             welcomeContentPanel.setLayout(new GridBagLayout());
@@ -357,8 +383,6 @@ public class Client extends Thread implements Constants {
             welcomeContentPanel.add(password, gbc);
 
             mainPanel.add(logoLabel);
-            //mainPanel.add(userNamePanel);
-            //mainPanel.add(passwordPanel);
             mainPanel.add(welcomeContentPanel);
             mainPanel.add(buttonPanel);
             mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
@@ -387,19 +411,20 @@ public class Client extends Thread implements Constants {
         private final JButton sendButton;               //button that sends a message to the other user(s) in the chat
         private final JPanel settingsPanel;             //panel that holds the settings button
         private final JButton settingsButton;           //button that allows a user to edit/delete their account
-        private final JButton createChatButton;         //button that allows a user to create a new chat
+        private final JButton createChatPopupButton;    //button that allows a user to create a new chat
         private final JLabel chatLabel;                 //label that shows the title/users in a selected chat
+        private final JButton addUsersButton;           //button to add users into a selected chat
+        private final JPanel chatLabelPanel;            //panel that holds the chatLabel and addUsers button
         private final JPanel messageContent;            //MAYBE WILL NEED LATER ON
-        private final JScrollBar verticalChatScroller;  //Scroll bar
+        private final JScrollBar verticalChatScroller;  //Scroll bar for the chat
 
         private JFrame createChatPopUp;
-        private JPanel mainPopupPanel;
-        private int numUsers;
-        private JLabel selectUsers;
-        JPanel newUserPanel;
-        JLabel newUserLabel;
-        JTextField newUser;
-        JButton addUserButton;
+        private JPanel createChatContentPane;
+        private JPanel createChatNamePane;
+        private JLabel createChatTitle;
+        private JLabel createChatNameLabel;
+        private JTextField createChatNameTextField;
+        private JButton createChatButton;
 
         public AppGUI(Account user) {
             setTitle("Messaging App");
@@ -412,8 +437,8 @@ public class Client extends Thread implements Constants {
             settingsButton = new JButton("User Settings");
             settingsButton.addActionListener(actionListener);
 
-            createChatButton = new JButton("Create New Chat");
-            createChatButton.addActionListener(actionListener);
+            createChatPopupButton = new JButton("Create New Chat");
+            createChatPopupButton.addActionListener(actionListener);
 
             chatPanel = new JPanel();
 
@@ -424,10 +449,15 @@ public class Client extends Thread implements Constants {
             sendMessage = new JTextField();
             sendButton = new JButton("Send");
             sendButton.addActionListener(actionListener);
+
+            //TODO: Reformat chatPanel so that it uses the GridBagLayout
             chatPanel.setLayout(new GridLayout(0, 2, 100, 10));
             chatPanel.setBackground(Color.WHITE);
             chatSelectorPanel.setLayout(new BoxLayout(chatSelectorPanel, BoxLayout.Y_AXIS));
-            chatLabel = new JLabel("Test Label");
+
+            chatLabelPanel = new JPanel();
+            chatLabel = new JLabel();
+            addUsersButton = new JButton("Add Users");
             messageContent = new JPanel();
 
             chatSelectorScroller = new JScrollPane(chatSelectorPanel);
@@ -447,14 +477,16 @@ public class Client extends Thread implements Constants {
 
             //setting up the right side of the GUI
             selectedChat.setLayout(new BorderLayout());
-            //chatScroller.setBounds(50, 30, 800, 800);
             verticalChatScroller = chatScroller.getVerticalScrollBar();
 
+            chatLabelPanel.setLayout(new BorderLayout());
+            chatLabelPanel.add(chatLabel, BorderLayout.WEST);
+            chatLabelPanel.add(addUsersButton, BorderLayout.EAST);
 
             selectedChat.setAutoscrolls(true);
             selectedChat.add(chatScroller);
             selectedChat.add(messagePanel, BorderLayout.SOUTH);
-            selectedChat.add(chatLabel, BorderLayout.NORTH);
+            selectedChat.add(chatLabelPanel, BorderLayout.NORTH);
 
             messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
             messagePanel.add(sendMessage);
@@ -468,7 +500,7 @@ public class Client extends Thread implements Constants {
             chatSelectorScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             currentChats.add(chatSelectorScroller);
             currentChats.add(settingsPanel, BorderLayout.NORTH);
-            currentChats.add(createChatButton, BorderLayout.SOUTH);
+            currentChats.add(createChatPopupButton, BorderLayout.SOUTH);
             settingsPanel.add(settingsButton);
             pack();
             setLocationRelativeTo(null);
@@ -484,31 +516,30 @@ public class Client extends Thread implements Constants {
                     //TODO: Write this to allow a user to edit/delete their account
 
                 }
-                if (e.getSource() == createChatButton) {
-                    //TODO: Create the chat, then allow a user to add additional users
-                    //TODO: add "Add User" button
-                    JPanel newChat = new JPanel();
-                    JLabel chatLabel = new JLabel(" User1 and User2 ");
-                    JButton openChatButton = new JButton("Open Chat");
-                    newChat.setLayout(new BorderLayout());
-                    newChat.add(chatLabel, BorderLayout.CENTER);
-                    newChat.add(openChatButton, BorderLayout.SOUTH);
-                    Border selectChatBorder = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
-                    newChat.setBorder(selectChatBorder);
-                    newChat.setMinimumSize(new Dimension(100, 150));
-                    chatSelectorPanel.add(newChat);
-                    chatSelectorPanel.revalidate();
-                    validate();
+                if (e.getSource() == createChatPopupButton) {
+                    createCreateChatPopUp();
                 }
-                if (e.getSource() == addUserButton) {
-                    JLabel additionalUserLabel = new JLabel();
-                    JTextField additionalUser = new JTextField();
-                    JPanel additionalUserPanel = new JPanel();
-                    numUsers++;
-                    additionalUserLabel.setText("User " + numUsers + ": ");
-                    additionalUserPanel.add(additionalUserLabel);
-                    additionalUserPanel.add(additionalUser);
-                    mainPopupPanel.add(additionalUserPanel);
+                if (e.getSource() == createChatButton) {
+                    if (createChatNameTextField.getText().equals("")) {
+                        JOptionPane.showMessageDialog(null, "Please enter a name", "Messaging App",
+                                JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        createChatPopUp.dispose();
+                        JPanel newChat = new JPanel();
+                        JLabel chatLabel = new JLabel(createChatNameTextField.getText(), SwingConstants.CENTER);
+                        chatLabel.setText(createChatNameTextField.getText());
+                        JButton openChatButton = new JButton("Open Chat");
+                        openChatButton.addActionListener(actionListener);
+                        newChat.setLayout(new BorderLayout());
+                        newChat.add(chatLabel, BorderLayout.CENTER);
+                        newChat.add(openChatButton, BorderLayout.SOUTH);
+                        Border selectChatBorder = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
+                        newChat.setBorder(selectChatBorder);
+                        newChat.setMinimumSize(new Dimension(100, 150));
+                        chatSelectorPanel.add(newChat);
+                        chatSelectorPanel.revalidate();
+                        validate();
+                    }
                 }
             }
         };
@@ -584,10 +615,38 @@ public class Client extends Thread implements Constants {
             sendMessage.setText("");
         }
 
+        public void createCreateChatPopUp() {
+            createChatPopUp = new JFrame();
+            createChatTitle = new JLabel("Create Chat", SwingConstants.CENTER);
+            createChatContentPane = new JPanel();
+            createChatNameLabel = new JLabel("Chat Name: ");
+            createChatNameTextField = new JTextField(15);
+            createChatNamePane = new JPanel();
+            createChatButton = new JButton("Create Chat");
+            createChatButton.addActionListener(actionListener);
+
+            createChatContentPane.setLayout(new BoxLayout(createChatContentPane, BoxLayout.Y_AXIS));
+            createChatNamePane.add(createChatNameLabel);
+            createChatNamePane.add(createChatNameTextField);
+
+            createChatContentPane.add(createChatTitle);
+            createChatContentPane.add(Box.createRigidArea(new Dimension(0, 15)));
+            createChatContentPane.add(createChatNamePane);
+            createChatContentPane.add(createChatButton);
+            createChatContentPane.add(Box.createRigidArea(new Dimension(0, 10)));
+            createChatContentPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            createChatPopUp.setSize(300, 150);
+            createChatPopUp.setLocationRelativeTo(null);
+            createChatPopUp.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            createChatPopUp.setVisible(true);
+
+            createChatPopUp.add(createChatContentPane, BorderLayout.CENTER);
+        }
+
         public void loadMessages(Account user) throws IOException, ClassNotFoundException {
             //TODO: Add the messages from a chat to the right panel
             user.getChats();
-
 
         }
 
