@@ -11,6 +11,7 @@ public class Account implements Serializable {
     public Account(String userName, String password) {
         this.userName = userName;
         this.password = password;
+        chats = new ArrayList<>();
     }
 
     public String getUserName() {
@@ -27,6 +28,10 @@ public class Account implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void addChat(Chat chat) {
+        chats.add(chat);
     }
 
     public ArrayList<Chat> getChats() {

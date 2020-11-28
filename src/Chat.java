@@ -25,6 +25,10 @@ public class Chat implements Serializable {
         users.add(user);
     }
 
+    public synchronized void removeMessage(Message message) {
+        messages.remove(message);
+    }
+
     public synchronized ArrayList<Account> getUsers() {
         return users;
     }
