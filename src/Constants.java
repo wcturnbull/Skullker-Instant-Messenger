@@ -25,8 +25,9 @@ public interface Constants {
 
     byte REGISTER_ACCOUNT   = 0x2a;
     byte LOG_IN             = 0x2b;
-    byte INVALID_ACCOUNT    = 0x2c;
-    byte FOUND_ACCOUNT      = 0x2f;
+    byte DELETE_ACCOUNT     = 0x2d;
+    byte EDIT_USERNAME      = 0x21;
+    byte EDIT_PASSWORD      = 0x22;
 
     byte ADD_USER_TO_CHAT   = 0x3a;
     byte CREATE_CHAT        = 0x3c;
@@ -35,5 +36,5 @@ public interface Constants {
     byte NO_REQUEST         = 0x0;
     byte REQUEST_DATA       = 0xa;
     byte CONTINUE           = 0xc;
-    byte CLIENT_DISCONNECT  = 0xd;
+    byte DENIED             = 0xd;
 }

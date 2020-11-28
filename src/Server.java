@@ -72,6 +72,16 @@ public class Server implements Constants {
         return null;
     }
 
+    public void deleteAccount(Account account) {
+        synchronized (USER_SYNC) {
+            for (int i = 0; i < users.size(); i++) {
+                if (users.get(i).equals(account)) {
+                    users.remove(i);
+                    return;
+                }
+            }
+        }
+    }
 
     class ClientThread extends Thread {
         private Socket socket;
@@ -99,16 +109,14 @@ public class Server implements Constants {
         public void run() {
             System.out.println("Client thread deployed!");
             byte choice = 0;
-            Chat currentChat;
-            do {
+            while (true) {
                 try {
                     choice = ois.readByte();
-                    currentChat = (Chat) ois.readObject();
                     switch (choice) {
                         case LOG_IN:
                             Account acc = fetchAccount((Account) ois.readObject());
                             if (acc == null) {
-                                oos.writeByte(INVALID_ACCOUNT);
+                                oos.writeByte(DENIED);
                             } else {
                                 oos.writeByte(CONTINUE);
                                 System.out.println("Successful log-in!");
@@ -125,7 +133,7 @@ public class Server implements Constants {
                                 oos.writeByte(CONTINUE);
                                 client = newAcc;
                             } else {
-                                oos.writeByte(INVALID_ACCOUNT);
+                                oos.writeByte(DENIED);
                             }
                             oos.flush();
                             break;/**
@@ -151,18 +159,28 @@ public class Server implements Constants {
                             TODO: delete chat
                              */
                     }
-                    if (ois.readByte() == REQUEST_DATA) {
-                        oos.writeUnshared(getMessages(currentChat));
-                        oos.flush();
+                    if (client != null) {
+                        oos.writeUnshared(client);
                     }
                 } catch (EOFException e) {
                     break;
+                } catch (SocketException e) {
+                    System.out.println("Client disconnected...");
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-            } while (choice != CLIENT_DISCONNECT);
+            }
+            try {
+                in.close();
+                out.close();
+
+                ois.close();
+                oos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
