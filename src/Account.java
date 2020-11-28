@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.io.StreamCorruptedException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
@@ -38,6 +39,7 @@ public class Account implements Serializable {
                 return c;
             }
         }
+        return null;
     }
 
     @Override
