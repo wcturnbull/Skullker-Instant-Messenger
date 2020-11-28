@@ -181,6 +181,88 @@ public class Client extends Thread implements Constants {
         private JPasswordField confirmPasswordTextField;    //Confirm password text field
         private JButton registerButton;                     //Register button
 
+        class GUIListener implements ActionListener {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Sign In Button
+                if (e.getSource() == signInButton) {
+                    try {
+                        oos.writeByte(LOG_IN);
+                        oos.writeUnshared(null);
+                        oos.writeUnshared(new Account(userName.getText(), String.valueOf(password.getPassword())));
+                        oos.flush();
+
+                        byte status = ois.readByte();
+                        if (status == CONTINUE) {
+                            account = (Account) ois.readObject();
+                            oos.writeByte(NO_REQUEST);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    getAppGUI().setVisible(true);
+                                }
+                            });
+                            dispose();
+                        } else if (status == INVALID_ACCOUNT) {
+                            JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
+                                    JOptionPane.ERROR_MESSAGE);
+                            oos.writeByte(NO_REQUEST);
+                        }
+                    } catch (IOException | ClassNotFoundException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+                //Sign Up Button
+                if (e.getSource() == signUpButton) {
+                    try {
+                        oos.writeByte(REGISTER_ACCOUNT);
+                        oos.writeUnshared(null);
+                        createRegistrationWindow(userName.getText(), String.valueOf(password.getPassword()));
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+                //Register Button
+                if (e.getSource() == registerButton) {
+                    try {
+                        if (userNameRegisterTextField.getText().equals("") ||
+                                String.valueOf(passwordRegisterTextField.getPassword()).equals("")) {
+                            JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
+                                    JOptionPane.ERROR_MESSAGE);
+                        } else if (!String.valueOf(passwordRegisterTextField.getPassword()).
+                                equals(String.valueOf(confirmPasswordTextField.getPassword()))) {
+                            JOptionPane.showMessageDialog(null, "Passwords did not match", "Messaging App",
+                                    JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            Account newAccount = new Account(userNameRegisterTextField.getText(),
+                                    String.valueOf(passwordRegisterTextField.getPassword()));
+                            oos.writeUnshared(newAccount);
+                            oos.flush();
+                            byte status = ois.readByte();
+
+                            if (status == CONTINUE) {
+                                account = newAccount;
+                                oos.writeByte(NO_REQUEST);
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        getAppGUI().setVisible(true);
+                                    }
+                                });
+                                registrationFrame.dispose();
+                                dispose();
+                            } else if (status == INVALID_ACCOUNT) {
+                                JOptionPane.showMessageDialog(null, "Invalid Account", "Messaging App",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+            }
+        }
+
         ActionListener actionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

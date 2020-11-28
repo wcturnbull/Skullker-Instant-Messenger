@@ -32,6 +32,14 @@ public class Account implements Serializable {
         return chats;
     }
 
+    public synchronized Chat fetchChat(Chat chat) {
+        for (Chat c : chats) {
+            if (c.equals(chat)) {
+                return c;
+            }
+        }
+    }
+
     @Override
     public synchronized boolean equals(Object o) {
         if (o == null) {
