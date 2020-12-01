@@ -1,11 +1,12 @@
 import java.util.ArrayList;
 import java.io.*;
 import java.net.*;
+import java.util.Vector;
 
 public class Server implements Constants {
-    private ArrayList<Chat> chats;
-    private ArrayList<Account> users;
-    private ArrayList<Message> messages;
+    private Vector<Chat> chats;
+    private Vector<Account> users;
+    private Vector<Message> messages;
     private ServerThread serverThread;
 
     // multi-thread gatekeepers
@@ -18,9 +19,9 @@ public class Server implements Constants {
         USER_SYNC = new Object();
         MESSAGE_SYNC = new Object();
 
-        users = new ArrayList<Account>();
-        chats = new ArrayList<Chat>();
-        messages = new ArrayList<Message>();
+        users = new Vector<Account>();
+        chats = new Vector<Chat>();
+        messages = new Vector<Message>();
         ServerThread serverThread = new ServerThread();
         serverThread.start();
 
@@ -40,7 +41,7 @@ public class Server implements Constants {
         }
     }
 
-    public ArrayList<Message> getMessages(Chat chat) {
+    public Vector<Message> getMessages(Chat chat) {
         return fetchChat(chat).getMessages();
     }
 
@@ -136,7 +137,13 @@ public class Server implements Constants {
                                 oos.writeByte(DENIED);
                             }
                             oos.flush();
-                            break;/**
+                            break;
+                        case DELETE_ACCOUNT:
+                            deleteAccount(client);
+                            System.out.println(client.getUserName() + " was deleted.");
+                            client = null;
+                            break;
+                            /**
                         case SEND_MESSAGE:
                             Message message = (Message) ois.readObject();
                             System.out.println(message.getMessage());
@@ -160,6 +167,7 @@ public class Server implements Constants {
                              */
                     }
                     if (client != null) {
+                        System.out.println("Echoing client info...");
                         oos.writeUnshared(client);
                     }
                 } catch (EOFException e) {

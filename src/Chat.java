@@ -1,14 +1,14 @@
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Vector;
 
 public class Chat implements Serializable {
-    private ArrayList<Account> users;
-    private ArrayList<Message> messages;
+    private Vector<Account> users;
+    private Vector<Message> messages;
     private String name;
 
     public Chat(Account owner, String name) {
-        users = new ArrayList<Account>();
-        messages = new ArrayList<Message>();
+        users = new Vector<Account>();
+        messages = new Vector<Message>();
         users.add(owner);
         this.name = name;
     }
@@ -17,7 +17,7 @@ public class Chat implements Serializable {
         messages.add(message);
     }
 
-    public synchronized ArrayList<Message> getMessages() {
+    public synchronized Vector<Message> getMessages() {
         return messages;
     }
 
@@ -29,7 +29,7 @@ public class Chat implements Serializable {
         messages.remove(message);
     }
 
-    public synchronized ArrayList<Account> getUsers() {
+    public synchronized Vector<Account> getUsers() {
         return users;
     }
 

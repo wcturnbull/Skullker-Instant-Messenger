@@ -34,11 +34,11 @@ public class Client extends Thread implements Constants {
     private PrintWriter pw;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
-    private WelcomeGUI client;
+    private WelcomeGUI welcome;
     private AppGUI app;
 
     public Client() throws IOException, ClassNotFoundException {
-        client = new WelcomeGUI();
+        welcome = new WelcomeGUI();
         app = new AppGUI(account);
         socket = new Socket("localhost", 0xBEEF);
         br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -48,7 +48,7 @@ public class Client extends Thread implements Constants {
     }
 
     public WelcomeGUI getWelcomeGUI() {
-        return client;
+        return welcome;
     }
 
     public AppGUI getAppGUI() {
@@ -56,11 +56,11 @@ public class Client extends Thread implements Constants {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        Client client = new Client();
+        Client welcome = new Client();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                client.getWelcomeGUI().setVisible(true);
+                welcome.getWelcomeGUI().setVisible(true);
             }
         });
     }
@@ -112,6 +112,7 @@ public class Client extends Thread implements Constants {
                             });
                             userName.setText("");
                             password.setText("");
+                            account = (Account) ois.readObject();
                             dispose();
                         } else if (status == DENIED) {
                             JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
@@ -156,6 +157,7 @@ public class Client extends Thread implements Constants {
                                         getAppGUI().setVisible(true);
                                     }
                                 });
+                                account = (Account) ois.readObject();
                                 registrationFrame.dispose();
                                 dispose();
                             } else if (status == DENIED) {
@@ -165,6 +167,8 @@ public class Client extends Thread implements Constants {
                         }
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
+                    } catch (ClassNotFoundException cnfException) {
+                        cnfException.printStackTrace();
                     }
                 }
             }
@@ -374,7 +378,7 @@ public class Client extends Thread implements Constants {
         boolean chatOpen = false;
 
         public AppGUI(Account user) throws IOException, ClassNotFoundException {
-            setTitle("Skullker -- " + client.userName.getText());
+            setTitle("Skullker -- " + welcome.userName.getText());
 
             splitPane = new JSplitPane();
 
@@ -930,13 +934,19 @@ public class Client extends Thread implements Constants {
                     int yes_no = JOptionPane.showConfirmDialog(null, "Are you sure you would like to delete " +
                             "your account?", "Skullker", JOptionPane.YES_NO_OPTION);
                     if (yes_no == JOptionPane.YES_OPTION) {
+                        try {
+                            oos.writeByte(DELETE_ACCOUNT);
+                            oos.flush();
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        }
                         //TODO: delete the account from the server
                         userSettingsWindow.dispose();
                         app.dispose();
                         SwingUtilities.invokeLater(new Runnable() {
                             @Override
                             public void run() {
-                                client.setVisible(true);
+                                welcome.setVisible(true);
                             }
                         });
 

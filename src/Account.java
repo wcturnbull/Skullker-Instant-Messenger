@@ -1,17 +1,17 @@
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
+import java.util.Vector;
 
 public class Account implements Serializable {
     private String userName;    //Username for a password
     private String password;    //Password for an account
-    private ArrayList<Chat> chats;
+    private Vector<Chat> chats;
 
     public Account(String userName, String password) {
         this.userName = userName;
         this.password = password;
-        chats = new ArrayList<>();
+        chats = new Vector<Chat>();
     }
 
     public String getUserName() {
@@ -39,7 +39,7 @@ public class Account implements Serializable {
         chats.add(chat);
     }
 
-    public ArrayList<Chat> getChats() {
+    public Vector<Chat> getChats() {
         return chats;
     }
 
