@@ -12,7 +12,6 @@ import java.net.*;
 
 public class Client extends Thread implements Constants {
 
-
     /**
      * add functionality so that client starts a socket that can
      * connect to the server.
@@ -96,31 +95,7 @@ public class Client extends Thread implements Constants {
             public void actionPerformed(ActionEvent e) {
                 //Sign In Button
                 if (e.getSource() == signInButton) {
-                    try {
-                        oos.writeByte(LOG_IN);
-                        oos.writeUnshared(new Account(userName.getText(), String.valueOf(password.getPassword())));
-                        oos.flush();
-
-                        byte status = ois.readByte();
-                        if (status == CONTINUE) {
-                            account = (Account) ois.readObject();
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    getAppGUI().setVisible(true);
-                                }
-                            });
-                            userName.setText("");
-                            password.setText("");
-                            account = (Account) ois.readObject();
-                            dispose();
-                        } else if (status == DENIED) {
-                            JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
-                                    JOptionPane.ERROR_MESSAGE);
-                        }
-                    } catch (IOException | ClassNotFoundException ioException) {
-                        ioException.printStackTrace();
-                    }
+                    signIn();
                 }
                 //Sign Up Button
                 if (e.getSource() == signUpButton) {
@@ -133,44 +108,78 @@ public class Client extends Thread implements Constants {
                 }
                 //Register Button
                 if (e.getSource() == registerButton) {
-                    try {
-                        if (userNameRegisterTextField.getText().equals("") ||
-                                String.valueOf(passwordRegisterTextField.getPassword()).equals("")) {
-                            JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
-                                    JOptionPane.ERROR_MESSAGE);
-                        } else if (!String.valueOf(passwordRegisterTextField.getPassword()).
-                                equals(String.valueOf(confirmPasswordTextField.getPassword()))) {
-                            JOptionPane.showMessageDialog(null, "Passwords did not match", "Skullker",
-                                    JOptionPane.ERROR_MESSAGE);
-                        } else {
-                            Account newAccount = new Account(userNameRegisterTextField.getText(),
-                                    String.valueOf(passwordRegisterTextField.getPassword()));
-                            oos.writeUnshared(newAccount);
-                            oos.flush();
-                            byte status = ois.readByte();
-
-                            if (status == CONTINUE) {
-                                account = newAccount;
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        getAppGUI().setVisible(true);
-                                    }
-                                });
-                                account = (Account) ois.readObject();
-                                registrationFrame.dispose();
-                                dispose();
-                            } else if (status == DENIED) {
-                                JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
-                                        JOptionPane.ERROR_MESSAGE);
-                            }
-                        }
-                    } catch (IOException | ClassNotFoundException exception) {
-                        exception.printStackTrace();
-                    }
+                    register();
                 }
             }
         };
+
+        public void signIn() {
+            try {
+                oos.writeByte(LOG_IN);
+                oos.writeUnshared(new Account(userName.getText(), String.valueOf(password.getPassword())));
+                oos.flush();
+
+                byte status = ois.readByte();
+                if (status == CONTINUE) {
+                    account = (Account) ois.readObject();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            getAppGUI().setVisible(true);
+                        }
+                    });
+                    userName.setText("");
+                    password.setText("");
+                    account = (Account) ois.readObject();
+                    dispose();
+                } else if (status == DENIED) {
+                    JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (IOException | ClassNotFoundException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+
+        public void register() {
+            try {
+                if (userNameRegisterTextField.getText().equals("") ||
+                        String.valueOf(passwordRegisterTextField.getPassword()).equals("")) {
+                    JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
+                            JOptionPane.ERROR_MESSAGE);
+                } else if (!String.valueOf(passwordRegisterTextField.getPassword()).
+                        equals(String.valueOf(confirmPasswordTextField.getPassword()))) {
+                    JOptionPane.showMessageDialog(null, "Passwords did not match", "Skullker",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    Account newAccount = new Account(userNameRegisterTextField.getText(),
+                            String.valueOf(passwordRegisterTextField.getPassword()));
+                    oos.writeUnshared(newAccount);
+                    oos.flush();
+                    byte status = ois.readByte();
+
+                    if (status == CONTINUE) {
+                        account = newAccount;
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                getAppGUI().setVisible(true);
+                            }
+                        });
+                        account = (Account) ois.readObject();
+                        registrationFrame.dispose();
+                        dispose();
+                    } else if (status == DENIED) {
+                        JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            } catch (ClassNotFoundException cnfException) {
+                cnfException.printStackTrace();
+            }
+        }
 
         //builds the registration popup window
         public void createRegistrationWindow(String userName, String password) {
@@ -185,8 +194,62 @@ public class Client extends Thread implements Constants {
             passwordRegisterLabel = new JLabel("Password: ", SwingConstants.RIGHT);
             confirmPasswordLabel = new JLabel("Confirm Password: ", SwingConstants.RIGHT);
             userNameRegisterTextField = new JTextField(userName, 15);
+            userNameRegisterTextField.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        register();
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+
+                }
+            });
             passwordRegisterTextField = new JPasswordField(password, 15);
+            passwordRegisterTextField.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        register();
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+
+                }
+            });
             confirmPasswordTextField = new JPasswordField(15);
+            confirmPasswordTextField.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        register();
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+
+                }
+            });
             registerButton = new JButton("Register");
             registerButton.addActionListener(actionListener);
 
@@ -248,9 +311,45 @@ public class Client extends Thread implements Constants {
             buttonPanel = new JPanel();
 
             userName = new JTextField(15);
+            userName.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        signIn();
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+
+                }
+            });
             userNameLabel = new JLabel("Username: ", SwingConstants.CENTER);
 
             password = new JPasswordField(15);
+            password.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        signIn();
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+
+                }
+            });
             passwordLabel = new JLabel("Password: ", SwingConstants.CENTER);
 
             if (logo == null) {
@@ -325,7 +424,7 @@ public class Client extends Thread implements Constants {
         private final JPanel chatLabelPanel;            //panel that holds the chatLabel and addUsers button
         private JPanel messageContent;                  //MAYBE WILL NEED LATER ON
         private final JScrollBar verticalChatScroller;  //Scroll bar for the chat
-        private GridBagConstraints gbc;
+        //private GridBagConstraints gbc;
 
         //create chat window
         private JFrame createChatPopUp;
@@ -363,13 +462,14 @@ public class Client extends Thread implements Constants {
         private JLabel addUsernameLabel;
         private JTextField addUsernameTextField;
         private JPanel addUsernamePanel;
-        private JButton addUserButton;
+        private JButton addInputedUserButton;
 
         //message editing window
         private JFrame editMessageFrame;
         private JPanel editMessageContentPane;
         private JLabel editMessageTitle;
         private JTextArea editMessageTextArea;
+        private JScrollPane editMessageScrollPane;
         private JButton editMessageDoneButton;
 
         Chat currentChat;
@@ -400,12 +500,6 @@ public class Client extends Thread implements Constants {
             sendButton.addActionListener(new AppGUIListener());
 
             chatPanel.setLayout(new GridBagLayout());
-            gbc = new GridBagConstraints();
-            //gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.weightx = 1;
-            gbc.weighty = 1;
-            gbc.fill = GridBagConstraints.BOTH;
 
             chatPanel.setBackground(Color.WHITE);
             chatSelectorPanel.setLayout(new BoxLayout(chatSelectorPanel, BoxLayout.Y_AXIS));
@@ -413,7 +507,14 @@ public class Client extends Thread implements Constants {
             chatLabelPanel = new JPanel();
             chatLabel = new JLabel();
             addUsersButton = new JButton("Add Users");
-            addUsersButton.addActionListener(new AppGUIListener());
+            addUsersButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == addUsersButton) {
+                        createAddUsersWindow();
+                    }
+                }
+            });
 
             chatSelectorScroller = new JScrollPane(chatSelectorPanel);
             chatScroller = new JScrollPane(chatPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -446,7 +547,30 @@ public class Client extends Thread implements Constants {
             messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
             messagePanel.add(sendMessage);
             sendMessage.setEditable(false);
-            sendMessage.addKeyListener(keyListener);
+            sendMessage.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        Message newMessage = new Message(account, sendMessage.getText(), currentChat);
+                        sendMessage(newMessage);
+                    }
+                    if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+                        //Test case, won't need later on
+                        Account testAccount = new Account("Test Account", "1234");
+                        receiveMessage(new Message(testAccount, "Test", new Chat(testAccount, "test Chat")));
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+
+                }
+            });
             messagePanel.add(sendButton);
 
             //setting up the left side of the GUI
@@ -457,7 +581,6 @@ public class Client extends Thread implements Constants {
             currentChats.add(settingsPanel, BorderLayout.NORTH);
             currentChats.add(createChatPopupButton, BorderLayout.SOUTH);
             settingsPanel.add(settingsButton);
-            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             /**
              * Having some issues with this addChats(account) if someone wants
              * to try to fix this bug. It's late and I'm tired lol
@@ -467,13 +590,16 @@ public class Client extends Thread implements Constants {
             setLocationRelativeTo(null);
         }
 
-        //creates a fully functional message editor (NEEDS VISUAL WORK)
+        //creates a fully functional message editor
         public void createMessageEditor(Message message) {
             //TODO: Make it look good
             editMessageFrame = new JFrame("Message Editor");
             editMessageContentPane = new JPanel();
             editMessageTitle = new JLabel("Edit: ");
             editMessageTextArea = new JTextArea(message.getMessage());
+            editMessageScrollPane = new JScrollPane(editMessageTextArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            editMessageScrollPane.setBounds(10, 60, 780, 500);
             editMessageDoneButton = new JButton("Done");
             editMessageDoneButton.addActionListener(new ActionListener() {
                 @Override
@@ -488,24 +614,38 @@ public class Client extends Thread implements Constants {
 
             editMessageContentPane.setLayout(new GridBagLayout());
 
+            GridBagConstraints gbc = new GridBagConstraints();
+
+            gbc.weightx = 0;
+            gbc.weighty = 0;
             gbc.gridx = 0;
             gbc.gridy = 0;
             gbc.gridwidth = 1;
+            gbc.insets = new Insets(5, 0, 0, 0);
 
             editMessageContentPane.add(editMessageTitle, gbc);
 
-            gbc.gridx = 1;
-            //gbc.weightx = 2.0;
-            editMessageContentPane.add(editMessageTextArea, gbc);
-
-            gbc.gridx = 1;
+            gbc.gridx = 0;
             gbc.gridy = 1;
-            editMessageContentPane.add(editMessageDoneButton);
+            gbc.weightx = 0.3;
+            gbc.weighty = 0.7;
+            editMessageScrollPane.setPreferredSize(new Dimension(200, 125));
+            editMessageTextArea.setWrapStyleWord(true);
+            editMessageTextArea.setLineWrap(true);
+            editMessageContentPane.add(editMessageScrollPane, gbc);
+
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            gbc.gridwidth = 2;
+            gbc.weighty = 0;
+            gbc.weightx = 0;
+            gbc.insets = new Insets(0, 0, 16, 0);
+            editMessageContentPane.add(editMessageDoneButton, gbc);
 
             editMessageFrame.add(editMessageContentPane);
 
-            editMessageFrame.setSize(400, 300);
-            editMessageFrame.pack();
+            editMessageFrame.setSize(250, 250);
+            //editMessageFrame.pack();
             editMessageFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             editMessageFrame.setLocationRelativeTo(messageContent);
             editMessageFrame.setVisible(true);
@@ -552,7 +692,8 @@ public class Client extends Thread implements Constants {
             editAccountFrame = new JFrame("Edit Account");
             editAccountFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             editAccountContentPane = new JPanel();
-            editAccountTitle = new JLabel("Edit Account:");
+            editAccountTitle = new JLabel("Edit Account:", SwingConstants.CENTER);
+            editAccountTitle.setFont(editAccountTitle.getFont().deriveFont(14f));
 
             editUsernameLabel = new JLabel("New Username: ");
             editUsernameTextField = new JTextField(account.getUserName(), 15);
@@ -594,11 +735,18 @@ public class Client extends Thread implements Constants {
 
             editAccountContentPane.setLayout(new GridBagLayout());
 
+            GridBagConstraints gbc = new GridBagConstraints();
+
+            gbc.weightx = 0;
+            gbc.weighty = 0;
             gbc.gridx = 0;
             gbc.gridy = 0;
             gbc.gridwidth = 3;
-            editAccountContentPane.add(editAccountTitle);
+            gbc.insets = new Insets(0, 0, 20, 0);
+            editAccountContentPane.add(editAccountTitle, gbc);
 
+            gbc.insets = new Insets(0, 0, 0, 0);
+            gbc.gridx = 0;
             gbc.gridy = 1;
             gbc.gridwidth = 1;
             editAccountContentPane.add(editUsernameLabel, gbc);
@@ -619,11 +767,12 @@ public class Client extends Thread implements Constants {
             gbc.gridx++;
             editAccountContentPane.add(editPasswordConfirmButton, gbc);
 
+            gbc.insets = new Insets(20, 0, 0 , 0);
             gbc.gridy++;
             editAccountContentPane.add(doneEditingButton, gbc);
 
             editAccountFrame.add(editAccountContentPane);
-            editAccountFrame.setSize(new Dimension(400, 300));
+            editAccountFrame.setSize(new Dimension(400, 200));
             editAccountFrame.setVisible(true);
             editAccountFrame.setLocationRelativeTo(null);
         }
@@ -631,16 +780,20 @@ public class Client extends Thread implements Constants {
         //creates a window that allows a user to add other users to the chat (NOT FUNCTIONAL)
         public void createAddUsersWindow() {
             addUsersWindow = new JFrame("Add Users");
+            addUsersWindow.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             addUsersContentPanel = new JPanel();
             addUserTitle = new JLabel("Add a user:");
+
+
             addUserTitle.setFont(addUserTitle.getFont().deriveFont(14f));
 
             addUsernameLabel = new JLabel("Username: ");
             addUsernamePanel = new JPanel();
             addUsernameTextField = new JTextField(15);
 
-            addUserButton = new JButton("Add User");
-            addUserButton.addActionListener(new AppGUIListener());
+            addInputedUserButton = new JButton("Add User");
+            addInputedUserButton.addActionListener(new AppGUIListener());
+
 
             addUsersContentPanel.setLayout(new BoxLayout(addUsersContentPanel, BoxLayout.Y_AXIS));
 
@@ -655,19 +808,16 @@ public class Client extends Thread implements Constants {
             addUsersContentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
             addUsersContentPanel.add(addUsernamePanel);
             addUsersContentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-            addUsersContentPanel.add(addUsersButton);
+            addUsersContentPanel.add(addInputedUserButton);
             addUsersContentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
 
             addUsersWindow.add(addUsersContentPanel);
 
             addUsersWindow.setSize(300, 150);
-            addUsersWindow.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             addUsersWindow.setVisible(true);
 
             addUsersWindow.pack();
             addUsersWindow.setLocationRelativeTo(null);
-
-
         }
 
         //user settings window
@@ -720,6 +870,29 @@ public class Client extends Thread implements Constants {
             createChatContentPane = new JPanel();
             createChatNameLabel = new JLabel("Chat Name: ");
             createChatNameTextField = new JTextField(15);
+            createChatNameTextField.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        if (createChatNameTextField.getText().equals("")) {
+                            JOptionPane.showMessageDialog(null, "Please enter a name", "Skullker",
+                                    JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            createChat(createChatNameTextField.getText());
+                        }
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+
+                }
+            });
             createChatNamePane = new JPanel();
             createChatButton = new JButton("Create Chat");
             createChatButton.addActionListener(new AppGUIListener());
@@ -744,8 +917,8 @@ public class Client extends Thread implements Constants {
         }
 
         //creates a chat, adds it to the user's account, and sets the current chat to the created chat
-        public void createChat() {
-            Chat chat = new Chat(account, createChatNameTextField.getText());
+        public void createChat(String chatName) {
+            Chat chat = new Chat(account, chatName);
             sendMessage.setEditable(true);
             account.addChat(chat);
             createIndividualChatPanel(chat);
@@ -754,6 +927,8 @@ public class Client extends Thread implements Constants {
 
         //panel that holds a user's sent message and a menu for message manipulation
         public void createSendMessagePane(Message message) {
+            GridBagConstraints gbc = new GridBagConstraints();
+
             gbc.anchor = GridBagConstraints.FIRST_LINE_END;
             gbc.gridx = 1;
 
@@ -780,7 +955,6 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == editMessageMenuItem) {
-                        System.out.println("Edit");
                         editMessage(message);
                     }
                 }
@@ -790,7 +964,6 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == deleteMessageMenuItem) {
-                        System.out.println("Delete");
                         currentChat.removeMessage(message);
                         deleteMessage(message);
                         loadChat(currentChat);
@@ -818,13 +991,6 @@ public class Client extends Thread implements Constants {
             if (chatOpen) {
                 if (!sendMessage.getText().equals("")) {
                     createSendMessagePane(message);
-                    try {
-                        oos.writeByte(SEND_MESSAGE);
-                        oos.writeUnshared(message);
-                        account = (Account) ois.readObject();
-                    } catch (IOException | ClassNotFoundException exception) {
-                        exception.printStackTrace();
-                    }
                     currentChat.sendMessage(message);
                 }
             }
@@ -833,6 +999,7 @@ public class Client extends Thread implements Constants {
         //panel that holds a received message
         public void createReceiveMessagePane(Message message) {
             Insets receivedMessageInset = new Insets(5, 0, 0, 60);
+            GridBagConstraints gbc = new GridBagConstraints();
             gbc.anchor = GridBagConstraints.FIRST_LINE_END;
             gbc.gridx = 0;
             //gbc.insets = receivedMessageInset;
@@ -887,11 +1054,11 @@ public class Client extends Thread implements Constants {
 
             Vector<Message> allMessages = chat.getMessages();
 
-            for (Message allMessage : allMessages) {
-                if (allMessage.getSender() == account) {
-                    createSendMessagePane(allMessage);
+            for (int i = 0; i < allMessages.size(); i++) {
+                if (allMessages.get(i).getSender() == account) {
+                    createSendMessagePane(allMessages.get(i));
                 } else {
-                    createReceiveMessagePane(allMessage);
+                    createReceiveMessagePane(allMessages.get(i));
                 }
             }
 
@@ -929,7 +1096,7 @@ public class Client extends Thread implements Constants {
                         JOptionPane.showMessageDialog(null, "Please enter a name", "Skullker",
                                 JOptionPane.ERROR_MESSAGE);
                     } else {
-                        createChat();
+                        createChat(createChatNameTextField.getText());
                     }
                 }
                 if (e.getSource() == editAccountButton) {
@@ -946,6 +1113,7 @@ public class Client extends Thread implements Constants {
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
+                        //TODO: delete the account from the server
                         userSettingsWindow.dispose();
                         app.dispose();
                         SwingUtilities.invokeLater(new Runnable() {
@@ -960,38 +1128,12 @@ public class Client extends Thread implements Constants {
                 if (e.getSource() == cancelButton) {
                     userSettingsWindow.dispose();
                 }
-                if (e.getSource() == addUsersButton) {
-                    createAddUsersWindow();
-                }
-                if (e.getSource() == addUserButton) {
+                if (e.getSource() == addInputedUserButton) {
                     //TODO: Add another user to the chat (It is checking the field "addUsernameTextField")
+                    addUsersWindow.dispose();
+
                 }
             }
         }
-
-        KeyListener keyListener = new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    Message newMessage = new Message(account, sendMessage.getText(), currentChat);
-                    sendMessage(newMessage);
-                }
-                if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-                    //Test case, won't need later on
-                    Account testAccount = new Account("Test Account", "1234");
-                    receiveMessage(new Message(testAccount, "Test", new Chat(testAccount, "test Chat")));
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-
-            }
-        };
     }
 }
