@@ -70,8 +70,8 @@ public class Server implements Constants {
 
     public Account fetchAccount(Account acc) {
         for (Account a : users) {
-            if (acc.equals(acc)) {
-                return acc;
+            if (a.equals(acc)) {
+                return a;
             }
         }
         return null;
@@ -206,7 +206,7 @@ public class Server implements Constants {
 
         @Override
         public void run() {
-            new CloseThread().start();
+            new ExecutionerThread().start();
             while (run) {
                 try {
                     Socket socket = serverSocket.accept();
@@ -224,10 +224,10 @@ public class Server implements Constants {
             }
         }
 
-        class CloseThread extends Thread {
+        class ExecutionerThread extends Thread {
             private Scanner in;
 
-            public CloseThread() {
+            public ExecutionerThread() {
                 in = new Scanner(System.in);
             }
 
