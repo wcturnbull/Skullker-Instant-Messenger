@@ -43,13 +43,17 @@ public class Account implements Serializable {
         return chats;
     }
 
-    public synchronized Chat fetchChat(Chat chat) {
+    public Chat fetchChat(Chat chat) {
         for (Chat c : chats) {
             if (c.equals(chat)) {
                 return c;
             }
         }
         return null;
+    }
+
+    public synchronized boolean matches(Account acc) {
+        return this.userName.equals(acc.getUserName());
     }
 
     @Override

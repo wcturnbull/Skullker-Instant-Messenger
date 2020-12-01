@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 import java.util.Vector;
 
 public class Server implements Constants {
@@ -13,15 +14,29 @@ public class Server implements Constants {
     private final Object CHAT_SYNC;
     private final Object USER_SYNC;
     private final Object MESSAGE_SYNC;
+    private final Object RUN_SYNC;
+
+    private boolean run;
 
     public Server() {
         CHAT_SYNC = new Object();
         USER_SYNC = new Object();
         MESSAGE_SYNC = new Object();
+        RUN_SYNC = new Object();
 
-        users = new Vector<Account>();
-        chats = new Vector<Chat>();
-        messages = new Vector<Message>();
+        run = true;
+
+        if (!(new File("data.txt").exists())) {
+            chats = new Vector<Chat>();
+            users = new Vector<Account>();
+        } else {
+            try (ObjectInputStream fois = new ObjectInputStream(new FileInputStream("data.txt"))) {
+                chats = (Vector<Chat>) fois.readObject();
+                users = (Vector<Account>) fois.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
         ServerThread serverThread = new ServerThread();
         serverThread.start();
 
@@ -29,16 +44,11 @@ public class Server implements Constants {
     }
 
     public void addChat(Chat chat) {
-        synchronized (CHAT_SYNC) {
-            chats.add(chat);
-        }
+        chats.add(chat);
     }
 
-    public void writeMessage(Chat chat, Message message) {
-        Chat currentChat = fetchChat(chat);
-        synchronized (CHAT_SYNC) {
-            currentChat.sendMessage(message);
-        }
+    public void writeMessage(Message message) {
+        fetchChat(message.getChat()).sendMessage(message);
     }
 
     public Vector<Message> getMessages(Chat chat) {
@@ -46,48 +56,47 @@ public class Server implements Constants {
     }
 
     public Chat fetchChat(Chat clientChat) {
-        synchronized (CHAT_SYNC) {
-            for (Chat chat : chats) {
-                if (chat.equals(clientChat)) {
-                    return chat;
-                }
+        for (Chat chat : chats) {
+            if (chat.equals(clientChat)) {
+                return chat;
             }
         }
         return null;
     }
 
     public void addUser(Account newAcc) {
-        synchronized (USER_SYNC) {
-            users.add(newAcc);
-        }
+        users.add(newAcc);
     }
 
-    public Account fetchAccount(Account clientAcc) {
-        synchronized (USER_SYNC) {
-            for (Account acc : users) {
-                if (acc.equals(clientAcc)) {
-                    return acc;
-                }
+    public Account fetchAccount(Account acc) {
+        for (Account a : users) {
+            if (acc.equals(acc)) {
+                return acc;
+            }
+        }
+        return null;
+    }
+
+    public Account matchAccounts(Account acc) {
+        for (Account a : users) {
+            if (a.matches(acc)) {
+                return a;
             }
         }
         return null;
     }
 
     public void deleteAccount(Account account) {
-        synchronized (USER_SYNC) {
-            for (int i = 0; i < users.size(); i++) {
-                if (users.get(i).equals(account)) {
-                    users.remove(i);
-                    return;
-                }
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).equals(account)) {
+                users.remove(i);
+                return;
             }
         }
     }
 
     class ClientThread extends Thread {
         private Socket socket;
-        private BufferedReader in;
-        private PrintWriter out;
         private ObjectInputStream ois;
         private ObjectOutputStream oos;
         private Account client;
@@ -95,8 +104,6 @@ public class Server implements Constants {
         public ClientThread(Socket socket) {
             this.socket = socket;
             try {
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                out = new PrintWriter(socket.getOutputStream());
 
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 ois = new ObjectInputStream(socket.getInputStream());
@@ -110,61 +117,54 @@ public class Server implements Constants {
         public void run() {
             System.out.println("Client thread deployed!");
             byte choice = 0;
-            while (true) {
+            while (run) {
                 try {
                     choice = ois.readByte();
-                    switch (choice) {
-                        case LOG_IN:
-                            Account acc = fetchAccount((Account) ois.readObject());
-                            if (acc == null) {
-                                oos.writeByte(DENIED);
-                            } else {
-                                oos.writeByte(CONTINUE);
-                                System.out.println("Successful log-in!");
-                                client = acc;
-                                oos.writeUnshared(acc);
-                            }
-                            oos.flush();
-                            break;
-                        case REGISTER_ACCOUNT:
-                            Account newAcc = (Account) ois.readObject();
-                            if (fetchAccount(newAcc) == null) {
-                                addUser(newAcc);
-                                System.out.println("Successful registration!");
-                                oos.writeByte(CONTINUE);
-                                client = newAcc;
-                            } else {
-                                oos.writeByte(DENIED);
-                            }
-                            oos.flush();
-                            break;
-                        case DELETE_ACCOUNT:
-                            deleteAccount(client);
-                            System.out.println(client.getUserName() + " was deleted.");
-                            client = null;
-                            break;
-                            /**
-                        case SEND_MESSAGE:
-                            Message message = (Message) ois.readObject();
-                            System.out.println(message.getMessage());
-                            writeMessage(currentChat, message);
-                            oos.writeUnshared(getMessages(currentChat));
-                            break;
-                        case CREATE_CHAT:
-                            Chat chat = (Chat) ois.readObject();
-                            addChat(chat);
-                            break;**/
-                            /*
-                            TODO: send message
-                            TODO: create chat
-                            TODO: delete account
-                            TODO: delete message
-                            TODO: edit message
-                            TODO: edit account
-                            TODO: server persistence
-                            TODO: add user to chat
-                            TODO: delete chat
-                             */
+                    if (choice == LOG_IN) {
+                        Account acc = fetchAccount((Account) ois.readObject());
+                        if (acc == null) {
+                            oos.writeByte(DENIED);
+                        } else {
+                            oos.writeByte(CONTINUE);
+                            System.out.println("Successful log-in!");
+                            client = acc;
+                            oos.writeUnshared(acc);
+                        }
+                        oos.flush();
+                    } else if (choice == REGISTER_ACCOUNT) {
+                        Account newAcc = (Account) ois.readObject();
+                        if (matchAccounts(newAcc) == null) {
+                            oos.writeByte(CONTINUE);
+                            addUser(newAcc);
+                            System.out.println("Successful registration!");
+                            client = newAcc;
+                        } else {
+                            oos.writeByte(DENIED);
+                        }
+                        oos.flush();
+                    } else if (choice == DELETE_ACCOUNT) {
+                        deleteAccount(client);
+                        System.out.println(client.getUserName() + " was deleted.");
+                        client = null;
+                    } else if (choice == EDIT_USERNAME) {
+                        Account acc = (Account) ois.readObject();
+
+                    } else if (choice == SEND_MESSAGE) {
+                        Message message = (Message) ois.readObject();
+                        System.out.println(message.getMessage());
+                        writeMessage(message);
+                    } else if (choice == CREATE_CHAT) {
+                        Chat chat = (Chat) ois.readObject();
+                        addChat(chat);
+                    } else if (choice == ADD_USER_TO_CHAT) {
+                        Chat chat = (Chat) ois.readObject();
+                        Account acc = matchAccounts((Account) ois.readObject());
+                        if (acc == null) {
+                            oos.writeByte(DENIED);
+                        } else {
+                            oos.writeByte(CONTINUE);
+                            fetchChat(chat).addUser(acc);
+                        }
                     }
                     if (client != null) {
                         System.out.println("Echoing client info...");
@@ -174,16 +174,12 @@ public class Server implements Constants {
                     break;
                 } catch (SocketException e) {
                     System.out.println("Client disconnected...");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
             try {
-                in.close();
-                out.close();
-
+                socket.close();
                 ois.close();
                 oos.close();
             } catch (IOException e) {
@@ -210,7 +206,8 @@ public class Server implements Constants {
 
         @Override
         public void run() {
-            while (true) {
+            new CloseThread().start();
+            while (run) {
                 try {
                     Socket socket = serverSocket.accept();
                     System.out.println("Client accepted!");
@@ -219,6 +216,36 @@ public class Server implements Constants {
                     clientThreads.add(clientThread);
                     System.out.println("Deploying client thread...");
                     clientThread.start();
+                } catch (SocketException e) {
+                    break;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        class CloseThread extends Thread {
+            private Scanner in;
+
+            public CloseThread() {
+                in = new Scanner(System.in);
+            }
+
+            @Override
+            public void run() {
+                System.out.println("Respond to this prompt when you desire to close the server.");
+                in.nextLine();
+                synchronized (RUN_SYNC) {
+                    run = false;
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                try (ObjectOutputStream foos = new ObjectOutputStream(new FileOutputStream("data.txt"))) {
+                    foos.writeUnshared(chats);
+                    foos.writeUnshared(users);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

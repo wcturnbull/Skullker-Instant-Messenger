@@ -23,6 +23,7 @@ public class Chat implements Serializable {
 
     public synchronized void addUser(Account user) {
         users.add(user);
+        user.addChat(this);
     }
 
     public synchronized void removeMessage(Message message) {

@@ -165,10 +165,8 @@ public class Client extends Thread implements Constants {
                                         JOptionPane.ERROR_MESSAGE);
                             }
                         }
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    } catch (ClassNotFoundException cnfException) {
-                        cnfException.printStackTrace();
+                    } catch (IOException | ClassNotFoundException exception) {
+                        exception.printStackTrace();
                     }
                 }
             }
@@ -459,6 +457,7 @@ public class Client extends Thread implements Constants {
             currentChats.add(settingsPanel, BorderLayout.NORTH);
             currentChats.add(createChatPopupButton, BorderLayout.SOUTH);
             settingsPanel.add(settingsButton);
+            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             /**
              * Having some issues with this addChats(account) if someone wants
              * to try to fix this bug. It's late and I'm tired lol
@@ -819,6 +818,13 @@ public class Client extends Thread implements Constants {
             if (chatOpen) {
                 if (!sendMessage.getText().equals("")) {
                     createSendMessagePane(message);
+                    try {
+                        oos.writeByte(SEND_MESSAGE);
+                        oos.writeUnshared(message);
+                        account = (Account) ois.readObject();
+                    } catch (IOException | ClassNotFoundException exception) {
+                        exception.printStackTrace();
+                    }
                     currentChat.sendMessage(message);
                 }
             }
@@ -879,13 +885,13 @@ public class Client extends Thread implements Constants {
             //TODO: Test to see if it loads received messages properly
             chatPanel.removeAll();
 
-            ArrayList<Message> allMessages = chat.getMessages();
+            Vector<Message> allMessages = chat.getMessages();
 
-            for (int i = 0; i < allMessages.size(); i++) {
-                if (allMessages.get(i).getSender() == account) {
-                    createSendMessagePane(allMessages.get(i));
+            for (Message allMessage : allMessages) {
+                if (allMessage.getSender() == account) {
+                    createSendMessagePane(allMessage);
                 } else {
-                    createReceiveMessagePane(allMessages.get(i));
+                    createReceiveMessagePane(allMessage);
                 }
             }
 
@@ -897,7 +903,7 @@ public class Client extends Thread implements Constants {
         //Adds all of a user's chats onto the left panel (not functional)
         public void addChats(Account user) {
             //TODO: Add all of the chats that a given user is in to the left panel
-            ArrayList<Chat> userChats;
+            Vector<Chat> userChats;
             userChats = user.getChats();
             for (Chat chat : userChats) {
                 createIndividualChatPanel(chat);
@@ -940,7 +946,6 @@ public class Client extends Thread implements Constants {
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
-                        //TODO: delete the account from the server
                         userSettingsWindow.dispose();
                         app.dispose();
                         SwingUtilities.invokeLater(new Runnable() {
