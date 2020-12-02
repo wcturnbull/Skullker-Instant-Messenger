@@ -163,8 +163,17 @@ public class Server implements Constants {
                         System.out.println(message.getMessage());
                         writeMessage(message);
                     } else if (choice == CREATE_CHAT) {
-                        Chat chat = (Chat) ois.readObject();
-                        addChat(chat);
+                        Chat chat = new Chat(client, ((Chat) ois.readObject()).getName());
+                        if (fetchChat(chat) == null) {
+                            System.out.println("allowed");
+                            oos.writeByte(CONTINUE);
+                            addChat(chat);
+                        } else {
+                            System.out.println("denied");
+                            oos.writeByte(DENIED);
+                        }
+                        oos.flush();
+                        System.out.println("flusehd");
                     } else if (choice == ADD_USER_TO_CHAT) {
                         Chat chat = (Chat) ois.readObject();
                         Account acc = matchAccounts((Account) ois.readObject());

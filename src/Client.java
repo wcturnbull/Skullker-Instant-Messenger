@@ -590,7 +590,7 @@ public class Client extends Thread implements Constants {
 
             pack();
             setLocationRelativeTo(null);
-
+            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
             ActionListener timerActionListener = new ActionListener() {
                 @Override
@@ -766,7 +766,7 @@ public class Client extends Thread implements Constants {
                 }
             });
 
-            doneEditingButton = new JButton("Done Editing");
+            doneEditingButton = new JButton("Exit Menu");
             doneEditingButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -965,7 +965,18 @@ public class Client extends Thread implements Constants {
         //creates a chat, adds it to the user's account, and sets the current chat to the created chat
         public void createChat(String chatName) {
             //TODO: tell server a new chat is being created and Add the chat to the user's chats
+            timer.restart();
             Chat chat = new Chat(account, chatName);
+            try {
+                oos.writeByte(CREATE_CHAT);
+                oos.writeUnshared(chat);
+                if (ois.readByte() == DENIED) {
+                    //TODO: invalid chat GUI here
+                }
+                account = (Account) ois.readObject();
+            } catch (IOException | ClassNotFoundException exception) {
+                exception.printStackTrace();
+            }
             sendMessage.setEditable(true);
             createIndividualChatPanel(chat);
             loadChat(chat);
