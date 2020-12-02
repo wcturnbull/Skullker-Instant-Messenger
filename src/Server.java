@@ -148,7 +148,16 @@ public class Server implements Constants {
                         client = null;
                     } else if (choice == EDIT_USERNAME) {
                         Account acc = (Account) ois.readObject();
-
+                        if (matchAccounts(acc) == null) {
+                            oos.writeByte(CONTINUE);
+                            client.setUserName(acc.getUserName());
+                        } else {
+                            oos.writeByte(DENIED);
+                        }
+                        oos.flush();
+                    } else if (choice == EDIT_PASSWORD) {
+                        Account acc = (Account) ois.readObject();
+                        client.setPassword(acc.getPassword());
                     } else if (choice == SEND_MESSAGE) {
                         Message message = (Message) ois.readObject();
                         System.out.println(message.getMessage());
@@ -165,6 +174,7 @@ public class Server implements Constants {
                             oos.writeByte(CONTINUE);
                             fetchChat(chat).addUser(acc);
                         }
+                        oos.flush();
                     }
                     if (client != null) {
                         System.out.println("Echoing client info...");

@@ -473,7 +473,7 @@ public class Client extends Thread implements Constants {
         private JScrollPane editMessageScrollPane;
         private JButton editMessageDoneButton;
 
-        Timer timer;
+        private Timer timer;
 
         Chat currentChat;
         boolean chatOpen = false;
@@ -596,6 +596,12 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (account != null) {
+                        try {
+                            oos.writeByte(NO_REQUEST);
+                            account = (Account) ois.readObject();
+                        } catch (IOException | ClassNotFoundException exception) {
+                            exception.printStackTrace();
+                        }
                         Point scrollBarLocation = verticalChatScroller.getLocation();
                         setTitle("Skullker -- " + account.getUserName());
                         if (currentChat != null) {
@@ -724,7 +730,18 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == editUsernameConfirmButton) {
-                        //TODO: Set the username
+                        try {
+                            timer.restart();
+                            oos.writeByte(EDIT_USERNAME);
+                            oos.writeUnshared(new Account(editUsernameTextField.getText(),
+                                    editPasswordTextField.getText()));
+                            if (ois.readByte() == DENIED) {
+                                //TODO: edit username failed message please!
+                            }
+                            account = (Account) ois.readObject();
+                        } catch (IOException | ClassNotFoundException exception) {
+                            exception.printStackTrace();
+                        }
                     }
                 }
             });
@@ -736,7 +753,15 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == editPasswordConfirmButton) {
-                        //TODO: Set the Password
+                        try {
+                            timer.restart();
+                            oos.writeByte(EDIT_PASSWORD);
+                            oos.writeUnshared(new Account(editUsernameTextField.getText(),
+                                    editPasswordTextField.getText()));
+                            account = (Account) ois.readObject();
+                        } catch (IOException | ClassNotFoundException exception) {
+                            exception.printStackTrace();
+                        }
                     }
                 }
             });
@@ -1136,6 +1161,7 @@ public class Client extends Thread implements Constants {
                             "your account?", "Skullker", JOptionPane.YES_NO_OPTION);
                     if (yes_no == JOptionPane.YES_OPTION) {
                         try {
+                            timer.restart();
                             oos.writeByte(DELETE_ACCOUNT);
                             oos.flush();
                         } catch (IOException ioException) {

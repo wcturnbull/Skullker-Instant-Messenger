@@ -10,6 +10,7 @@ public class Chat implements Serializable {
         users = new Vector<Account>();
         messages = new Vector<Message>();
         users.add(owner);
+        owner.addChat(this);
         this.name = name;
     }
 
