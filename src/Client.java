@@ -595,13 +595,13 @@ public class Client extends Thread implements Constants {
             ActionListener timerActionListener = new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (account != null) {
+                    if (account != null) {/**
                         try {
                             oos.writeByte(NO_REQUEST);
                             account = (Account) ois.readObject();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
-                        }
+                        }**/
                         Point scrollBarLocation = verticalChatScroller.getLocation();
                         setTitle("Skullker -- " + account.getUserName());
                         if (currentChat != null) {
