@@ -425,7 +425,7 @@ public class Client extends Thread implements Constants {
         private final JPanel settingsPanel;             //panel that holds the settings button
         private final JButton settingsButton;           //button that allows a user to edit/delete their account
         private final JButton createChatPopupButton;    //button that allows a user to create a new chat
-        private JLabel chatLabel;                       //label that shows the title/users in a selected chat
+        private final JLabel chatLabel;                       //label that shows the title/users in a selected chat
         private final JButton addUsersButton;           //button to add users into a selected chat
         private final JPanel chatLabelPanel;            //panel that holds the chatLabel and addUsers button
         private JPanel messageContent;                  //MAYBE WILL NEED LATER ON
@@ -613,20 +613,30 @@ public class Client extends Thread implements Constants {
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
                         }
+
                         setTitle("Skullker -- " + account.getUserName());
                         addChats();
+
                         if (currentChat != null) {
                             currentChat = fetchCurrentChat(new Chat(currentChat.getUsers().get(0),
                                     currentChat.getName()));
                         }
-                        //System.out.println(currentChat);
+
+                        chatPanel.removeAll();
+                        chatPanel.revalidate();
+                        chatPanel.repaint();
+                        validate();
+                        sendMessage.setEditable(false);
+                        chatOpen = false;
+                        chatLabel.setText("");
+
+                        System.out.println(currentChat);
                         if (currentChat != null) {
                             loadChat(currentChat);
                         }
                     }
                 }
             };
-
             timer = new Timer(100, timerActionListener);
             timer.setRepeats(true);
             timer.start();
@@ -1141,7 +1151,8 @@ public class Client extends Thread implements Constants {
             //TODO: Test to see if it loads received messages properly
             int verticalChatScrollerValue = verticalChatScroller.getValue();
 
-            chatPanel.removeAll();
+            chatOpen = true;
+            sendMessage.setEditable(true);
             Vector<Message> allMessages = currentChat.getMessages();
             for (int i = 0; i < allMessages.size(); i++) {
                 if (allMessages.get(i).getSender().equals(account)) {
@@ -1151,17 +1162,19 @@ public class Client extends Thread implements Constants {
                 }
             }
 
-            System.out.println(verticalChatScrollerValue);
+            //System.out.println(verticalChatScrollerValue);
 
             StringBuilder usersInChat = new StringBuilder(account.getUserName());
 
             if (chat.getUsers().size() > 1) {
-                for (int i = 1; i < chat.getUsers().size(); i++) {
-                    usersInChat.append(", ").append(chat.getUsers().get(i).getUserName());
+                for (int i = 0; i < chat.getUsers().size(); i++) {
+                    if (!chat.getUsers().get(i).getUserName().equals(account.getUserName())) {
+                        usersInChat.append(", ").append(chat.getUsers().get(i).getUserName());
+                    }
                 }
             }
 
-            chatLabel.setText(currentChat.getName() + " -- " + usersInChat);
+            chatLabel.setText(" " + currentChat.getName() + " -- " + usersInChat);
             chatLabelPanel.add(addUsersButton, BorderLayout.EAST);
             verticalChatScroller.setValue(verticalChatScrollerValue);
 
@@ -1253,6 +1266,8 @@ public class Client extends Thread implements Constants {
                         byte status = ois.readByte();
                         if (status == DENIED) {
                             //TODO: user not found error GUI please!
+                            JOptionPane.showMessageDialog(null, "Invalid User", "Skullker",
+                                    JOptionPane.ERROR_MESSAGE);
                         }
                         account = (Account) ois.readObject();
                     } catch (IOException | ClassNotFoundException exception) {
