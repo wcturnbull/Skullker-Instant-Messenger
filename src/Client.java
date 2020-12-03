@@ -118,12 +118,12 @@ public class Client extends Thread implements Constants {
         public void signIn() {
             try {
                 oos.writeByte(LOG_IN);
-                oos.writeUnshared(new Account(userName.getText(), String.valueOf(password.getPassword())));
+                oos.writeObject(new Account(userName.getText(), String.valueOf(password.getPassword())));
                 oos.flush();
 
                 byte status = ois.readByte();
                 if (status == CONTINUE) {
-                    account = (Account) ois.readUnshared();
+                    account = (Account) ois.readObject();
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
@@ -132,7 +132,7 @@ public class Client extends Thread implements Constants {
                     });
                     userName.setText("");
                     password.setText("");
-                    account = (Account) ois.readUnshared();
+                    account = (Account) ois.readObject();
                     dispose();
                 } else if (status == DENIED) {
                     JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
@@ -156,7 +156,7 @@ public class Client extends Thread implements Constants {
                 } else {
                     Account newAccount = new Account(userNameRegisterTextField.getText(),
                             String.valueOf(passwordRegisterTextField.getPassword()));
-                    oos.writeUnshared(newAccount);
+                    oos.writeObject(newAccount);
                     oos.flush();
                     byte status = ois.readByte();
 
@@ -168,7 +168,7 @@ public class Client extends Thread implements Constants {
                                 getAppGUI().setVisible(true);
                             }
                         });
-                        account = (Account) ois.readUnshared();
+                        account = (Account) ois.readObject();
                         registrationFrame.dispose();
                         dispose();
                     } else if (status == DENIED) {
@@ -476,11 +476,11 @@ public class Client extends Thread implements Constants {
 
         private Timer timer;
 
-        Chat currentChat;
-        boolean chatOpen = false;
+        private Chat currentChat;
+        private boolean chatOpen;
 
         public AppGUI() throws IOException, ClassNotFoundException {
-
+            chatOpen = false;
 
             splitPane = new JSplitPane();
 
@@ -597,19 +597,20 @@ public class Client extends Thread implements Constants {
             ActionListener timerActionListener = new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (account != null) {/**
+                    if (account != null) {
                         try {
                             oos.writeByte(NO_REQUEST);
-                            account = (Account) ois.readUnshared();
+                            oos.flush();
+                            account = (Account) ois.readObject();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
-                        }**/
+                        }
                         Point scrollBarLocation = verticalChatScroller.getLocation();
                         setTitle("Skullker -- " + account.getUserName());
                         if (currentChat != null) {
-                            currentChat = fetchCurrentChat(new Chat(account, currentChat.getName()));
+                            currentChat = fetchCurrentChat(new Chat(currentChat.getUsers().get(0),
+                                    currentChat.getName()));
                         }
-                        System.out.println(currentChat);
                         if (currentChat != null) {
                             loadChat(currentChat);
                         }
@@ -620,7 +621,7 @@ public class Client extends Thread implements Constants {
                 }
             };
 
-            timer = new Timer(1000, timerActionListener);
+            timer = new Timer(100, timerActionListener);
             timer.setRepeats(true);
             timer.start();
         }
@@ -700,8 +701,8 @@ public class Client extends Thread implements Constants {
                     if (e.getSource() == openChatButton) {
                         sendMessage.setEditable(true);
                         chatOpen = true;
-                        currentChat = fetchCurrentChat(chat);
-                        loadChat(chat);
+                        currentChat = fetchCurrentChat(new Chat(chat.getUsers().get(0), chat.getName()));
+                        loadChat(currentChat);
                         chatLabel.setText(chat.getName());
                     }
                 }
@@ -736,14 +737,16 @@ public class Client extends Thread implements Constants {
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == editUsernameConfirmButton) {
                         try {
+                            currentChat = null;
+                            chatOpen = false;
                             timer.restart();
                             oos.writeByte(EDIT_USERNAME);
-                            oos.writeUnshared(new Account(editUsernameTextField.getText(),
+                            oos.writeObject(new Account(editUsernameTextField.getText(),
                                     editPasswordTextField.getText()));
                             if (ois.readByte() == DENIED) {
                                 //TODO: edit username failed message please!
                             }
-                            account = (Account) ois.readUnshared();
+                            account = (Account) ois.readObject();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
                         }
@@ -759,11 +762,14 @@ public class Client extends Thread implements Constants {
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == editPasswordConfirmButton) {
                         try {
+
+                            currentChat = null;
+                            chatOpen = false;
                             timer.restart();
                             oos.writeByte(EDIT_PASSWORD);
-                            oos.writeUnshared(new Account(editUsernameTextField.getText(),
+                            oos.writeObject(new Account(editUsernameTextField.getText(),
                                     editPasswordTextField.getText()));
-                            account = (Account) ois.readUnshared();
+                            account = (Account) ois.readObject();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
                         }
@@ -974,11 +980,11 @@ public class Client extends Thread implements Constants {
             currentChat = chat;
             try {
                 oos.writeByte(CREATE_CHAT);
-                oos.writeUnshared(chat);
+                oos.writeObject(chat);
                 if (ois.readByte() == DENIED) {
                     //TODO: invalid chat GUI here
                 }
-                account = (Account) ois.readUnshared();
+                account = (Account) ois.readObject();
             } catch (IOException | ClassNotFoundException exception) {
                 exception.printStackTrace();
             }
@@ -1060,13 +1066,12 @@ public class Client extends Thread implements Constants {
             if (chatOpen) {
                 if (!sendMessage.getText().equals("")) {
                     createSendMessagePane(message);
-                    //TODO: send the server the message
                     try {
                         oos.writeByte(SEND_MESSAGE);
-                        oos.writeUnshared(message.getMessage());
-                        oos.writeUnshared(currentChat);
-                        oos.writeUnshared(message.getTime());
-                        account = (Account) ois.readUnshared();
+                        oos.writeObject(message.getMessage());
+                        oos.writeObject(currentChat);
+                        oos.writeObject(message.getTime());
+                        account = (Account) ois.readObject();
                     } catch (IOException | ClassNotFoundException exception) {
                         exception.printStackTrace();
                     }
@@ -1198,6 +1203,7 @@ public class Client extends Thread implements Constants {
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
+                        account = null;
                         //TODO: delete the account from the server
                         userSettingsWindow.dispose();
                         app.dispose();
@@ -1216,6 +1222,19 @@ public class Client extends Thread implements Constants {
                 }
                 if (e.getSource() == addInputedUserButton) {
                     timer.restart();
+                    try {
+                        oos.writeByte(ADD_USER_TO_CHAT);
+                        oos.writeObject(currentChat);
+                        oos.writeObject(new Account(addUsernameTextField.getText(), ""));
+
+                        byte status = ois.readByte();
+                        if (status == DENIED) {
+                            //TODO: user not found error GUI please!
+                        }
+                        account = (Account) ois.readObject();
+                    } catch (IOException | ClassNotFoundException exception) {
+                        exception.printStackTrace();
+                    }
                     //TODO: Add another user to the chat (It is checking the field "addUsernameTextField")
                     addUsersWindow.dispose();
 

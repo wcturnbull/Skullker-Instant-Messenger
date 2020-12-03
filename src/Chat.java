@@ -60,10 +60,16 @@ public class Chat implements Serializable {
 
     @Override
     public synchronized String toString() {
-        String out = String.format("%s %s ", name, users.get(0));
-        for (Message m : messages) {
-            out += String.format("\n\t%s", m);
+        StringBuilder out = new StringBuilder(String.format("%s %s ", name, users.get(0)));
+        out.append("\n(");
+        for (int i = 1; i < users.size(); i++) {
+            out.append(users.get(i).getUserName()).append(", ");
         }
-        return out;
+        out.substring(0, out.length() - 2);
+        out.append(")");
+        for (Message m : messages) {
+            out.append(String.format("\n\t%s", m));
+        }
+        return out.toString();
     }
 }
