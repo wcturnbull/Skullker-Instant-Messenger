@@ -10,7 +10,6 @@ public class Chat implements Serializable {
         users = new Vector<Account>();
         messages = new Vector<Message>();
         users.add(owner);
-        owner.addChat(this);
         this.name = name;
     }
 
@@ -57,5 +56,14 @@ public class Chat implements Serializable {
                     this.users.get(0).equals(((Chat) o).getUsers().get(0)));
         }
         return false;
+    }
+
+    @Override
+    public synchronized String toString() {
+        String out = String.format("%s %s ", name, users.get(0));
+        for (Message m : messages) {
+            out += String.format("\n\t%s", m);
+        }
+        return out;
     }
 }

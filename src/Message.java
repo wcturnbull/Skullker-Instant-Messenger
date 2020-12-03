@@ -4,11 +4,13 @@ public class Message implements Serializable {
     private Account sender;
     private String message;
     private Chat chat;
+    private String time;
 
-    public Message(Account sender, String message, Chat chat) {
+    public Message(Account sender, String message, Chat chat, String time) {
         this.sender = sender;
         this.message = message;
         this.chat = chat;
+        this.time = time;
     }
 
     public Message(String message) {
@@ -31,6 +33,10 @@ public class Message implements Serializable {
         return chat;
     }
 
+    public String getTime() {
+        return time;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null) {
@@ -43,8 +49,13 @@ public class Message implements Serializable {
             Message message = (Message) o;
             return (this.message.equals(message.getMessage()) &&
                     this.sender.equals(message.getSender()) &&
-                    this.chat.equals(message.getChat()));
+                    this.chat.equals(message.getChat()) &&
+                    this.time.equals(message.getTime()));
         }
         return false;
+    }
+
+    public String toString() {
+        return String.format(message);
     }
 }

@@ -31,8 +31,8 @@ public class Server implements Constants {
             users = new Vector<Account>();
         } else {
             try (ObjectInputStream fois = new ObjectInputStream(new FileInputStream("data.txt"))) {
-                chats = (Vector<Chat>) fois.readObject();
-                users = (Vector<Account>) fois.readObject();
+                chats = (Vector<Chat>) fois.readUnshared();
+                users = (Vector<Account>) fois.readUnshared();
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -47,6 +47,7 @@ public class Server implements Constants {
         chats.add(chat);
     }
 
+    //TODO: THE REASON IT IS BROKEN IS BECAUSE THE CLIENT'S CURRENT CHAT DOES NOT UPDATE FOR THE USER CREDENTIALS
     public void writeMessage(Message message) {
         fetchChat(message.getChat()).sendMessage(message);
     }
@@ -56,7 +57,9 @@ public class Server implements Constants {
     }
 
     public Chat fetchChat(Chat clientChat) {
+        System.out.println(clientChat);
         for (Chat chat : chats) {
+            System.out.println(chat);
             if (chat.equals(clientChat)) {
                 return chat;
             }
@@ -121,7 +124,7 @@ public class Server implements Constants {
                 try {
                     choice = ois.readByte();
                     if (choice == LOG_IN) {
-                        Account acc = fetchAccount((Account) ois.readObject());
+                        Account acc = fetchAccount((Account) ois.readUnshared());
                         if (acc == null) {
                             oos.writeByte(DENIED);
                         } else {
@@ -132,7 +135,7 @@ public class Server implements Constants {
                         }
                         oos.flush();
                     } else if (choice == REGISTER_ACCOUNT) {
-                        Account newAcc = (Account) ois.readObject();
+                        Account newAcc = (Account) ois.readUnshared();
                         if (matchAccounts(newAcc) == null) {
                             oos.writeByte(CONTINUE);
                             addUser(newAcc);
@@ -147,7 +150,7 @@ public class Server implements Constants {
                         System.out.println(client.getUserName() + " was deleted.");
                         client = null;
                     } else if (choice == EDIT_USERNAME) {
-                        Account acc = (Account) ois.readObject();
+                        Account acc = (Account) ois.readUnshared();
                         if (matchAccounts(acc) == null) {
                             oos.writeByte(CONTINUE);
                             client.setUserName(acc.getUserName());
@@ -156,27 +159,28 @@ public class Server implements Constants {
                         }
                         oos.flush();
                     } else if (choice == EDIT_PASSWORD) {
-                        Account acc = (Account) ois.readObject();
+                        Account acc = (Account) ois.readUnshared();
                         client.setPassword(acc.getPassword());
                     } else if (choice == SEND_MESSAGE) {
-                        Message message = (Message) ois.readObject();
-                        System.out.println(message.getMessage());
-                        writeMessage(message);
+                        String message = (String) ois.readUnshared();
+                        Chat chat = (Chat) ois.readUnshared();
+                        System.out.println(chat);
+                        String time = (String) ois.readUnshared();
+                        writeMessage(new Message(client, message,
+                                fetchChat(chat), time));
                     } else if (choice == CREATE_CHAT) {
-                        Chat chat = new Chat(client, ((Chat) ois.readObject()).getName());
+                        Chat chat = new Chat(client, ((Chat) ois.readUnshared()).getName());
                         if (fetchChat(chat) == null) {
-                            System.out.println("allowed");
                             oos.writeByte(CONTINUE);
                             addChat(chat);
+                            client.addChat(chat);
                         } else {
-                            System.out.println("denied");
                             oos.writeByte(DENIED);
                         }
                         oos.flush();
-                        System.out.println("flusehd");
                     } else if (choice == ADD_USER_TO_CHAT) {
-                        Chat chat = (Chat) ois.readObject();
-                        Account acc = matchAccounts((Account) ois.readObject());
+                        Chat chat = (Chat) ois.readUnshared();
+                        Account acc = matchAccounts((Account) ois.readUnshared());
                         if (acc == null) {
                             oos.writeByte(DENIED);
                         } else {
@@ -186,9 +190,14 @@ public class Server implements Constants {
                         oos.flush();
                     }
                     if (client != null) {
-                        System.out.println("Echoing client info...");
+                        System.out.println("Echoing client info...");/**
+                        for (Chat c : client.getChats()) {
+                            System.out.println(c);
+                        }**/
                         oos.writeUnshared(client);
+                        oos.flush();
                     }
+                    oos.reset();
                 } catch (EOFException e) {
                     break;
                 } catch (SocketException e) {

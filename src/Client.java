@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.time.LocalDateTime;
 
 public class Client extends Thread implements Constants {
 
@@ -122,7 +123,7 @@ public class Client extends Thread implements Constants {
 
                 byte status = ois.readByte();
                 if (status == CONTINUE) {
-                    account = (Account) ois.readObject();
+                    account = (Account) ois.readUnshared();
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
@@ -131,7 +132,7 @@ public class Client extends Thread implements Constants {
                     });
                     userName.setText("");
                     password.setText("");
-                    account = (Account) ois.readObject();
+                    account = (Account) ois.readUnshared();
                     dispose();
                 } else if (status == DENIED) {
                     JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
@@ -167,7 +168,7 @@ public class Client extends Thread implements Constants {
                                 getAppGUI().setVisible(true);
                             }
                         });
-                        account = (Account) ois.readObject();
+                        account = (Account) ois.readUnshared();
                         registrationFrame.dispose();
                         dispose();
                     } else if (status == DENIED) {
@@ -559,14 +560,15 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        Message newMessage = new Message(account, sendMessage.getText(), currentChat);
+                        Message newMessage = new Message(account, sendMessage.getText(), currentChat,
+                                LocalDateTime.now().toString());
                         sendMessage(newMessage);
                         sendMessage.setText("");
                     }
                     if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
                         //Test case, won't need later on
                         Account testAccount = new Account("Test Account", "1234");
-                        receiveMessage(new Message(testAccount, "Test", new Chat(testAccount, "test Chat")));
+                        receiveMessage(new Message(testAccount, "Test", new Chat(testAccount, "test Chat"), LocalDateTime.now().toString()));
                     }
                 }
 
@@ -598,12 +600,16 @@ public class Client extends Thread implements Constants {
                     if (account != null) {/**
                         try {
                             oos.writeByte(NO_REQUEST);
-                            account = (Account) ois.readObject();
+                            account = (Account) ois.readUnshared();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
                         }**/
                         Point scrollBarLocation = verticalChatScroller.getLocation();
                         setTitle("Skullker -- " + account.getUserName());
+                        if (currentChat != null) {
+                            currentChat = fetchCurrentChat(new Chat(account, currentChat.getName()));
+                        }
+                        System.out.println(currentChat);
                         if (currentChat != null) {
                             loadChat(currentChat);
                         }
@@ -682,12 +688,11 @@ public class Client extends Thread implements Constants {
 
         //creates a chat panel with an "open chat" button and the chat's title
         public void createIndividualChatPanel(Chat chat) {
-            currentChat = chat;
+            //currentChat = chat;
             JPanel newChat = new JPanel();
             String chatTitle = chat.getName();
             JLabel chatLabelLeftPanel = new JLabel(chatTitle, SwingConstants.CENTER);
             chatLabelLeftPanel.setText(chatTitle);
-            chatLabel.setText(chatTitle);
             JButton openChatButton = new JButton("Open Chat");
             openChatButton.addActionListener(new ActionListener() {
                 @Override
@@ -695,7 +700,7 @@ public class Client extends Thread implements Constants {
                     if (e.getSource() == openChatButton) {
                         sendMessage.setEditable(true);
                         chatOpen = true;
-                        currentChat = chat;
+                        currentChat = fetchCurrentChat(chat);
                         loadChat(chat);
                         chatLabel.setText(chat.getName());
                     }
@@ -738,7 +743,7 @@ public class Client extends Thread implements Constants {
                             if (ois.readByte() == DENIED) {
                                 //TODO: edit username failed message please!
                             }
-                            account = (Account) ois.readObject();
+                            account = (Account) ois.readUnshared();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
                         }
@@ -758,7 +763,7 @@ public class Client extends Thread implements Constants {
                             oos.writeByte(EDIT_PASSWORD);
                             oos.writeUnshared(new Account(editUsernameTextField.getText(),
                                     editPasswordTextField.getText()));
-                            account = (Account) ois.readObject();
+                            account = (Account) ois.readUnshared();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
                         }
@@ -964,22 +969,31 @@ public class Client extends Thread implements Constants {
 
         //creates a chat, adds it to the user's account, and sets the current chat to the created chat
         public void createChat(String chatName) {
-            //TODO: tell server a new chat is being created and Add the chat to the user's chats
             timer.restart();
             Chat chat = new Chat(account, chatName);
+            currentChat = chat;
             try {
                 oos.writeByte(CREATE_CHAT);
                 oos.writeUnshared(chat);
                 if (ois.readByte() == DENIED) {
                     //TODO: invalid chat GUI here
                 }
-                account = (Account) ois.readObject();
+                account = (Account) ois.readUnshared();
             } catch (IOException | ClassNotFoundException exception) {
                 exception.printStackTrace();
             }
             sendMessage.setEditable(true);
             createIndividualChatPanel(chat);
             loadChat(chat);
+        }
+
+        public Chat fetchCurrentChat(Chat chat) {
+            for (Chat c : account.getChats()) {
+                if (c.equals(chat)) {
+                    return c;
+                }
+            }
+            return null;
         }
 
         //panel that holds a user's sent message and a menu for message manipulation
@@ -1044,12 +1058,19 @@ public class Client extends Thread implements Constants {
         //sends a message to the server and builds a sendMessagePane
         public void sendMessage(Message message) {
             if (chatOpen) {
-                //if (!sendMessage.getText().equals("")) {
+                if (!sendMessage.getText().equals("")) {
                     createSendMessagePane(message);
-                    currentChat.sendMessage(message);
                     //TODO: send the server the message
-
-                //}
+                    try {
+                        oos.writeByte(SEND_MESSAGE);
+                        oos.writeUnshared(message.getMessage());
+                        oos.writeUnshared(currentChat);
+                        oos.writeUnshared(message.getTime());
+                        account = (Account) ois.readUnshared();
+                    } catch (IOException | ClassNotFoundException exception) {
+                        exception.printStackTrace();
+                    }
+                }
             }
         }
 
@@ -1107,17 +1128,15 @@ public class Client extends Thread implements Constants {
         public void loadChat(Chat chat) {
             //TODO: Test to see if it loads received messages properly
             chatPanel.removeAll();
-
-            Vector<Message> allMessages = chat.getMessages();
-
+            Vector<Message> allMessages = currentChat.getMessages();
             for (int i = 0; i < allMessages.size(); i++) {
-                if (allMessages.get(i).getSender() == account) {
+                if (allMessages.get(i).getSender().equals(account)) {
                     createSendMessagePane(allMessages.get(i));
                 } else {
                     createReceiveMessagePane(allMessages.get(i));
                 }
             }
-
+            chatLabel.setText(currentChat.getName());
             chatPanel.repaint();
             chatPanel.revalidate();
             validate();
@@ -1139,7 +1158,8 @@ public class Client extends Thread implements Constants {
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == sendButton) {
                     timer.restart();
-                    Message newMessage = new Message(account, sendMessage.getText(), currentChat);
+                    Message newMessage = new Message(account, sendMessage.getText(), currentChat,
+                            LocalDateTime.now().toString());
                     sendMessage(newMessage);
                     sendMessage.setText("");
                 }

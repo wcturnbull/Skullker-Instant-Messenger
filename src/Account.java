@@ -71,4 +71,9 @@ public class Account implements Serializable {
         }
         return false;
     }
+
+    @Override
+    public synchronized String toString() {
+        return String.format("%s %s ", userName, password);
+    }
 }
