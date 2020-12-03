@@ -426,7 +426,7 @@ public class Client extends Thread implements Constants {
         private final JPanel chatLabelPanel;            //panel that holds the chatLabel and addUsers button
         private JPanel messageContent;                  //MAYBE WILL NEED LATER ON
         private final JScrollBar verticalChatScroller;  //Scroll bar for the chat
-        private GridBagConstraints gbc;
+        private GridBagConstraints gbc;                 //Grid bag Constraints for the chatPanel
 
         //create chat window
         private JFrame createChatPopUp;
@@ -474,7 +474,8 @@ public class Client extends Thread implements Constants {
         private JScrollPane editMessageScrollPane;
         private JButton editMessageDoneButton;
 
-        private Timer timer;
+        private final Timer timer;
+        private int scrollBarLocation;
 
         Chat currentChat;
         boolean chatOpen = false;
@@ -510,6 +511,7 @@ public class Client extends Thread implements Constants {
 
             chatLabelPanel = new JPanel();
             chatLabel = new JLabel();
+            chatLabel.setAutoscrolls(true);
             addUsersButton = new JButton("Add Users");
             addUsersButton.addActionListener(new ActionListener() {
                 @Override
@@ -604,18 +606,15 @@ public class Client extends Thread implements Constants {
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
                         }**/
-                        Point scrollBarLocation = verticalChatScroller.getLocation();
                         setTitle("Skullker -- " + account.getUserName());
+                        addChats();
                         if (currentChat != null) {
                             currentChat = fetchCurrentChat(new Chat(account, currentChat.getName()));
                         }
-                        System.out.println(currentChat);
+                        //System.out.println(currentChat);
                         if (currentChat != null) {
                             loadChat(currentChat);
                         }
-                        addChats();
-
-                        verticalChatScroller.setLocation(scrollBarLocation);
                     }
                 }
             };
@@ -693,6 +692,7 @@ public class Client extends Thread implements Constants {
             String chatTitle = chat.getName();
             JLabel chatLabelLeftPanel = new JLabel(chatTitle, SwingConstants.CENTER);
             chatLabelLeftPanel.setText(chatTitle);
+            chatLabel.setText(chatTitle);
             JButton openChatButton = new JButton("Open Chat");
             openChatButton.addActionListener(new ActionListener() {
                 @Override
@@ -702,7 +702,7 @@ public class Client extends Thread implements Constants {
                         chatOpen = true;
                         currentChat = fetchCurrentChat(chat);
                         loadChat(chat);
-                        chatLabel.setText(chat.getName());
+                        //chatLabel.setText(chat.getName());
                     }
                 }
             });
@@ -1127,6 +1127,8 @@ public class Client extends Thread implements Constants {
         //loads all of the messages from a chat into the right panel (Needs to be tested with receiving messages)
         public void loadChat(Chat chat) {
             //TODO: Test to see if it loads received messages properly
+            int verticalChatScrollerValue = verticalChatScroller.getValue();
+
             chatPanel.removeAll();
             Vector<Message> allMessages = currentChat.getMessages();
             for (int i = 0; i < allMessages.size(); i++) {
@@ -1136,7 +1138,21 @@ public class Client extends Thread implements Constants {
                     createReceiveMessagePane(allMessages.get(i));
                 }
             }
-            chatLabel.setText(currentChat.getName());
+
+            System.out.println(verticalChatScrollerValue);
+
+            StringBuilder usersInChat = new StringBuilder(account.getUserName());
+
+            if (chat.getUsers().size() > 1) {
+                for (int i = 1; i < chat.getUsers().size(); i++) {
+                    usersInChat.append(", ").append(chat.getUsers().get(i).getUserName());
+                }
+            }
+
+            chatLabel.setText(currentChat.getName() + " -- " + usersInChat);
+            chatLabelPanel.add(addUsersButton, BorderLayout.EAST);
+            verticalChatScroller.setValue(verticalChatScrollerValue);
+
             chatPanel.repaint();
             chatPanel.revalidate();
             validate();
@@ -1217,6 +1233,9 @@ public class Client extends Thread implements Constants {
                 if (e.getSource() == addInputedUserButton) {
                     timer.restart();
                     //TODO: Add another user to the chat (It is checking the field "addUsernameTextField")
+
+
+                    loadChat(currentChat);
                     addUsersWindow.dispose();
 
                 }
