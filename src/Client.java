@@ -117,9 +117,13 @@ public class Client extends Thread implements Constants {
 
         public void signIn() {
             try {
-                oos.writeByte(LOG_IN);
-                oos.writeObject(new Account(userName.getText(), String.valueOf(password.getPassword())));
-                oos.flush();
+                try {
+                    oos.writeByte(LOG_IN);
+                    oos.writeObject(new Account(userName.getText(), String.valueOf(password.getPassword())));
+                    oos.flush();
+                } catch (SocketException exception) {
+                    //TODO: server closed error + DISPOSE GUIS
+                }
 
                 byte status = ois.readByte();
                 if (status == CONTINUE) {
@@ -516,8 +520,10 @@ public class Client extends Thread implements Constants {
             addUsersButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == addUsersButton) {
-                        createAddUsersWindow();
+                    if (chatOpen) {
+                        if (e.getSource() == addUsersButton) {
+                            createAddUsersWindow();
+                        }
                     }
                 }
             });
@@ -1257,6 +1263,7 @@ public class Client extends Thread implements Constants {
 
                     loadChat(currentChat);
                     addUsersWindow.dispose();
+
 
                 }
             }

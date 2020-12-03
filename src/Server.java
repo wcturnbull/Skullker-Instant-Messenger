@@ -162,12 +162,8 @@ public class Server implements Constants {
                         Account acc = (Account) ois.readObject();
                         client.setPassword(acc.getPassword());
                     } else if (choice == SEND_MESSAGE) {
-                        String message = (String) ois.readObject();
-                        Chat chat = (Chat) ois.readObject();
-                        System.out.println(chat);
-                        String time = (String) ois.readObject();
-                        writeMessage(new Message(client, message,
-                                fetchChat(chat), time));
+                        writeMessage(new Message(client, (String) ois.readObject(),
+                                fetchChat((Chat) ois.readObject()), (String) ois.readObject()));
                     } else if (choice == CREATE_CHAT) {
                         Chat chat = new Chat(client, ((Chat) ois.readObject()).getName());
                         if (fetchChat(chat) == null) {
