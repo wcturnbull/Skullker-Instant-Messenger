@@ -122,7 +122,11 @@ public class Client extends Thread implements Constants {
                     oos.writeObject(new Account(userName.getText(), String.valueOf(password.getPassword())));
                     oos.flush();
                 } catch (SocketException exception) {
-                    //TODO: server closed error + DISPOSE GUIS
+                    registrationFrame.dispose();
+                    dispose();
+
+                    JOptionPane.showMessageDialog(null, "Server Closed", "Skullker",
+                            JOptionPane.ERROR_MESSAGE);
                 }
 
                 byte status = ois.readByte();
@@ -137,6 +141,9 @@ public class Client extends Thread implements Constants {
                     userName.setText("");
                     password.setText("");
                     account = (Account) ois.readObject();
+                    if (registrationFrame != null) {
+                        registrationFrame.dispose();
+                    }
                     dispose();
                 } else if (status == DENIED) {
                     JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
@@ -425,10 +432,9 @@ public class Client extends Thread implements Constants {
         private final JPanel settingsPanel;             //panel that holds the settings button
         private final JButton settingsButton;           //button that allows a user to edit/delete their account
         private final JButton createChatPopupButton;    //button that allows a user to create a new chat
-        private final JLabel chatLabel;                       //label that shows the title/users in a selected chat
+        private final JLabel chatLabel;                 //label that shows the title/users in a selected chat
         private final JButton addUsersButton;           //button to add users into a selected chat
         private final JPanel chatLabelPanel;            //panel that holds the chatLabel and addUsers button
-        private JPanel messageContent;                  //MAYBE WILL NEED LATER ON
         private final JScrollBar verticalChatScroller;  //Scroll bar for the chat
         private GridBagConstraints gbc;                 //Grid bag Constraints for the chatPanel
 
@@ -611,7 +617,9 @@ public class Client extends Thread implements Constants {
                             oos.flush();
                             account = (Account) ois.readObject();
                         } catch (SocketException | EOFException exception) {
-                            //TODO: dispose all GUIs and tell the user that the server has closed
+                            JOptionPane.showMessageDialog(null, "Server Closed", "Skullker",
+                                    JOptionPane.ERROR_MESSAGE);
+                            disposeAllFrames();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
                         }
@@ -643,9 +651,17 @@ public class Client extends Thread implements Constants {
             timer.start();
         }
 
+        public void disposeAllFrames() {
+            dispose();
+            createChatPopUp.dispose();
+            userSettingsWindow.dispose();
+            editAccountFrame.dispose();
+            addUsersWindow.dispose();
+            editMessageFrame.dispose();
+        }
+
         //creates a fully functional message editor
         public void createMessageEditor(Message message) {
-            //TODO: Make it look good
             editMessageFrame = new JFrame("Message Editor");
             editMessageContentPane = new JPanel();
             editMessageTitle = new JLabel("Edit: ");
@@ -659,7 +675,8 @@ public class Client extends Thread implements Constants {
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == editMessageDoneButton) {
                         if (editMessageTextArea.getText().equals("")) {
-                            //TODO: invalid message
+                            JOptionPane.showMessageDialog(null, "Invalid Message", "Skullker",
+                                    JOptionPane.ERROR_MESSAGE);
                             return;
                         }
                         try {
@@ -712,7 +729,7 @@ public class Client extends Thread implements Constants {
             editMessageFrame.setSize(250, 250);
             //editMessageFrame.pack();
             editMessageFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            editMessageFrame.setLocationRelativeTo(messageContent);
+            editMessageFrame.setLocationRelativeTo(null);
             editMessageFrame.setVisible(true);
         }
 
@@ -723,7 +740,6 @@ public class Client extends Thread implements Constants {
             String chatTitle = chat.getName();
             JLabel chatLabelLeftPanel = new JLabel(chatTitle, SwingConstants.CENTER);
             chatLabelLeftPanel.setText(chatTitle);
-            chatLabel.setText(chatTitle);
             JButton openChatButton = new JButton("Open Chat");
             openChatButton.addActionListener(new ActionListener() {
                 @Override
@@ -733,7 +749,6 @@ public class Client extends Thread implements Constants {
                         chatOpen = true;
                         currentChat = fetchCurrentChat(new Chat(chat.getUsers().get(0), chat.getName()));
                         loadChat(currentChat);
-                        chatLabel.setText(chat.getName());
                     }
                 }
             });
@@ -752,7 +767,6 @@ public class Client extends Thread implements Constants {
 
         //creates a window that allows a user to edit their account information (NEEDS WORK)
         public void createEditAccountWindow() {
-            //TODO: Make this fully functional
             editAccountFrame = new JFrame("Edit Account");
             editAccountFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             editAccountContentPane = new JPanel();
@@ -772,7 +786,8 @@ public class Client extends Thread implements Constants {
                             oos.writeObject(new Account(editUsernameTextField.getText(),
                                     editPasswordTextField.getText()));
                             if (ois.readByte() == DENIED) {
-                                //TODO: edit username failed message please!
+                                JOptionPane.showMessageDialog(null, "Invalid Username", "Skullker",
+                                        JOptionPane.ERROR_MESSAGE);
                             }
                             account = (Account) ois.readObject();
                         } catch (IOException | ClassNotFoundException exception) {
@@ -871,6 +886,23 @@ public class Client extends Thread implements Constants {
             addUsernameLabel = new JLabel("Username: ");
             addUsernamePanel = new JPanel();
             addUsernameTextField = new JTextField(15);
+            addUsernameTextField.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        addUser();
+                    }
+                }
+                @Override
+                public void keyReleased(KeyEvent e) {
+
+                }
+            });
 
             addInputedUserButton = new JButton("Add User");
             addInputedUserButton.addActionListener(new AppGUIListener());
@@ -1007,15 +1039,19 @@ public class Client extends Thread implements Constants {
                 oos.writeByte(CREATE_CHAT);
                 oos.writeObject(chat);
                 if (ois.readByte() == DENIED) {
-                    //TODO: invalid chat GUI here
+                    JOptionPane.showMessageDialog(null, "Chat Already Exists", "Skullker",
+                            JOptionPane.ERROR_MESSAGE);
+                    currentChat = null;
                 }
                 account = (Account) ois.readObject();
             } catch (IOException | ClassNotFoundException exception) {
                 exception.printStackTrace();
             }
             sendMessage.setEditable(true);
-            createIndividualChatPanel(chat);
-            loadChat(chat);
+            if (currentChat != null) {
+                createIndividualChatPanel(chat);
+                loadChat(chat);
+            }
         }
 
         public Chat fetchCurrentChat(Chat chat) {
@@ -1070,11 +1106,11 @@ public class Client extends Thread implements Constants {
                     }
                 }
             });
+
             manipulateMessageMenu.add(editMessageMenuItem);
             manipulateMessageMenu.add(deleteMessageMenuItem);
             manipulateMessageMenuBar.add(manipulateMessageMenu);
             messageContent.add(manipulateMessageMenuBar);
-
 
             chatPanel.add(messageContent, gbc);
             chatPanel.revalidate();
@@ -1082,7 +1118,7 @@ public class Client extends Thread implements Constants {
 
             gbc.gridy++;
 
-            verticalChatScroller.setValue(verticalChatScroller.getMaximum());
+            //verticalChatScroller.setValue(verticalChatScroller.getMaximum());
         }
 
         //sends a message to the server and builds a sendMessagePane
@@ -1130,12 +1166,11 @@ public class Client extends Thread implements Constants {
 
             gbc.gridy++;
 
-            verticalChatScroller.setValue(verticalChatScroller.getMaximum());
+            //verticalChatScroller.setValue(verticalChatScroller.getMaximum());
             //sendMessage.setText("");
         }
 
         //receives a message from the server and builds a receiveMessagePane
-        //TODO: the received messages need to be added to the Chat's messages ArrayList
         public void receiveMessage(Message message) {
             createReceiveMessagePane(message);
             //currentChat.sendMessage(message);
@@ -1155,23 +1190,21 @@ public class Client extends Thread implements Constants {
 
         //builds the message editor and tells the server a message is edited
         public void editMessage(Message message) {
-            //TODO: Tell the server a message is being updated
             createMessageEditor(message);
         }
 
         //loads all of the messages from a chat into the right panel (Needs to be tested with receiving messages)
         public void loadChat(Chat chat) {
-            //TODO: Test to see if it loads received messages properly
             int verticalChatScrollerValue = verticalChatScroller.getValue();
 
             chatOpen = true;
             sendMessage.setEditable(true);
             Vector<Message> allMessages = currentChat.getMessages();
-            for (int i = 0; i < allMessages.size(); i++) {
-                if (allMessages.get(i).getSender().equals(account)) {
-                    createSendMessagePane(allMessages.get(i));
+            for (Message message : allMessages) {
+                if (message.getSender().equals(account)) {
+                    createSendMessagePane(message);
                 } else {
-                    createReceiveMessagePane(allMessages.get(i));
+                    createReceiveMessagePane(message);
                 }
             }
 
@@ -1180,14 +1213,16 @@ public class Client extends Thread implements Constants {
             StringBuilder usersInChat = new StringBuilder(account.getUserName());
 
             if (chat.getUsers().size() > 1) {
-                for (int i = 0; i < chat.getUsers().size(); i++) {
-                    if (!chat.getUsers().get(i).getUserName().equals(account.getUserName())) {
-                        usersInChat.append(", ").append(chat.getUsers().get(i).getUserName());
+                for (Account user : chat.getUsers()) {
+                    if (!user.getUserName().equals(account.getUserName())) {
+                        usersInChat.append(", ").append(user.getUserName());
                     }
                 }
+                chatLabel.setText(" " + currentChat.getName() + " -- " + usersInChat);
+            } else {
+                chatLabel.setText(" " + currentChat.getName());
             }
 
-            chatLabel.setText(" " + currentChat.getName() + " -- " + usersInChat);
             chatLabelPanel.add(addUsersButton, BorderLayout.EAST);
             verticalChatScroller.setValue(verticalChatScrollerValue);
 
@@ -1198,13 +1233,37 @@ public class Client extends Thread implements Constants {
 
         //Adds all of a user's chats onto the left panel (not functional)
         public void addChats() {
-            //TODO: Add all of the chats that a given user is in to the left panel
             chatSelectorPanel.removeAll();
             Vector<Chat> userChats;
             userChats = account.getChats();
             for (Chat chat : userChats) {
                 createIndividualChatPanel(chat);
             }
+        }
+
+        public void addUser() {
+            try {
+                if (addUsernameTextField.getText().equals(account.getUserName())) {
+                    JOptionPane.showMessageDialog(null, "Invalid User", "Skullker",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                oos.writeByte(ADD_USER_TO_CHAT);
+                oos.writeObject(currentChat);
+                oos.writeObject(new Account(addUsernameTextField.getText(), ""));
+
+                byte status = ois.readByte();
+                if (status == DENIED) {
+                    JOptionPane.showMessageDialog(null, "Invalid User", "Skullker",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    addUsersWindow.dispose();
+                }
+                account = (Account) ois.readObject();
+            } catch (IOException | ClassNotFoundException exception) {
+                exception.printStackTrace();
+            }
+            loadChat(currentChat);
         }
 
         class AppGUIListener implements ActionListener {
@@ -1236,7 +1295,6 @@ public class Client extends Thread implements Constants {
                     }
                 }
                 if (e.getSource() == editAccountButton) {
-                    //TODO: add edit account functionality
                     timer.restart();
                     createEditAccountWindow();
                 }
@@ -1254,7 +1312,6 @@ public class Client extends Thread implements Constants {
                             ioException.printStackTrace();
                         }
                         account = null;
-                        //TODO: delete the account from the server
                         userSettingsWindow.dispose();
                         app.dispose();
                         SwingUtilities.invokeLater(new Runnable() {
@@ -1272,32 +1329,7 @@ public class Client extends Thread implements Constants {
                 }
                 if (e.getSource() == addInputedUserButton) {
                     timer.restart();
-                    try {
-                        if (addUsernameTextField.getText().equals(account.getUserName())) {
-                            //TODO: error message here for trying to add themself
-                            return;
-                        }
-                        oos.writeByte(ADD_USER_TO_CHAT);
-                        oos.writeObject(currentChat);
-                        oos.writeObject(new Account(addUsernameTextField.getText(), ""));
-
-                        byte status = ois.readByte();
-                        if (status == DENIED) {
-                            //TODO: user not found error GUI please!
-                            JOptionPane.showMessageDialog(null, "Invalid User", "Skullker",
-                                    JOptionPane.ERROR_MESSAGE);
-                        }
-                        account = (Account) ois.readObject();
-                    } catch (IOException | ClassNotFoundException exception) {
-                        exception.printStackTrace();
-                    }
-                    //TODO: Add another user to the chat (It is checking the field "addUsernameTextField")
-
-
-                    loadChat(currentChat);
-                    addUsersWindow.dispose();
-
-
+                    addUser();
                 }
             }
         }
