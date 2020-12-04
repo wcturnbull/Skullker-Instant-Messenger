@@ -1166,9 +1166,7 @@ public class Client implements Constants {
         }
 
         //loads all of the messages from a chat into the right panel (Needs to be tested with receiving messages)
-        public void loadChat(Chat chat) {/**
-            chatOpen = true;
-            sendMessage.setEditable(true);**/
+        public void loadChat(Chat chat) {
             Vector<Message> allMessages = currentChat.getMessages();
             for (Message message : allMessages) {
                 if (message.getSender().equals(account)) {
