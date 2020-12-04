@@ -23,12 +23,13 @@ public class Chat implements Serializable {
 
     public void addUser(Account user) {
         users.add(user);
-        user.addChat(this);
+        user.joinChat(this);
     }
 
     public void removeUser(Account user) {
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).equals(user)) {
+                users.get(i).leaveChat(this);
                 users.remove(i);
             }
         }

@@ -1,6 +1,4 @@
 import java.io.Serializable;
-import java.io.StreamCorruptedException;
-import java.lang.reflect.Array;
 import java.util.Vector;
 
 public class Account implements Serializable {
@@ -35,8 +33,16 @@ public class Account implements Serializable {
         this.password = other.password;
     }
 
-    public void addChat(Chat chat) {
+    public void joinChat(Chat chat) {
         chats.add(chat);
+    }
+
+    public void leaveChat(Chat chat) {
+        for (int i = 0; i < chats.size(); i++) {
+            if (chats.get(i).equals(chat)) {
+                chats.remove(i);
+            }
+        }
     }
 
     public Vector<Chat> getChats() {

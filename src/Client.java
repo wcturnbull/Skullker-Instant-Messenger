@@ -29,10 +29,7 @@ public class Client extends Thread implements Constants {
      * later we will shift everything to gui's?
      */
     private Account account;
-    private ArrayList<Chat> chats;
     private Socket socket;
-    private BufferedReader br;
-    private PrintWriter pw;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     private WelcomeGUI welcome;
@@ -42,8 +39,6 @@ public class Client extends Thread implements Constants {
         welcome = new WelcomeGUI();
         app = new AppGUI();
         socket = new Socket("localhost", 0xBEEF);
-        br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        pw = new PrintWriter(socket.getOutputStream());
         oos = new ObjectOutputStream(socket.getOutputStream());
         ois = new ObjectInputStream(socket.getInputStream());
     }
@@ -187,10 +182,8 @@ public class Client extends Thread implements Constants {
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 }
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            } catch (ClassNotFoundException cnfException) {
-                cnfException.printStackTrace();
+            } catch (IOException | ClassNotFoundException exception) {
+                exception.printStackTrace();
             }
         }
 
