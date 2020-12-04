@@ -634,7 +634,6 @@ public class Client extends Thread implements Constants {
 
                         chatPanel.removeAll();
                         chatPanel.revalidate();
-                        chatPanel.repaint();
                         validate();
                         sendMessage.setEditable(false);
                         chatOpen = false;
@@ -748,10 +747,20 @@ public class Client extends Thread implements Constants {
                         sendMessage.setEditable(true);
                         chatOpen = true;
                         currentChat = fetchCurrentChat(new Chat(chat.getUsers().get(0), chat.getName()));
-                        loadChat(currentChat);
                     }
                 }
             });
+            JButton leaveChatButton = new JButton("Leave Chat");
+            leaveChatButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == leaveChatButton) {
+                        //TODO: Allow a user to leave the chat
+
+                    }
+                }
+            });
+
             newChat.setLayout(new BorderLayout());
             newChat.add(chatLabelLeftPanel, BorderLayout.CENTER);
             newChat.add(openChatButton, BorderLayout.SOUTH);
