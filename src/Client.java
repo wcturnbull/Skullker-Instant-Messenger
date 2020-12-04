@@ -759,7 +759,7 @@ public class Client extends Thread implements Constants {
                     }
                 }
             });
-
+            // TODO: make this look better
             newChat.setLayout(new BoxLayout(newChat, BoxLayout.Y_AXIS));
             newChat.add(chatLabelLeftPanel);
             newChat.add(openChatButton);
