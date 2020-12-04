@@ -1176,18 +1176,18 @@ public class Client implements Constants {
                 }
             }
 
-            chatLabelPanel.add(addUsersButton, BorderLayout.EAST);
-
-            chatPanel.repaint();
-            chatPanel.revalidate();
-            validate();
-
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     verticalChatScroller.setValue(verticalChatScroller.getMaximum());
                     verticalChatScroller.setUnitIncrement(5);
                 }
             });
+
+            chatLabelPanel.add(addUsersButton, BorderLayout.EAST);
+            chatPanel.repaint();
+            chatPanel.revalidate();
+            validate();
+
         }
 
         //Adds all of a user's chats onto the left panel (not functional)
