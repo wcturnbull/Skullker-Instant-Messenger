@@ -145,7 +145,9 @@ public class Client implements Constants {
         public void register() {
             try {
                 if (userNameRegisterTextField.getText().equals("") ||
-                        String.valueOf(passwordRegisterTextField.getPassword()).equals("")) {
+                        userNameRegisterTextField.getText().indexOf(' ') >= 0 ||
+                        String.valueOf(passwordRegisterTextField.getPassword()).equals("") ||
+                        String.valueOf(passwordRegisterTextField.getPassword()).indexOf(' ') >= 0) {
                     JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
                             JOptionPane.ERROR_MESSAGE);
                 } else if (!String.valueOf(passwordRegisterTextField.getPassword()).
@@ -737,18 +739,27 @@ public class Client implements Constants {
             editUsernameConfirmButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    try {
-                        timer.restart();
-                        oos.writeByte(EDIT_USERNAME);
-                        oos.writeObject(new Account(editUsernameTextField.getText(),
-                                editPasswordTextField.getText()));
-                        if (ois.readByte() == DENIED) {
-                            JOptionPane.showMessageDialog(null, "Invalid Username",
-                                    "Skullker", JOptionPane.ERROR_MESSAGE);
+                    if (editUsernameTextField.getText().equals("") ||
+                            editUsernameTextField.getText().trim().indexOf(' ') >= 0) {
+                        JOptionPane.showMessageDialog(null, "Invalid Username",
+                                "Skullker", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        try {
+                            timer.restart();
+                            oos.writeByte(EDIT_USERNAME);
+                            oos.writeObject(new Account(editUsernameTextField.getText(),
+                                    editPasswordTextField.getText()));
+                            if (ois.readByte() == DENIED) {
+                                JOptionPane.showMessageDialog(null, "Invalid Username",
+                                        "Skullker", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Username Edited",
+                                        "Skullker", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                            account = (Account) ois.readObject();
+                        } catch (IOException | ClassNotFoundException exception) {
+                            exception.printStackTrace();
                         }
-                        account = (Account) ois.readObject();
-                    } catch (IOException | ClassNotFoundException exception) {
-                        exception.printStackTrace();
                     }
                 }
             });
@@ -759,14 +770,22 @@ public class Client implements Constants {
             editPasswordConfirmButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    try {
-                        timer.restart();
-                        oos.writeByte(EDIT_PASSWORD);
-                        oos.writeObject(new Account(editUsernameTextField.getText(),
-                                editPasswordTextField.getText()));
-                        account = (Account) ois.readObject();
-                    } catch (IOException | ClassNotFoundException exception) {
-                        exception.printStackTrace();
+                    if (editPasswordTextField.getText().equals("") ||
+                            editPasswordTextField.getText().trim().indexOf(' ') >= 0) {
+                        JOptionPane.showMessageDialog(null, "Invalid Password",
+                                "Skullker", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        try {
+                            timer.restart();
+                            oos.writeByte(EDIT_PASSWORD);
+                            oos.writeObject(new Account(editUsernameTextField.getText(),
+                                    editPasswordTextField.getText()));
+                            account = (Account) ois.readObject();
+                            JOptionPane.showMessageDialog(null, "Password Edited",
+                                    "Skullker", JOptionPane.INFORMATION_MESSAGE);
+                        } catch (IOException | ClassNotFoundException exception) {
+                            exception.printStackTrace();
+                        }
                     }
                 }
             });
