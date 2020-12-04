@@ -1,6 +1,12 @@
 import java.io.Serializable;
 import java.util.Vector;
+import java.awt.Color;
 
+/**
+ *
+ * @author Wes Turnbull, Evan Wang CS18000, 001
+ * @version 7 December 2020
+ */
 public class Account implements Serializable {
     private String userName;    //Username for a password
     private String password;    //Password for an account

@@ -8,25 +8,18 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
 import java.util.Vector;
 import java.time.LocalDateTime;
 
+/**
+ *
+ * @author Wes Turnbull, Evan Wang CS18000, 001
+ * @version 7 December 2020
+ */
 public class Client extends Thread implements Constants {
 
     /**
-     * add functionality so that client starts a socket that can
-     * connect to the server.
-     * once connected, allow the user to send messages to the server
      *
-     * Neihl's Edit: So i was thinking about how this class will interact with the server class so I'm going to just write
-     * them down here to talk about on monday. First and foremost, is this class going to be run through swingutilities
-     * like i have it now? or will it be run through everything being implemented through the psvm. personally i think
-     * the swingutilities functions way better. Second, the interaction with the server class. What I was envisioning
-     * was something like a welcome screen with the options to sign in or create an account and when either option is chosen
-     * then I'll send information to the server. All this being said, I'm not sure how to implement the class without the
-     * gui aspect, so my final question is, should i just write this class to be run through the intellij terminal and then
-     * later we will shift everything to gui's?
      */
     private Account account;
     private Socket socket;
@@ -157,8 +150,8 @@ public class Client extends Thread implements Constants {
                             JOptionPane.ERROR_MESSAGE);
                 } else if (!String.valueOf(passwordRegisterTextField.getPassword()).
                         equals(String.valueOf(confirmPasswordTextField.getPassword()))) {
-                    JOptionPane.showMessageDialog(null, "Passwords did not match", "Skullker",
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Passwords did not match",
+                            "Skullker", JOptionPane.ERROR_MESSAGE);
                 } else {
                     Account newAccount = new Account(userNameRegisterTextField.getText(),
                             String.valueOf(passwordRegisterTextField.getPassword()));
@@ -521,9 +514,7 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (chatOpen) {
-                        if (e.getSource() == addUsersButton) {
-                            createAddUsersWindow();
-                        }
+                        createAddUsersWindow();
                     }
                 }
             });
@@ -559,13 +550,7 @@ public class Client extends Thread implements Constants {
             messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
             messagePanel.add(sendMessage);
             sendMessage.setEditable(false);
-            sendMessage.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-
-                }
-
-                @Override
+            sendMessage.addKeyListener(new KeyAdapter() {@Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         Message newMessage = new Message(account, sendMessage.getText(), currentChat,
@@ -576,13 +561,9 @@ public class Client extends Thread implements Constants {
                     if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
                         //Test case, won't need later on
                         Account testAccount = new Account("Test Account", "1234");
-                        receiveMessage(new Message(testAccount, "Test", new Chat(testAccount, "test Chat"), LocalDateTime.now().toString()));
+                        receiveMessage(new Message(testAccount, "Test", new Chat(testAccount,
+                                "test Chat"), LocalDateTime.now().toString()));
                     }
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-
                 }
             });
             messagePanel.add(sendButton);
@@ -601,8 +582,7 @@ public class Client extends Thread implements Constants {
             pack();
             setLocationRelativeTo(null);
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-            ActionListener timerActionListener = new ActionListener() {
+            timer = new Timer(100, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (account != null) {
@@ -639,8 +619,7 @@ public class Client extends Thread implements Constants {
                         }
                     }
                 }
-            };
-            timer = new Timer(100, timerActionListener);
+            });
             timer.setRepeats(true);
             timer.start();
         }
@@ -667,24 +646,22 @@ public class Client extends Thread implements Constants {
             editMessageDoneButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == editMessageDoneButton) {
-                        if (editMessageTextArea.getText().equals("")) {
-                            JOptionPane.showMessageDialog(null, "Invalid Message", "Skullker",
-                                    JOptionPane.ERROR_MESSAGE);
-                            return;
-                        }
-                        try {
-                            oos.writeByte(EDIT_MESSAGE);
-                            oos.writeObject(message);
-                            oos.writeObject(editMessageTextArea.getText());
-                            oos.flush();
-                            account = (Account) ois.readObject();
-                        } catch (IOException | ClassNotFoundException exception) {
-                            exception.printStackTrace();
-                        }
-                        loadChat(currentChat);
-                        editMessageFrame.dispose();
+                    if (editMessageTextArea.getText().equals("")) {
+                        JOptionPane.showMessageDialog(null, "Invalid Message",
+                                "Skullker", JOptionPane.ERROR_MESSAGE);
+                        return;
                     }
+                    try {
+                        oos.writeByte(EDIT_MESSAGE);
+                        oos.writeObject(message);
+                        oos.writeObject(editMessageTextArea.getText());
+                        oos.flush();
+                        account = (Account) ois.readObject();
+                    } catch (IOException | ClassNotFoundException exception) {
+                        exception.printStackTrace();
+                    }
+                    loadChat(currentChat);
+                    editMessageFrame.dispose();
                 }
             });
 
@@ -738,26 +715,21 @@ public class Client extends Thread implements Constants {
             openChatButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == openChatButton) {
-                        sendMessage.setEditable(true);
-                        chatOpen = true;
-                        currentChat = fetchCurrentChat(new Chat(chat.getUsers().get(0), chat.getName()));
-                    }
+                    sendMessage.setEditable(true);
+                    chatOpen = true;
+                    currentChat = fetchCurrentChat(new Chat(chat.getUsers().get(0), chat.getName()));
                 }
             });
             JButton leaveChatButton = new JButton("Leave Chat");
             leaveChatButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == leaveChatButton) {
-                        try {
-                            oos.writeByte(LEAVE_CHAT);
-                            oos.writeObject(chat);
-                            account = (Account) ois.readObject();
-                        } catch (IOException | ClassNotFoundException exception) {
-                            exception.printStackTrace();
-                        }
-
+                    try {
+                        oos.writeByte(LEAVE_CHAT);
+                        oos.writeObject(chat);
+                        account = (Account) ois.readObject();
+                    } catch (IOException | ClassNotFoundException exception) {
+                        exception.printStackTrace();
                     }
                 }
             });
@@ -792,20 +764,18 @@ public class Client extends Thread implements Constants {
             editUsernameConfirmButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == editUsernameConfirmButton) {
-                        try {
-                            timer.restart();
-                            oos.writeByte(EDIT_USERNAME);
-                            oos.writeObject(new Account(editUsernameTextField.getText(),
-                                    editPasswordTextField.getText()));
-                            if (ois.readByte() == DENIED) {
-                                JOptionPane.showMessageDialog(null, "Invalid Username", "Skullker",
-                                        JOptionPane.ERROR_MESSAGE);
-                            }
-                            account = (Account) ois.readObject();
-                        } catch (IOException | ClassNotFoundException exception) {
-                            exception.printStackTrace();
+                    try {
+                        timer.restart();
+                        oos.writeByte(EDIT_USERNAME);
+                        oos.writeObject(new Account(editUsernameTextField.getText(),
+                                editPasswordTextField.getText()));
+                        if (ois.readByte() == DENIED) {
+                            JOptionPane.showMessageDialog(null, "Invalid Username",
+                                    "Skullker", JOptionPane.ERROR_MESSAGE);
                         }
+                        account = (Account) ois.readObject();
+                    } catch (IOException | ClassNotFoundException exception) {
+                        exception.printStackTrace();
                     }
                 }
             });
@@ -816,16 +786,14 @@ public class Client extends Thread implements Constants {
             editPasswordConfirmButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == editPasswordConfirmButton) {
-                        try {
-                            timer.restart();
-                            oos.writeByte(EDIT_PASSWORD);
-                            oos.writeObject(new Account(editUsernameTextField.getText(),
-                                    editPasswordTextField.getText()));
-                            account = (Account) ois.readObject();
-                        } catch (IOException | ClassNotFoundException exception) {
-                            exception.printStackTrace();
-                        }
+                    try {
+                        timer.restart();
+                        oos.writeByte(EDIT_PASSWORD);
+                        oos.writeObject(new Account(editUsernameTextField.getText(),
+                                editPasswordTextField.getText()));
+                        account = (Account) ois.readObject();
+                    } catch (IOException | ClassNotFoundException exception) {
+                        exception.printStackTrace();
                     }
                 }
             });
@@ -834,13 +802,9 @@ public class Client extends Thread implements Constants {
             doneEditingButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == doneEditingButton) {
-                        editAccountFrame.dispose();
-                    }
+                    editAccountFrame.dispose();
                 }
             });
-
-
 
             editAccountContentPane.setLayout(new GridBagLayout());
 
@@ -899,21 +863,12 @@ public class Client extends Thread implements Constants {
             addUsernameLabel = new JLabel("Username: ");
             addUsernamePanel = new JPanel();
             addUsernameTextField = new JTextField(15);
-            addUsernameTextField.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-
-                }
-
+            addUsernameTextField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         addUser();
                     }
-                }
-                @Override
-                public void keyReleased(KeyEvent e) {
-
                 }
             });
 
@@ -996,28 +951,17 @@ public class Client extends Thread implements Constants {
             createChatContentPane = new JPanel();
             createChatNameLabel = new JLabel("Chat Name: ");
             createChatNameTextField = new JTextField(15);
-            createChatNameTextField.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-
-                }
-
-                @Override
+            createChatNameTextField.addKeyListener(new KeyAdapter() {@Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         if (createChatNameTextField.getText().equals("")) {
-                            JOptionPane.showMessageDialog(null, "Please enter a name", "Skullker",
-                                    JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "Please enter a name",
+                                    "Skullker", JOptionPane.ERROR_MESSAGE);
                         } else {
                             createChat(createChatNameTextField.getText());
                             createChatPopUp.dispose();
                         }
                     }
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-
                 }
             });
             createChatNamePane = new JPanel();
@@ -1087,7 +1031,8 @@ public class Client extends Thread implements Constants {
             JTextArea messageTextArea = new JTextArea(message.getMessage());
             Border messageBorder = BorderFactory.createMatteBorder(1, 3, 1, 1, Color.BLACK);
             messageTextArea.setBorder(messageBorder);
-            messageBorder = BorderFactory.createTitledBorder(messageBorder, "you", TitledBorder.RIGHT, TitledBorder.BELOW_BOTTOM);
+            messageBorder = BorderFactory.createTitledBorder(messageBorder, "you",
+                    TitledBorder.RIGHT, TitledBorder.BELOW_BOTTOM);
             messageTextArea.setBorder(messageBorder);
             messageTextArea.setMinimumSize(new Dimension(75, 60));
             messageTextArea.setLineWrap(true);
@@ -1104,19 +1049,15 @@ public class Client extends Thread implements Constants {
             editMessageMenuItem.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == editMessageMenuItem) {
-                        editMessage(message);
-                    }
+                    editMessage(message);
                 }
             });
             deleteMessageMenuItem = new JMenuItem("Delete message");
             deleteMessageMenuItem.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == deleteMessageMenuItem) {
-                        deleteMessage(message);
-                        loadChat(currentChat);
-                    }
+                    deleteMessage(message);
+                    loadChat(currentChat);
                 }
             });
 
@@ -1137,7 +1078,7 @@ public class Client extends Thread implements Constants {
             if (chatOpen) {
                 if (!sendMessage.getText().equals("")) {
                     createSendMessagePane(message);
-                    verticalChatScroller.setValue(verticalChatScroller.getMaximum());
+                    //verticalChatScroller.setValue(verticalChatScroller.getMaximum());
                     try {
                         oos.writeByte(SEND_MESSAGE);
                         oos.writeObject(message.getMessage());
@@ -1177,14 +1118,11 @@ public class Client extends Thread implements Constants {
             validate();
 
             gbc.gridy++;
-
-            verticalChatScroller.setValue(verticalChatScroller.getMaximum());
         }
 
         //receives a message from the server and builds a receiveMessagePane
         public void receiveMessage(Message message) {
             createReceiveMessagePane(message);
-            verticalChatScroller.setValue(verticalChatScroller.getMaximum());
         }
 
         //tells the server a message is deleted
@@ -1206,7 +1144,7 @@ public class Client extends Thread implements Constants {
 
         //loads all of the messages from a chat into the right panel (Needs to be tested with receiving messages)
         public void loadChat(Chat chat) {
-            int verticalChatScrollerValue = verticalChatScroller.getValue();
+            //int verticalChatScrollerValue = verticalChatScroller.getValue();
 
             chatOpen = true;
             sendMessage.setEditable(true);
@@ -1240,7 +1178,7 @@ public class Client extends Thread implements Constants {
             chatPanel.revalidate();
             validate();
 
-            verticalChatScroller.setValue(verticalChatScrollerValue);
+            //verticalChatScroller.setValue(verticalChatScrollerValue);
         }
 
         //Adds all of a user's chats onto the left panel (not functional)
@@ -1300,8 +1238,8 @@ public class Client extends Thread implements Constants {
                 if (e.getSource() == createChatButton) {
                     timer.restart();
                     if (createChatNameTextField.getText().equals("")) {
-                        JOptionPane.showMessageDialog(null, "Please enter a name", "Skullker",
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "Please enter a name",
+                                "Skullker", JOptionPane.ERROR_MESSAGE);
                     } else {
                         createChat(createChatNameTextField.getText());
                         createChatPopUp.dispose();
@@ -1313,8 +1251,9 @@ public class Client extends Thread implements Constants {
                 }
                 if (e.getSource() == deleteAccountButton) {
                     timer.restart();
-                    int yes_no = JOptionPane.showConfirmDialog(null, "Are you sure you would like to delete " +
-                            "your account?", "Skullker", JOptionPane.YES_NO_OPTION);
+                    int yes_no = JOptionPane.showConfirmDialog(null,
+                            "Are you sure you would like to delete your account?",
+                            "Skullker", JOptionPane.YES_NO_OPTION);
                     if (yes_no == JOptionPane.YES_OPTION) {
                         try {
                             timer.restart();
@@ -1333,7 +1272,6 @@ public class Client extends Thread implements Constants {
                                 welcome.setVisible(true);
                             }
                         });
-
                     }
                 }
                 if (e.getSource() == cancelButton) {

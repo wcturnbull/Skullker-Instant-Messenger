@@ -1,5 +1,10 @@
 import java.io.Serializable;
 
+/**
+ *
+ * @author Wes Turnbull, Evan Wang CS18000, 001
+ * @version 7 December 2020
+ */
 public class Message implements Serializable {
     private Account sender;
     private String message;

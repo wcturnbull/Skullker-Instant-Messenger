@@ -1,6 +1,11 @@
 import java.io.Serializable;
 import java.util.Vector;
 
+/**
+ *
+ * @author Wes Turnbull, Evan Wang CS18000, 001
+ * @version 7 December 2020
+ */
 public class Chat implements Serializable {
     private Vector<Account> users;
     private Vector<Message> messages;

@@ -1,9 +1,13 @@
-import java.util.ArrayList;
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 import java.util.Vector;
 
+/**
+ *
+ * @author Wes Turnbull, Evan Wang CS18000, 001
+ * @version 7 December 2020
+ */
 public class Server implements Constants {
     private Vector<Chat> chats;
     private Vector<Account> users;
