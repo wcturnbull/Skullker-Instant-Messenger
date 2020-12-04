@@ -604,7 +604,6 @@ public class Client implements Constants {
                     } catch (IOException | ClassNotFoundException exception) {
                         exception.printStackTrace();
                     }
-                    loadChat(currentChat);
                     editMessageFrame.dispose();
                 }
             });
@@ -1001,7 +1000,6 @@ public class Client implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     deleteMessage(message);
-                    loadChat(currentChat);
                 }
             });
 
@@ -1158,7 +1156,6 @@ public class Client implements Constants {
             } catch (IOException | ClassNotFoundException exception) {
                 exception.printStackTrace();
             }
-            loadChat(currentChat);
         }
 
         class AppGUIListener implements ActionListener {
