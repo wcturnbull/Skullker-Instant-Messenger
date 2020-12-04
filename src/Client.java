@@ -754,8 +754,6 @@ public class Client extends Thread implements Constants {
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == editUsernameConfirmButton) {
                         try {
-                            currentChat = null;
-                            chatOpen = false;
                             timer.restart();
                             oos.writeByte(EDIT_USERNAME);
                             oos.writeObject(new Account(editUsernameTextField.getText(),
@@ -779,9 +777,6 @@ public class Client extends Thread implements Constants {
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == editPasswordConfirmButton) {
                         try {
-
-                            currentChat = null;
-                            chatOpen = false;
                             timer.restart();
                             oos.writeByte(EDIT_PASSWORD);
                             oos.writeObject(new Account(editUsernameTextField.getText(),
@@ -1234,6 +1229,7 @@ public class Client extends Thread implements Constants {
                     if (yes_no == JOptionPane.YES_OPTION) {
                         try {
                             timer.restart();
+                            chatSelectorPanel.removeAll();
                             oos.writeByte(DELETE_ACCOUNT);
                             oos.flush();
                         } catch (IOException ioException) {
