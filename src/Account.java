@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.util.Vector;
+import java.time.LocalDateTime;
 import java.awt.Color;
 
 /**
@@ -10,11 +11,13 @@ import java.awt.Color;
 public class Account implements Serializable {
     private String userName;    //Username for a password
     private String password;    //Password for an account
+    private String serial;
     private Vector<Chat> chats;
 
     public Account(String userName, String password) {
         this.userName = userName;
         this.password = password;
+        serial = String.format("%s %s %s", userName, password, LocalDateTime.now());
         chats = new Vector<Chat>();
     }
 
@@ -71,8 +74,16 @@ public class Account implements Serializable {
         }
     }
 
-    public synchronized boolean matches(Account acc) {
+    public synchronized boolean matchesUsername(Account acc) {
         return this.userName.equals(acc.getUserName());
+    }
+
+    public synchronized boolean matchesCredentials(Account acc) {
+        return this.userName.equals(acc.getUserName()) && this.password.equals(acc.getPassword()) ;
+    }
+
+    public String getSerial() {
+        return serial;
     }
 
     @Override
@@ -85,8 +96,7 @@ public class Account implements Serializable {
         }
         if (o instanceof Account) {
             Account account = (Account) o;
-            return (userName.equals(account.getUserName()) &&
-                    password.equals(account.getPassword()));
+            return (this.serial.equals(account.getSerial()));
         }
         return false;
     }

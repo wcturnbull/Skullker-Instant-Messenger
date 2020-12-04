@@ -66,16 +66,25 @@ public class Server implements Constants {
 
     public Account fetchAccount(Account acc) {
         for (Account a : users) {
-            if (a.equals(acc)) {
+            if (a.matchesCredentials(acc)) {
                 return a;
             }
         }
         return null;
     }
 
-    public Account matchAccounts(Account acc) {
+    public Account matchUsernames(Account acc) {
         for (Account a : users) {
-            if (a.matches(acc)) {
+            if (a.matchesUsername(acc)) {
+                return a;
+            }
+        }
+        return null;
+    }
+
+    public Account matchCredentials(Account acc) {
+        for (Account a : users) {
+            if (a.matchesCredentials(acc)) {
                 return a;
             }
         }
@@ -84,7 +93,7 @@ public class Server implements Constants {
 
     public void deleteAccount(Account account) {
         for (int i = 0; i < users.size(); i++) {
-            if (users.get(i).equals(account)) {
+            if (users.get(i).matchesCredentials(account)) {
                 users.get(i).delete();
                 users.remove(i);
                 return;
@@ -130,7 +139,7 @@ public class Server implements Constants {
                         oos.flush();
                     } else if (choice == REGISTER_ACCOUNT) {
                         Account newAcc = (Account) ois.readObject();
-                        if (matchAccounts(newAcc) == null) {
+                        if (matchUsernames(newAcc) == null) {
                             oos.writeByte(CONTINUE);
                             users.add(newAcc);
                             System.out.println("Successful registration!");
@@ -145,7 +154,7 @@ public class Server implements Constants {
                         client = null;
                     } else if (choice == EDIT_USERNAME) {
                         Account acc = (Account) ois.readObject();
-                        if (matchAccounts(acc) == null) {
+                        if (matchUsernames(acc) == null) {
                             oos.writeByte(CONTINUE);
                             client.setUserName(acc.getUserName());
                         } else {
@@ -170,7 +179,7 @@ public class Server implements Constants {
                         oos.flush();
                     } else if (choice == ADD_USER_TO_CHAT) {
                         Chat chat = (Chat) ois.readObject();
-                        Account acc = matchAccounts((Account) ois.readObject());
+                        Account acc = matchUsernames((Account) ois.readObject());
                         if (acc == null || fetchChat(chat).getUsers().contains(acc)) {
                             oos.writeByte(DENIED);
                         } else {

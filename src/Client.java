@@ -591,7 +591,7 @@ public class Client extends Thread implements Constants {
                 public void actionPerformed(ActionEvent e) {
                     if (account != null) {
                         try {
-                            oos.writeByte(NO_REQUEST);
+                            oos.writeByte(REQUEST_DATA);
                             oos.flush();
                             account = (Account) ois.readObject();
                         } catch (SocketException | EOFException exception) {
@@ -656,6 +656,7 @@ public class Client extends Thread implements Constants {
                         return;
                     }
                     try {
+                        timer.restart();
                         oos.writeByte(EDIT_MESSAGE);
                         oos.writeObject(message);
                         oos.writeObject(editMessageTextArea.getText());
@@ -729,6 +730,7 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
+                        timer.restart();
                         oos.writeByte(LEAVE_CHAT);
                         oos.writeObject(chat);
                         account = (Account) ois.readObject();
@@ -1011,7 +1013,6 @@ public class Client extends Thread implements Constants {
             sendMessage.setEditable(true);
             if (currentChat != null) {
                 createIndividualChatPanel(chat);
-                //loadChat(chat);
             }
         }
 
@@ -1084,6 +1085,7 @@ public class Client extends Thread implements Constants {
                     createSendMessagePane(message);
                     //verticalChatScroller.setValue(verticalChatScroller.getMaximum());
                     try {
+                        timer.restart();
                         oos.writeByte(SEND_MESSAGE);
                         oos.writeObject(message.getMessage());
                         oos.writeObject(currentChat);
@@ -1132,6 +1134,7 @@ public class Client extends Thread implements Constants {
         //tells the server a message is deleted
         public void deleteMessage(Message message) {
             try {
+                timer.restart();
                 oos.writeByte(DELETE_MESSAGE);
                 oos.writeObject(message);
                 account = (Account) ois.readObject();
@@ -1203,6 +1206,7 @@ public class Client extends Thread implements Constants {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
+                timer.restart();
                 oos.writeByte(ADD_USER_TO_CHAT);
                 oos.writeObject(currentChat);
                 oos.writeObject(new Account(addUsernameTextField.getText(), ""));
@@ -1225,22 +1229,18 @@ public class Client extends Thread implements Constants {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == sendButton) {
-                    timer.restart();
                     Message newMessage = new Message(account, sendMessage.getText(), currentChat,
                             LocalDateTime.now().toString());
                     sendMessage(newMessage);
                     sendMessage.setText("");
                 }
                 if (e.getSource() == settingsButton) {
-                    timer.restart();
                     createSettingsWindow();
                 }
                 if (e.getSource() == createChatPopupButton) {
-                    timer.restart();
                     createCreateChatPopUp();
                 }
                 if (e.getSource() == createChatButton) {
-                    timer.restart();
                     if (createChatNameTextField.getText().equals("")) {
                         JOptionPane.showMessageDialog(null, "Please enter a name",
                                 "Skullker", JOptionPane.ERROR_MESSAGE);
@@ -1250,7 +1250,6 @@ public class Client extends Thread implements Constants {
                     }
                 }
                 if (e.getSource() == editAccountButton) {
-                    timer.restart();
                     createEditAccountWindow();
                 }
                 if (e.getSource() == deleteAccountButton) {
