@@ -185,12 +185,7 @@ public class Server implements Constants {
                         Message message = (Message) ois.readObject();
                         fetchChat(message.getChat()).removeMessage(message);
                     }
-                    if (client != null) {/**
-                        System.out.println("Echoing client info...");
-                        System.out.println(client.getUserName());
-                        for (Chat c : client.getChats()) {
-                            System.out.println(c);
-                        }**/
+                    if (client != null) {
                         oos.writeObject(client);
                         oos.flush();
                     }

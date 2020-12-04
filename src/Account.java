@@ -61,7 +61,7 @@ public class Account implements Serializable {
     public void delete() {
         this.setUserName(this.userName + " (DELETED)");
         for (Chat c : chats) {
-            c.removeUser(this);
+            c.deleteUser(this);
         }
     }
 

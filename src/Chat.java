@@ -35,6 +35,14 @@ public class Chat implements Serializable {
         }
     }
 
+    public void deleteUser(Account user) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).equals(user)) {
+                users.remove(i);
+            }
+        }
+    }
+
     public void removeMessage(Message message) {
         messages.remove(message);
     }
