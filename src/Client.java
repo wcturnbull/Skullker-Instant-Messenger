@@ -1065,7 +1065,6 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == deleteMessageMenuItem) {
-                        currentChat.removeMessage(message);
                         deleteMessage(message);
                         loadChat(currentChat);
                     }
@@ -1144,7 +1143,13 @@ public class Client extends Thread implements Constants {
 
         //tells the server a message is deleted (INCOMPLETE)
         public void deleteMessage(Message message) {
-            //TODO: Tell the server a message is deleted
+            try {
+                oos.writeByte(DELETE_MESSAGE);
+                oos.writeObject(message);
+                account = (Account) ois.readObject();
+            } catch (IOException | ClassNotFoundException exception) {
+                exception.printStackTrace();
+            }
 
         }
 

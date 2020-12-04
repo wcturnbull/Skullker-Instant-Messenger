@@ -47,7 +47,6 @@ public class Server implements Constants {
         chats.add(chat);
     }
 
-    //TODO: THE REASON IT IS BROKEN IS BECAUSE THE CLIENT'S CURRENT CHAT DOES NOT UPDATE FOR THE USER CREDENTIALS
     public void writeMessage(Message message) {
         fetchChat(message.getChat()).sendMessage(message);
     }
@@ -99,6 +98,10 @@ public class Server implements Constants {
 
     public void editMessage(Message message, String newText) {
         fetchChat(message.getChat()).fetchMessage(message).editMessage(newText);
+    }
+
+    public void deleteMessage(Message message) {
+        fetchChat(message.getChat()).removeMessage(message);
     }
 
     class ClientThread extends Thread {
@@ -191,6 +194,9 @@ public class Server implements Constants {
                         Message message = (Message) ois.readObject();
                         String newText = (String) ois.readObject();
                         editMessage(message, newText);
+                    } else if (choice == DELETE_MESSAGE) {
+                        Message message = (Message) ois.readObject();
+                        deleteMessage(message);
                     }
                     if (client != null) {/**
                         System.out.println("Echoing client info...");
