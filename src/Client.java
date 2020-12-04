@@ -569,20 +569,23 @@ public class Client implements Constants {
                             exception.printStackTrace();
                         }
 
+                        // updates chatSelectorPanel if there is an update detected in the user's chats
                         if (!previousChats.equals(account.getChats())) {
                             addChats();
                         }
-
                         previousChats = account.getChats();
+
 
                         setTitle("Skullker -- " + account.getUserName());
 
+                        // updates previousChat and currentChat references
                         if (currentChat != null) {
                             previousChat = currentChat;
                             currentChat = fetchCurrentChat(new Chat(currentChat.getUsers().get(0),
                                     currentChat.getName()));
                         }
 
+                        // the following code block properly updates chatPanel's title and properties
                         if (currentChat != null) {
                             chatOpen = true;
                             sendMessage.setEditable(true);
@@ -598,6 +601,7 @@ public class Client implements Constants {
                                 chatLabel.setText(" " + currentChat.getName());
                             }
                         }
+                        // the following conditional only updates chatPanel if there is a change in currentChat
                         if (currentChat == null || !(previousChat.getMessages().equals(currentChat.getMessages()))) {
                             chatPanel.removeAll();
                             chatPanel.revalidate();
@@ -1162,9 +1166,9 @@ public class Client implements Constants {
         }
 
         //loads all of the messages from a chat into the right panel (Needs to be tested with receiving messages)
-        public void loadChat(Chat chat) {
+        public void loadChat(Chat chat) {/**
             chatOpen = true;
-            sendMessage.setEditable(true);
+            sendMessage.setEditable(true);**/
             Vector<Message> allMessages = currentChat.getMessages();
             for (Message message : allMessages) {
                 if (message.getSender().equals(account)) {
@@ -1172,19 +1176,6 @@ public class Client implements Constants {
                 } else {
                     createReceiveMessagePane(message);
                 }
-            }
-
-            StringBuilder usersInChat = new StringBuilder(account.getUserName());
-
-            if (chat.getUsers().size() > 1) {
-                for (Account user : chat.getUsers()) {
-                    if (!user.getUserName().equals(account.getUserName())) {
-                        usersInChat.append(", ").append(user.getUserName());
-                    }
-                }
-                chatLabel.setText(" " + currentChat.getName() + " -- " + usersInChat);
-            } else {
-                chatLabel.setText(" " + currentChat.getName());
             }
 
             chatLabelPanel.add(addUsersButton, BorderLayout.EAST);

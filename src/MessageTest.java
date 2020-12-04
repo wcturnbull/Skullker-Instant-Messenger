@@ -1,19 +1,16 @@
 import org.junit.Test;
-
-import java.lang.reflect.Constructor;
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.*;
+import static org.junit.Assert.*;
 
 public class MessageTest {
 
     @Test
     public void testGetSender() {
-            Account acc = new Account("test", "1234");
-            Object o = new Object();
-            Chat chat = new Chat(acc, "Chat");
-            Message test = new Message(acc, "hi", chat);
-            assertEquals(acc, test.getSender());
+        Account acc = new Account("test", "1234");
+        Object o = new Object();
+        Chat chat = new Chat(acc, "Chat");
+        Message test = new Message(acc, "hi", chat);
+        assertEquals(acc, test.getSender());
     }
 
     @Test
@@ -63,7 +60,6 @@ public class MessageTest {
                                                         // but different initialization times are not equal
         assertFalse(test.equals(acc)); //asserts that a message will return true when comparing to
                                                         // a different object entirely
-
     }
 
     @Test
@@ -75,7 +71,5 @@ public class MessageTest {
         assertEquals("", test.toString());//asserts that test returns a string type
         test.editMessage("hi");
         assertEquals("hi", test.toString());//asserts that test returns the correct string
-
-
     }
 }
