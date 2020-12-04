@@ -759,11 +759,11 @@ public class Client extends Thread implements Constants {
                     }
                 }
             });
-            //TODO: change layout to look good
-            newChat.setLayout(new BorderLayout());
-            newChat.add(chatLabelLeftPanel, BorderLayout.CENTER);
-            newChat.add(openChatButton, BorderLayout.NORTH);
-            newChat.add(leaveChatButton, BorderLayout.SOUTH);
+
+            newChat.setLayout(new BoxLayout(newChat, BoxLayout.Y_AXIS));
+            newChat.add(chatLabelLeftPanel);
+            newChat.add(openChatButton);
+            newChat.add(leaveChatButton);
             Border selectChatBorder = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
             newChat.setBorder(selectChatBorder);
             newChat.setMinimumSize(new Dimension(100, 150));
@@ -1059,7 +1059,7 @@ public class Client extends Thread implements Constants {
             sendMessage.setEditable(true);
             if (currentChat != null) {
                 createIndividualChatPanel(chat);
-                loadChat(chat);
+                //loadChat(chat);
             }
         }
 
@@ -1126,8 +1126,6 @@ public class Client extends Thread implements Constants {
             validate();
 
             gbc.gridy++;
-
-            //verticalChatScroller.setValue(verticalChatScroller.getMaximum());
         }
 
         //sends a message to the server and builds a sendMessagePane
@@ -1135,6 +1133,7 @@ public class Client extends Thread implements Constants {
             if (chatOpen) {
                 if (!sendMessage.getText().equals("")) {
                     createSendMessagePane(message);
+                    verticalChatScroller.setValue(verticalChatScroller.getMaximum());
                     try {
                         oos.writeByte(SEND_MESSAGE);
                         oos.writeObject(message.getMessage());
@@ -1175,17 +1174,16 @@ public class Client extends Thread implements Constants {
 
             gbc.gridy++;
 
-            //verticalChatScroller.setValue(verticalChatScroller.getMaximum());
-            //sendMessage.setText("");
+            verticalChatScroller.setValue(verticalChatScroller.getMaximum());
         }
 
         //receives a message from the server and builds a receiveMessagePane
         public void receiveMessage(Message message) {
             createReceiveMessagePane(message);
-            //currentChat.sendMessage(message);
+            verticalChatScroller.setValue(verticalChatScroller.getMaximum());
         }
 
-        //tells the server a message is deleted (INCOMPLETE)
+        //tells the server a message is deleted
         public void deleteMessage(Message message) {
             try {
                 oos.writeByte(DELETE_MESSAGE);
@@ -1233,11 +1231,12 @@ public class Client extends Thread implements Constants {
             }
 
             chatLabelPanel.add(addUsersButton, BorderLayout.EAST);
-            verticalChatScroller.setValue(verticalChatScrollerValue);
 
             chatPanel.repaint();
             chatPanel.revalidate();
             validate();
+
+            verticalChatScroller.setValue(verticalChatScrollerValue);
         }
 
         //Adds all of a user's chats onto the left panel (not functional)
