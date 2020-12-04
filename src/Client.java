@@ -28,12 +28,16 @@ public class Client extends Thread implements Constants {
     private WelcomeGUI welcome;
     private AppGUI app;
 
-    public Client() throws IOException, ClassNotFoundException {
+    public Client() {
         welcome = new WelcomeGUI();
         app = new AppGUI();
-        socket = new Socket("localhost", 0xBEEF);
-        oos = new ObjectOutputStream(socket.getOutputStream());
-        ois = new ObjectInputStream(socket.getInputStream());
+        try {
+            socket = new Socket("localhost", 0xBEEF);
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            ois = new ObjectInputStream(socket.getInputStream());
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     public WelcomeGUI getWelcomeGUI() {
@@ -44,7 +48,7 @@ public class Client extends Thread implements Constants {
         return app;
     }
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) {
         Client client = new Client();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
