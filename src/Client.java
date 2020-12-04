@@ -436,9 +436,10 @@ public class Client implements Constants {
         private JButton editMessageDoneButton;
 
         private final Timer timer;
-        private int scrollBarLocation;
 
+        private Chat previousChat;
         private Chat currentChat;
+        private Vector<Chat> previousChats;
         private boolean chatOpen;
 
         public AppGUI() {
@@ -547,6 +548,10 @@ public class Client implements Constants {
                     timer.stop();
                 }
             });
+
+            previousChat = null;
+            previousChats = new Vector<Chat>();
+
             timer = new Timer(100, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -564,26 +569,48 @@ public class Client implements Constants {
                             exception.printStackTrace();
                         }
 
+                        if (!previousChats.equals(account.getChats())) {
+                            addChats();
+                        }
+
+                        previousChats = account.getChats();
+
                         setTitle("Skullker -- " + account.getUserName());
-                        addChats();
 
                         if (currentChat != null) {
+                            previousChat = currentChat;
                             currentChat = fetchCurrentChat(new Chat(currentChat.getUsers().get(0),
                                     currentChat.getName()));
                         }
 
-                        chatPanel.removeAll();
-                        chatPanel.revalidate();
-                        chatPanel.repaint();
-                        validate();
-                        sendMessage.setEditable(false);
-                        chatOpen = false;
-                        chatLabel.setText("");
-
                         if (currentChat != null) {
-                            loadChat(currentChat);
+                            chatOpen = true;
+                            sendMessage.setEditable(true);
+                            StringBuilder usersInChat = new StringBuilder(account.getUserName());
+                            if (currentChat.getUsers().size() > 1) {
+                                for (Account user : currentChat.getUsers()) {
+                                    if (!user.getUserName().equals(account.getUserName())) {
+                                        usersInChat.append(", ").append(user.getUserName());
+                                    }
+                                }
+                                chatLabel.setText(" " + currentChat.getName() + " -- " + usersInChat);
+                            } else {
+                                chatLabel.setText(" " + currentChat.getName());
+                            }
                         }
-                        verticalChatScroller.setValue(verticalChatScroller.getMaximum());
+                        if (currentChat == null || !(previousChat.getMessages().equals(currentChat.getMessages()))) {
+                            chatPanel.removeAll();
+                            chatPanel.revalidate();
+                            chatPanel.repaint();
+                            validate();
+                            sendMessage.setEditable(false);
+                            chatOpen = false;
+                            chatLabel.setText("");
+
+                            if (currentChat != null) {
+                                loadChat(currentChat);
+                            }
+                        }
                     }
                 }
             });
@@ -694,6 +721,7 @@ public class Client implements Constants {
                     sendMessage.setEditable(true);
                     chatOpen = true;
                     currentChat = fetchCurrentChat(new Chat(chat.getUsers().get(0), chat.getName()));
+                    loadChat(currentChat);
                 }
             });
             JButton leaveChatButton = new JButton("Leave Chat");
@@ -986,6 +1014,7 @@ public class Client implements Constants {
             timer.restart();
             Chat chat = new Chat(account, chatName);
             currentChat = chat;
+            loadChat(currentChat);
             try {
                 oos.writeByte(CREATE_CHAT);
                 oos.writeObject(chat);
@@ -1022,7 +1051,7 @@ public class Client implements Constants {
             JPanel messageContent = new JPanel();
             messageContent.setBackground(Color.WHITE);
             JTextArea messageTextArea = new JTextArea(message.getMessage());
-            Border messageBorder = BorderFactory.createMatteBorder(1, 3, 1, 1, Color.BLACK);
+            Border messageBorder = BorderFactory.createMatteBorder(1, 1, 1, 3, Color.BLACK);
             messageTextArea.setBorder(messageBorder);
             messageBorder = BorderFactory.createTitledBorder(messageBorder, "you",
                     TitledBorder.RIGHT, TitledBorder.BELOW_BOTTOM);
@@ -1069,7 +1098,6 @@ public class Client implements Constants {
         public void sendMessage(Message message) {
             if (chatOpen) {
                 if (!sendMessage.getText().trim().equals("")) {
-                    //verticalChatScroller.setValue(verticalChatScroller.getMaximum());
                     try {
                         timer.restart();
                         oos.writeByte(SEND_MESSAGE);
@@ -1135,8 +1163,6 @@ public class Client implements Constants {
 
         //loads all of the messages from a chat into the right panel (Needs to be tested with receiving messages)
         public void loadChat(Chat chat) {
-            //int verticalChatScrollerValue = verticalChatScroller.getValue();
-
             chatOpen = true;
             sendMessage.setEditable(true);
             Vector<Message> allMessages = currentChat.getMessages();
@@ -1147,8 +1173,6 @@ public class Client implements Constants {
                     createReceiveMessagePane(message);
                 }
             }
-
-            //System.out.println(verticalChatScrollerValue);
 
             StringBuilder usersInChat = new StringBuilder(account.getUserName());
 
@@ -1169,6 +1193,12 @@ public class Client implements Constants {
             chatPanel.revalidate();
             validate();
 
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    verticalChatScroller.setValue(verticalChatScroller.getMaximum());
+                    verticalChatScroller.setUnitIncrement(5);
+                }
+            });
         }
 
         //Adds all of a user's chats onto the left panel (not functional)
