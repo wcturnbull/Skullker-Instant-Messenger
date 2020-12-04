@@ -13,24 +13,32 @@ public class Chat implements Serializable {
         this.name = name;
     }
 
-    public synchronized void sendMessage(Message message) {
+    public void sendMessage(Message message) {
         messages.add(message);
     }
 
-    public synchronized Vector<Message> getMessages() {
+    public Vector<Message> getMessages() {
         return messages;
     }
 
-    public synchronized void addUser(Account user) {
+    public void addUser(Account user) {
         users.add(user);
         user.addChat(this);
     }
 
-    public synchronized void removeMessage(Message message) {
+    public void removeUser(Account user) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).equals(user)) {
+                users.remove(i);
+            }
+        }
+    }
+
+    public void removeMessage(Message message) {
         messages.remove(message);
     }
 
-    public synchronized Vector<Account> getUsers() {
+    public Vector<Account> getUsers() {
         return users;
     }
 
@@ -59,7 +67,7 @@ public class Chat implements Serializable {
     }
 
     @Override
-    public synchronized String toString() {
+    public String toString() {
         StringBuilder out = new StringBuilder(String.format("%s %s ", name, users.get(0)));
         out.append("\n(");
         for (int i = 1; i < users.size(); i++) {

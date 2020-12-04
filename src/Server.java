@@ -92,6 +92,7 @@ public class Server implements Constants {
     public void deleteAccount(Account account) {
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).equals(account)) {
+                users.get(i).delete();
                 users.remove(i);
                 return;
             }

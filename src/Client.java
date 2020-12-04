@@ -610,6 +610,8 @@ public class Client extends Thread implements Constants {
                             oos.writeByte(NO_REQUEST);
                             oos.flush();
                             account = (Account) ois.readObject();
+                        } catch (SocketException | EOFException exception) {
+                            //TODO: dispose all GUIs and tell the user that the server has closed
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
                         }

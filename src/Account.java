@@ -52,6 +52,13 @@ public class Account implements Serializable {
         return null;
     }
 
+    public void delete() {
+        this.setUserName(this.userName + " (DELETED)");
+        for (Chat c : chats) {
+            c.removeUser(this);
+        }
+    }
+
     public synchronized boolean matches(Account acc) {
         return this.userName.equals(acc.getUserName());
     }
