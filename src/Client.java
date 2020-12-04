@@ -557,16 +557,9 @@ public class Client extends Thread implements Constants {
             sendMessage.addKeyListener(new KeyAdapter() {@Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        Message newMessage = new Message(account, sendMessage.getText(), currentChat,
-                                LocalDateTime.now().toString());
+                        Message newMessage = new Message(account, sendMessage.getText(), currentChat);
                         sendMessage(newMessage);
                         sendMessage.setText("");
-                    }
-                    if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-                        //Test case, won't need later on
-                        Account testAccount = new Account("Test Account", "1234");
-                        receiveMessage(new Message(testAccount, "Test", new Chat(testAccount,
-                                "test Chat"), LocalDateTime.now().toString()));
                     }
                 }
             });
@@ -1087,9 +1080,7 @@ public class Client extends Thread implements Constants {
                     try {
                         timer.restart();
                         oos.writeByte(SEND_MESSAGE);
-                        oos.writeObject(message.getMessage());
-                        oos.writeObject(currentChat);
-                        oos.writeObject(message.getTime());
+                        oos.writeObject(message);
                         account = (Account) ois.readObject();
                     } catch (IOException | ClassNotFoundException exception) {
                         exception.printStackTrace();
@@ -1229,8 +1220,7 @@ public class Client extends Thread implements Constants {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == sendButton) {
-                    Message newMessage = new Message(account, sendMessage.getText(), currentChat,
-                            LocalDateTime.now().toString());
+                    Message newMessage = new Message(account, sendMessage.getText(), currentChat);
                     sendMessage(newMessage);
                     sendMessage.setText("");
                 }

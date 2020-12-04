@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -11,11 +12,11 @@ public class Message implements Serializable {
     private Chat chat;
     private String time;
 
-    public Message(Account sender, String message, Chat chat, String time) {
+    public Message(Account sender, String message, Chat chat) {
         this.sender = sender;
         this.message = message;
         this.chat = chat;
-        this.time = time;
+        this.time = LocalDateTime.now().toString();
     }
 
     public Message(String message) {
