@@ -9,18 +9,14 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.util.Vector;
-import java.time.LocalDateTime;
 
 /**
  *
  * @author Wes Turnbull, Evan Wang CS18000, 001
  * @version 7 December 2020
  */
-public class Client extends Thread implements Constants {
+public class Client implements Constants {
 
-    /**
-     *
-     */
     private Account account;
     private Socket socket;
     private ObjectOutputStream oos;
@@ -197,60 +193,30 @@ public class Client extends Thread implements Constants {
             passwordRegisterLabel = new JLabel("Password: ", SwingConstants.RIGHT);
             confirmPasswordLabel = new JLabel("Confirm Password: ", SwingConstants.RIGHT);
             userNameRegisterTextField = new JTextField(userName, 15);
-            userNameRegisterTextField.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-
-                }
-
+            userNameRegisterTextField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         register();
                     }
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-
                 }
             });
             passwordRegisterTextField = new JPasswordField(password, 15);
-            passwordRegisterTextField.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-
-                }
-
+            passwordRegisterTextField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         register();
                     }
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-
                 }
             });
             confirmPasswordTextField = new JPasswordField(15);
-            confirmPasswordTextField.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-
-                }
-
+            confirmPasswordTextField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         register();
                     }
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-
                 }
             });
             registerButton = new JButton("Register");
@@ -314,43 +280,23 @@ public class Client extends Thread implements Constants {
             buttonPanel = new JPanel();
 
             userName = new JTextField(15);
-            userName.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-
-                }
-
+            userName.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         signIn();
                     }
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-
                 }
             });
             userNameLabel = new JLabel("Username: ", SwingConstants.CENTER);
 
             password = new JPasswordField(15);
-            password.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-
-                }
-
+            password.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         signIn();
                     }
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-
                 }
             });
             passwordLabel = new JLabel("Password: ", SwingConstants.CENTER);
@@ -557,7 +503,7 @@ public class Client extends Thread implements Constants {
             sendMessage.addKeyListener(new KeyAdapter() {@Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        Message newMessage = new Message(account, sendMessage.getText(), currentChat);
+                        Message newMessage = new Message(account, sendMessage.getText().trim(), currentChat);
                         sendMessage(newMessage);
                         sendMessage.setText("");
                     }
@@ -652,7 +598,7 @@ public class Client extends Thread implements Constants {
                         timer.restart();
                         oos.writeByte(EDIT_MESSAGE);
                         oos.writeObject(message);
-                        oos.writeObject(editMessageTextArea.getText());
+                        oos.writeObject(editMessageTextArea.getText().trim());
                         oos.flush();
                         account = (Account) ois.readObject();
                     } catch (IOException | ClassNotFoundException exception) {
@@ -1074,8 +1020,7 @@ public class Client extends Thread implements Constants {
         //sends a message to the server and builds a sendMessagePane
         public void sendMessage(Message message) {
             if (chatOpen) {
-                if (!sendMessage.getText().equals("")) {
-                    createSendMessagePane(message);
+                if (!sendMessage.getText().trim().equals("")) {
                     //verticalChatScroller.setValue(verticalChatScroller.getMaximum());
                     try {
                         timer.restart();
@@ -1176,7 +1121,7 @@ public class Client extends Thread implements Constants {
             chatPanel.revalidate();
             validate();
 
-            //verticalChatScroller.setValue(verticalChatScrollerValue);
+            //verticalChatScroller.setValue(0);
         }
 
         //Adds all of a user's chats onto the left panel (not functional)
@@ -1220,7 +1165,7 @@ public class Client extends Thread implements Constants {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == sendButton) {
-                    Message newMessage = new Message(account, sendMessage.getText(), currentChat);
+                    Message newMessage = new Message(account, sendMessage.getText().trim(), currentChat);
                     sendMessage(newMessage);
                     sendMessage.setText("");
                 }

@@ -11,21 +11,13 @@ import java.util.Vector;
 public class Server implements Constants {
     private Vector<Chat> chats;
     private Vector<Account> users;
-    private Vector<Message> messages;
-    private ServerThread serverThread;
 
     // multi-thread gatekeepers
-    private final Object CHAT_SYNC;
-    private final Object USER_SYNC;
-    private final Object MESSAGE_SYNC;
     private final Object RUN_SYNC;
 
     private boolean run;
 
     public Server() {
-        CHAT_SYNC = new Object();
-        USER_SYNC = new Object();
-        MESSAGE_SYNC = new Object();
         RUN_SYNC = new Object();
 
         run = true;
