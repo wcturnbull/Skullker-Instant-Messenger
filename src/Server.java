@@ -51,10 +51,6 @@ public class Server implements Constants {
         fetchChat(message.getChat()).sendMessage(message);
     }
 
-    public Vector<Message> getMessages(Chat chat) {
-        return fetchChat(chat).getMessages();
-    }
-
     public Chat fetchChat(Chat clientChat) {
         for (Chat chat : chats) {
             if (chat.equals(clientChat)) {
@@ -62,10 +58,6 @@ public class Server implements Constants {
             }
         }
         return null;
-    }
-
-    public void addUser(Account newAcc) {
-        users.add(newAcc);
     }
 
     public Account fetchAccount(Account acc) {
@@ -94,14 +86,6 @@ public class Server implements Constants {
                 return;
             }
         }
-    }
-
-    public void editMessage(Message message, String newText) {
-        fetchChat(message.getChat()).fetchMessage(message).editMessage(newText);
-    }
-
-    public void deleteMessage(Message message) {
-        fetchChat(message.getChat()).removeMessage(message);
     }
 
     class ClientThread extends Thread {
@@ -144,7 +128,7 @@ public class Server implements Constants {
                         Account newAcc = (Account) ois.readObject();
                         if (matchAccounts(newAcc) == null) {
                             oos.writeByte(CONTINUE);
-                            addUser(newAcc);
+                            users.add(newAcc);
                             System.out.println("Successful registration!");
                             client = newAcc;
                         } else {
@@ -193,10 +177,10 @@ public class Server implements Constants {
                     } else if (choice == EDIT_MESSAGE) {
                         Message message = (Message) ois.readObject();
                         String newText = (String) ois.readObject();
-                        editMessage(message, newText);
+                        fetchChat(message.getChat()).fetchMessage(message).editMessage(newText);
                     } else if (choice == DELETE_MESSAGE) {
                         Message message = (Message) ois.readObject();
-                        deleteMessage(message);
+                        fetchChat(message.getChat()).removeMessage(message);
                     }
                     if (client != null) {/**
                         System.out.println("Echoing client info...");
