@@ -1,6 +1,8 @@
 /**
  * Interface containing server-client protocol constants.
  *
+ * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+ *
  * Constants pertaining to each class are assigned hexadecimal prefixes like so:
  *      Message - 0x1
  *      Account - 0x2

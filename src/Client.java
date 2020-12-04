@@ -12,6 +12,8 @@ import java.util.Vector;
 
 /**
  *
+ * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+ *
  * @author Wes Turnbull, Evan Wang CS18000, 001
  * @version 7 December 2020
  */
@@ -145,7 +147,9 @@ public class Client implements Constants {
         public void register() {
             try {
                 if (userNameRegisterTextField.getText().equals("") ||
-                        String.valueOf(passwordRegisterTextField.getPassword()).equals("")) {
+                        userNameRegisterTextField.getText().indexOf(' ') >= 0 ||
+                        String.valueOf(passwordRegisterTextField.getPassword()).equals("") ||
+                        String.valueOf(passwordRegisterTextField.getPassword()).indexOf(' ') >= 0) {
                     JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
                             JOptionPane.ERROR_MESSAGE);
                 } else if (!String.valueOf(passwordRegisterTextField.getPassword()).
@@ -343,7 +347,18 @@ public class Client implements Constants {
             mainPanel.add(buttonPanel);
             mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-            setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    dispose();
+                    getAppGUI().disposeAllFrames();
+                    getAppGUI().getTimer().stop();
+                }
+            });
+
+
             setTitle("Skullker");
             setBackground(Color.WHITE);
             setSize(new Dimension(600, 400));
@@ -524,7 +539,14 @@ public class Client implements Constants {
 
             pack();
             setLocationRelativeTo(null);
-            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    disposeAllFrames();
+                    timer.stop();
+                }
+            });
             timer = new Timer(100, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -536,6 +558,7 @@ public class Client implements Constants {
                         } catch (SocketException | EOFException exception) {
                             JOptionPane.showMessageDialog(null, "Server Closed", "Skullker",
                                     JOptionPane.ERROR_MESSAGE);
+                            timer.stop();
                             disposeAllFrames();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
@@ -560,20 +583,30 @@ public class Client implements Constants {
                         if (currentChat != null) {
                             loadChat(currentChat);
                         }
+                        verticalChatScroller.setValue(verticalChatScroller.getMaximum());
                     }
                 }
             });
             timer.setRepeats(true);
             timer.start();
+
         }
 
         public void disposeAllFrames() {
             dispose();
-            createChatPopUp.dispose();
-            userSettingsWindow.dispose();
-            editAccountFrame.dispose();
-            addUsersWindow.dispose();
-            editMessageFrame.dispose();
+            try {
+                createChatPopUp.dispose();
+                userSettingsWindow.dispose();
+                editAccountFrame.dispose();
+                addUsersWindow.dispose();
+                editMessageFrame.dispose();
+            } catch (NullPointerException e) {
+                return;
+            }
+        }
+
+        public Timer getTimer() {
+            return timer;
         }
 
         //creates a fully functional message editor
@@ -642,7 +675,7 @@ public class Client implements Constants {
 
             editMessageFrame.setSize(250, 250);
             //editMessageFrame.pack();
-            editMessageFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            editMessageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             editMessageFrame.setLocationRelativeTo(null);
             editMessageFrame.setVisible(true);
         }
@@ -708,18 +741,27 @@ public class Client implements Constants {
             editUsernameConfirmButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    try {
-                        timer.restart();
-                        oos.writeByte(EDIT_USERNAME);
-                        oos.writeObject(new Account(editUsernameTextField.getText(),
-                                editPasswordTextField.getText()));
-                        if (ois.readByte() == DENIED) {
-                            JOptionPane.showMessageDialog(null, "Invalid Username",
-                                    "Skullker", JOptionPane.ERROR_MESSAGE);
+                    if (editUsernameTextField.getText().equals("") ||
+                            editUsernameTextField.getText().trim().indexOf(' ') >= 0) {
+                        JOptionPane.showMessageDialog(null, "Invalid Username",
+                                "Skullker", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        try {
+                            timer.restart();
+                            oos.writeByte(EDIT_USERNAME);
+                            oos.writeObject(new Account(editUsernameTextField.getText(),
+                                    editPasswordTextField.getText()));
+                            if (ois.readByte() == DENIED) {
+                                JOptionPane.showMessageDialog(null, "Invalid Username",
+                                        "Skullker", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Username Edited",
+                                        "Skullker", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                            account = (Account) ois.readObject();
+                        } catch (IOException | ClassNotFoundException exception) {
+                            exception.printStackTrace();
                         }
-                        account = (Account) ois.readObject();
-                    } catch (IOException | ClassNotFoundException exception) {
-                        exception.printStackTrace();
                     }
                 }
             });
@@ -730,14 +772,22 @@ public class Client implements Constants {
             editPasswordConfirmButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    try {
-                        timer.restart();
-                        oos.writeByte(EDIT_PASSWORD);
-                        oos.writeObject(new Account(editUsernameTextField.getText(),
-                                editPasswordTextField.getText()));
-                        account = (Account) ois.readObject();
-                    } catch (IOException | ClassNotFoundException exception) {
-                        exception.printStackTrace();
+                    if (editPasswordTextField.getText().equals("") ||
+                            editPasswordTextField.getText().trim().indexOf(' ') >= 0) {
+                        JOptionPane.showMessageDialog(null, "Invalid Password",
+                                "Skullker", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        try {
+                            timer.restart();
+                            oos.writeByte(EDIT_PASSWORD);
+                            oos.writeObject(new Account(editUsernameTextField.getText(),
+                                    editPasswordTextField.getText()));
+                            account = (Account) ois.readObject();
+                            JOptionPane.showMessageDialog(null, "Password Edited",
+                                    "Skullker", JOptionPane.INFORMATION_MESSAGE);
+                        } catch (IOException | ClassNotFoundException exception) {
+                            exception.printStackTrace();
+                        }
                     }
                 }
             });
@@ -1119,7 +1169,6 @@ public class Client implements Constants {
             chatPanel.revalidate();
             validate();
 
-            //verticalChatScroller.setValue(0);
         }
 
         //Adds all of a user's chats onto the left panel (not functional)

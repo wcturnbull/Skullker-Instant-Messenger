@@ -5,6 +5,8 @@ import java.awt.Color;
 
 /**
  *
+ * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+ *
  * @author Wes Turnbull, Evan Wang CS18000, 001
  * @version 7 December 2020
  */

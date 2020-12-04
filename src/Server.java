@@ -5,6 +5,8 @@ import java.util.Vector;
 
 /**
  *
+ * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+ *
  * @author Wes Turnbull, Evan Wang CS18000, 001
  * @version 7 December 2020
  */
@@ -89,6 +91,14 @@ public class Server implements Constants {
                 users.get(i).delete();
                 users.remove(i);
                 return;
+            }
+        }
+    }
+
+    public void sanitize() {
+        for (int i = 0; i < chats.size(); i++) {
+            if (chats.get(i).getUsers().size() < 1) {
+                chats.remove(i);
             }
         }
     }
@@ -195,6 +205,7 @@ public class Server implements Constants {
                         oos.writeObject(client);
                         oos.flush();
                     }
+                    sanitize();
                     oos.reset();
                 } catch (EOFException e) {
                     break;
