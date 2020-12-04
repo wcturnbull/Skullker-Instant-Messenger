@@ -93,6 +93,14 @@ public class Server implements Constants {
         }
     }
 
+    public void sanitize() {
+        for (int i = 0; i < chats.size(); i++) {
+            if (chats.get(i).getUsers().size() < 1) {
+                chats.remove(i);
+            }
+        }
+    }
+
     class ClientThread extends Thread {
         private final Socket socket;
         private ObjectInputStream ois;
@@ -195,6 +203,7 @@ public class Server implements Constants {
                         oos.writeObject(client);
                         oos.flush();
                     }
+                    sanitize();
                     oos.reset();
                 } catch (EOFException e) {
                     break;

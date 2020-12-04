@@ -343,7 +343,18 @@ public class Client implements Constants {
             mainPanel.add(buttonPanel);
             mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-            setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    dispose();
+                    getAppGUI().disposeAllFrames();
+                    getAppGUI().getTimer().stop();
+                }
+            });
+
+
             setTitle("Skullker");
             setBackground(Color.WHITE);
             setSize(new Dimension(600, 400));
@@ -524,7 +535,14 @@ public class Client implements Constants {
 
             pack();
             setLocationRelativeTo(null);
-            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    disposeAllFrames();
+                    timer.stop();
+                }
+            });
             timer = new Timer(100, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -536,6 +554,7 @@ public class Client implements Constants {
                         } catch (SocketException | EOFException exception) {
                             JOptionPane.showMessageDialog(null, "Server Closed", "Skullker",
                                     JOptionPane.ERROR_MESSAGE);
+                            timer.stop();
                             disposeAllFrames();
                         } catch (IOException | ClassNotFoundException exception) {
                             exception.printStackTrace();
@@ -560,20 +579,30 @@ public class Client implements Constants {
                         if (currentChat != null) {
                             loadChat(currentChat);
                         }
+                        verticalChatScroller.setValue(verticalChatScroller.getMaximum());
                     }
                 }
             });
             timer.setRepeats(true);
             timer.start();
+
         }
 
         public void disposeAllFrames() {
             dispose();
-            createChatPopUp.dispose();
-            userSettingsWindow.dispose();
-            editAccountFrame.dispose();
-            addUsersWindow.dispose();
-            editMessageFrame.dispose();
+            try {
+                createChatPopUp.dispose();
+                userSettingsWindow.dispose();
+                editAccountFrame.dispose();
+                addUsersWindow.dispose();
+                editMessageFrame.dispose();
+            } catch (NullPointerException e) {
+                return;
+            }
+        }
+
+        public Timer getTimer() {
+            return timer;
         }
 
         //creates a fully functional message editor
@@ -642,7 +671,7 @@ public class Client implements Constants {
 
             editMessageFrame.setSize(250, 250);
             //editMessageFrame.pack();
-            editMessageFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            editMessageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             editMessageFrame.setLocationRelativeTo(null);
             editMessageFrame.setVisible(true);
         }
@@ -1119,7 +1148,6 @@ public class Client implements Constants {
             chatPanel.revalidate();
             validate();
 
-            //verticalChatScroller.setValue(0);
         }
 
         //Adds all of a user's chats onto the left panel (not functional)
