@@ -57,9 +57,7 @@ public class Server implements Constants {
     }
 
     public Chat fetchChat(Chat clientChat) {
-        System.out.println(clientChat);
         for (Chat chat : chats) {
-            System.out.println(chat);
             if (chat.equals(clientChat)) {
                 return chat;
             }
@@ -97,6 +95,10 @@ public class Server implements Constants {
                 return;
             }
         }
+    }
+
+    public void editMessage(Message message, String newText) {
+        fetchChat(message.getChat()).fetchMessage(message).editMessage(newText);
     }
 
     class ClientThread extends Thread {
@@ -185,13 +187,17 @@ public class Server implements Constants {
                             fetchChat(chat).addUser(acc);
                         }
                         oos.flush();
+                    } else if (choice == EDIT_MESSAGE) {
+                        Message message = (Message) ois.readObject();
+                        String newText = (String) ois.readObject();
+                        editMessage(message, newText);
                     }
-                    if (client != null) {
+                    if (client != null) {/**
                         System.out.println("Echoing client info...");
                         System.out.println(client.getUserName());
                         for (Chat c : client.getChats()) {
                             System.out.println(c);
-                        }
+                        }**/
                         oos.writeObject(client);
                         oos.flush();
                     }

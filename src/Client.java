@@ -484,7 +484,7 @@ public class Client extends Thread implements Constants {
         private Chat currentChat;
         private boolean chatOpen;
 
-        public AppGUI() throws IOException, ClassNotFoundException {
+        public AppGUI() {
             chatOpen = false;
 
             splitPane = new JSplitPane();
@@ -632,7 +632,6 @@ public class Client extends Thread implements Constants {
                         chatOpen = false;
                         chatLabel.setText("");
 
-                        System.out.println(currentChat);
                         if (currentChat != null) {
                             loadChat(currentChat);
                         }
@@ -659,7 +658,19 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == editMessageDoneButton) {
-                        message.editMessage(editMessageTextArea.getText());
+                        if (editMessageTextArea.getText().equals("")) {
+                            //TODO: invalid message
+                            return;
+                        }
+                        try {
+                            oos.writeByte(EDIT_MESSAGE);
+                            oos.writeObject(message);
+                            oos.writeObject(editMessageTextArea.getText());
+                            oos.flush();
+                            account = (Account) ois.readObject();
+                        } catch (IOException | ClassNotFoundException exception) {
+                            exception.printStackTrace();
+                        }
                         loadChat(currentChat);
                         editMessageFrame.dispose();
                     }
@@ -1257,6 +1268,10 @@ public class Client extends Thread implements Constants {
                 if (e.getSource() == addInputedUserButton) {
                     timer.restart();
                     try {
+                        if (addUsernameTextField.getText().equals(account.getUserName())) {
+                            //TODO: error message here for trying to add themself
+                            return;
+                        }
                         oos.writeByte(ADD_USER_TO_CHAT);
                         oos.writeObject(currentChat);
                         oos.writeObject(new Account(addUsernameTextField.getText(), ""));

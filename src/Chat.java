@@ -50,6 +50,15 @@ public class Chat implements Serializable {
         this.name = name;
     }
 
+    public Message fetchMessage(Message message) {
+        for (Message m : messages) {
+            if (m.equals(message)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null) {
