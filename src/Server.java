@@ -174,6 +174,9 @@ public class Server implements Constants {
                             fetchChat(chat).addUser(acc);
                         }
                         oos.flush();
+                    } else if (choice == LEAVE_CHAT) {
+                        Chat chat = (Chat) ois.readObject();
+                        fetchChat(chat).removeUser(client);
                     } else if (choice == EDIT_MESSAGE) {
                         Message message = (Message) ois.readObject();
                         String newText = (String) ois.readObject();

@@ -748,15 +748,22 @@ public class Client extends Thread implements Constants {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == leaveChatButton) {
-                        //TODO: Allow a user to leave the chat
+                        try {
+                            oos.writeByte(LEAVE_CHAT);
+                            oos.writeObject(chat);
+                            account = (Account) ois.readObject();
+                        } catch (IOException | ClassNotFoundException exception) {
+                            exception.printStackTrace();
+                        }
 
                     }
                 }
             });
-
+            //TODO: change layout to look good
             newChat.setLayout(new BorderLayout());
             newChat.add(chatLabelLeftPanel, BorderLayout.CENTER);
-            newChat.add(openChatButton, BorderLayout.SOUTH);
+            newChat.add(openChatButton, BorderLayout.NORTH);
+            newChat.add(leaveChatButton, BorderLayout.SOUTH);
             Border selectChatBorder = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
             newChat.setBorder(selectChatBorder);
             newChat.setMinimumSize(new Dimension(100, 150));
@@ -1241,6 +1248,8 @@ public class Client extends Thread implements Constants {
             for (Chat chat : userChats) {
                 createIndividualChatPanel(chat);
             }
+            chatSelectorPanel.revalidate();
+            chatSelectorPanel.repaint();
         }
 
         public void addUser() {

@@ -70,8 +70,12 @@ public class Chat implements Serializable {
         }
         if (o instanceof Chat) {
             Chat chat = (Chat) o;
-            return (this.name.equals(chat.getName()) &&
-                    this.users.get(0).equals(((Chat) o).getUsers().get(0)));
+            if (chat.getUsers().size() != 0 && users.size() != 0) {
+                return (this.name.equals(chat.getName()) &&
+                        this.users.get(0).equals(((Chat) o).getUsers().get(0)));
+            } else {
+                return false;
+            }
         }
         return false;
     }
