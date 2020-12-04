@@ -89,7 +89,7 @@ public class Server implements Constants {
     }
 
     class ClientThread extends Thread {
-        private Socket socket;
+        private final Socket socket;
         private ObjectInputStream ois;
         private ObjectOutputStream oos;
         private Account client;
@@ -159,7 +159,7 @@ public class Server implements Constants {
                         if (fetchChat(chat) == null) {
                             oos.writeByte(CONTINUE);
                             addChat(chat);
-                            client.addChat(chat);
+                            client.joinChat(chat);
                         } else {
                             oos.writeByte(DENIED);
                         }
@@ -211,13 +211,9 @@ public class Server implements Constants {
     }
 
     class ServerThread extends Thread {
-        private ArrayList<Socket> clientSockets;
         private ServerSocket serverSocket;
-        private ArrayList<ClientThread> clientThreads;
 
         public ServerThread() {
-            clientSockets = new ArrayList<Socket>();
-            clientThreads = new ArrayList<ClientThread>();
             System.out.println("Server thread deployed!");
             try {
                 serverSocket = new ServerSocket(0xBEEF);
@@ -233,9 +229,7 @@ public class Server implements Constants {
                 try {
                     Socket socket = serverSocket.accept();
                     System.out.println("Client accepted!");
-                    clientSockets.add(socket);
                     ClientThread clientThread = new ClientThread(socket);
-                    clientThreads.add(clientThread);
                     System.out.println("Deploying client thread...");
                     clientThread.start();
                 } catch (SocketException e) {
