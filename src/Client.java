@@ -485,6 +485,7 @@ public class Client extends Thread implements Constants {
 
         public AppGUI() {
             chatOpen = false;
+            setTitle("Skullker -- " + welcome.userName.getText());
 
             splitPane = new JSplitPane();
 
@@ -538,7 +539,7 @@ public class Client extends Thread implements Constants {
             getContentPane().add(splitPane);
 
             splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-            splitPane.setDividerLocation(200);
+            splitPane.setDividerLocation(220);
             splitPane.setLeftComponent(currentChats);
             splitPane.setRightComponent(selectedChat);
 
@@ -627,6 +628,7 @@ public class Client extends Thread implements Constants {
 
                         chatPanel.removeAll();
                         chatPanel.revalidate();
+                        chatPanel.repaint();
                         validate();
                         sendMessage.setEditable(false);
                         chatOpen = false;
@@ -759,11 +761,13 @@ public class Client extends Thread implements Constants {
                     }
                 }
             });
-            // TODO: make this look better
-            newChat.setLayout(new BoxLayout(newChat, BoxLayout.Y_AXIS));
-            newChat.add(chatLabelLeftPanel);
-            newChat.add(openChatButton);
-            newChat.add(leaveChatButton);
+            newChat.setLayout(new BorderLayout());
+            newChat.add(chatLabelLeftPanel, BorderLayout.CENTER);
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.setLayout(new GridLayout(1, 2));
+            buttonPanel.add(openChatButton);
+            buttonPanel.add(leaveChatButton);
+            newChat.add(buttonPanel, BorderLayout.SOUTH);
             Border selectChatBorder = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
             newChat.setBorder(selectChatBorder);
             newChat.setMinimumSize(new Dimension(100, 150));
@@ -1242,8 +1246,7 @@ public class Client extends Thread implements Constants {
         //Adds all of a user's chats onto the left panel (not functional)
         public void addChats() {
             chatSelectorPanel.removeAll();
-            Vector<Chat> userChats;
-            userChats = account.getChats();
+            Vector<Chat> userChats = account.getChats();
             for (Chat chat : userChats) {
                 createIndividualChatPanel(chat);
             }
