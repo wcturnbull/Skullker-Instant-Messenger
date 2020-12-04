@@ -167,7 +167,7 @@ public class Server implements Constants {
                     } else if (choice == ADD_USER_TO_CHAT) {
                         Chat chat = (Chat) ois.readObject();
                         Account acc = matchAccounts((Account) ois.readObject());
-                        if (acc == null && !fetchChat(chat).getUsers().contains(acc)) {
+                        if (acc == null || fetchChat(chat).getUsers().contains(acc)) {
                             oos.writeByte(DENIED);
                         } else {
                             oos.writeByte(CONTINUE);
