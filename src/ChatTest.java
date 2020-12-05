@@ -296,6 +296,25 @@ public class ChatTest {
     }
 
     @Test
+    public void testGetTime() {
+        Method testMethod;
+        try {
+            testMethod = Chat.class.getMethod("getTime");
+            if (!Modifier.isPublic(testMethod.getModifiers())) {
+                Assert.fail();
+            } else if (!testMethod.getReturnType().equals(String.class)) {
+                Assert.fail();
+            }
+        } catch (NoSuchMethodException e) {
+            System.out.println("The getTime method does not exist");
+            Assert.fail();
+        }
+        Account acc = new Account("test", "1234");
+        Chat test = new Chat(acc, "Chat");
+        assertTrue(test.getTime().matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.[0-9]+$"));
+    }
+
+    @Test
     public void testEquals() {
         Method method;
         try {

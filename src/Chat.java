@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.util.Vector;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -12,12 +13,14 @@ public class Chat implements Serializable {
     private Vector<Account> users;
     private Vector<Message> messages;
     private String name;
+    private String time;
 
     public Chat(Account owner, String name) {
         users = new Vector<Account>();
         messages = new Vector<Message>();
         users.add(owner);
         this.name = name;
+        time = LocalDateTime.now().toString();
     }
 
     public void sendMessage(Message message) {
@@ -75,6 +78,10 @@ public class Chat implements Serializable {
         return null;
     }
 
+    public String getTime() {
+        return time;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null) {
@@ -87,7 +94,8 @@ public class Chat implements Serializable {
             Chat chat = (Chat) o;
             if (chat.getUsers().size() != 0 && users.size() != 0) {
                 return (this.name.equals(chat.getName()) &&
-                        this.users.get(0).equals(((Chat) o).getUsers().get(0)));
+                        this.users.get(0).equals(((Chat) o).getUsers().get(0)) &&
+                        this.time.equals(chat.getTime()));
             } else {
                 return false;
             }

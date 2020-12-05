@@ -604,8 +604,7 @@ public class Client implements Constants {
                         // updates previousChat and currentChat references
                         if (currentChat != null) {
                             previousChat = currentChat;
-                            currentChat = fetchCurrentChat(new Chat(currentChat.getUsers().get(0),
-                                    currentChat.getName()));
+                            currentChat = fetchCurrentChat(currentChat);
                         }
 
                         // the following code block properly updates chatPanel's title and properties
@@ -747,7 +746,10 @@ public class Client implements Constants {
                 public void actionPerformed(ActionEvent e) {
                     sendMessage.setEditable(true);
                     chatOpen = true;
-                    currentChat = fetchCurrentChat(new Chat(chat.getUsers().get(0), chat.getName()));
+                    previousChat = currentChat;
+                    currentChat = fetchCurrentChat(chat);
+                    chatPanel.removeAll();
+                    chatPanel.revalidate();
                     loadChat(currentChat);
                 }
             });
@@ -1040,6 +1042,8 @@ public class Client implements Constants {
             timer.restart();
             Chat chat = new Chat(account, chatName);
             currentChat = chat;
+            chatPanel.removeAll();
+            chatPanel.revalidate();
             loadChat(currentChat);
             try {
                 oos.writeByte(CREATE_CHAT);
