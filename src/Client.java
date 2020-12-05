@@ -505,6 +505,7 @@ public class Client implements Constants {
             //setting up the right side of the GUI
             selectedChat.setLayout(new BorderLayout());
             verticalChatScroller = chatScroller.getVerticalScrollBar();
+            verticalChatScroller.setUnitIncrement(5);
 
             chatLabelPanel.setLayout(new BorderLayout());
             chatLabelPanel.add(chatLabel, BorderLayout.WEST);
@@ -884,7 +885,6 @@ public class Client implements Constants {
             addUsersContentPanel = new JPanel();
             addUserTitle = new JLabel("Add a user:");
 
-
             addUserTitle.setFont(addUserTitle.getFont().deriveFont(14f));
 
             addUsernameLabel = new JLabel("Username: ");
@@ -1049,8 +1049,6 @@ public class Client implements Constants {
 
         //panel that holds a user's sent message and a menu for message manipulation
         public void createSendMessagePane(Message message) {
-
-            //gbc.anchor = GridBagConstraints.FIRST_LINE_END;
             gbc.gridx = 1;
 
             JPanel messageContent = new JPanel();
@@ -1117,10 +1115,8 @@ public class Client implements Constants {
 
         //panel that holds a received message
         public void createReceiveMessagePane(Message message) {
-            //Insets receivedMessageInset = new Insets(5, 0, 0, 60);
-            //gbc.anchor = GridBagConstraints.FIRST_LINE_END;
             gbc.gridx = 0;
-            //gbc.insets = receivedMessageInset;
+
             JPanel messageContent = new JPanel();
             messageContent.setBackground(Color.WHITE);
             JTextArea receivedMessage = new JTextArea(message.getMessage());
@@ -1180,7 +1176,6 @@ public class Client implements Constants {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     verticalChatScroller.setValue(verticalChatScroller.getMaximum());
-                    verticalChatScroller.setUnitIncrement(5);
                 }
             });
 
