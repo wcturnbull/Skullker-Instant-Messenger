@@ -20,11 +20,11 @@ import java.util.Vector;
  */
 public class Client implements Constants {
 
-    private Account account;
-    private ObjectOutputStream oos;
-    private ObjectInputStream ois;
-    private final WelcomeGUI welcome;
-    private final AppGUI app;
+    private Account account;            // Account object for the client
+    private ObjectOutputStream oos;     // Receives messages from the server
+    private ObjectInputStream ois;      // Sends messages to the server
+    private final WelcomeGUI welcome;   // WelcomeGUI object to be used to open the WelcomeGUI
+    private final AppGUI app;           // AppGUI object to be used to open the AppGUI
     private Image skullkerLogo;         // logo for app
     private Image skullkerLogoIcon;     // logo with white background to be set as the icon image
 
