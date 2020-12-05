@@ -423,7 +423,7 @@ public class Client implements Constants {
         private final JButton addUsersButton;           // button to add users into a selected chat
         private final JPanel chatLabelPanel;            // panel that holds the chatLabel and addUsers button
         private final JScrollBar verticalChatScroller;  // Scroll bar for the chat
-        private final GridBagConstraints gbc;           // Grid bag Constraints for the chatPanel
+        private final GridBagConstraints gbcChatPanel;  // Grid bag Constraints for the chatPanel
 
         //create chat window
         private JFrame createChatPopUp;                 // main window for the create chat popup
@@ -561,7 +561,7 @@ public class Client implements Constants {
             currentChats.add(createChatPopupButton, BorderLayout.SOUTH);
             settingsPanel.add(settingsButton);
 
-            gbc = new GridBagConstraints();
+            gbcChatPanel = new GridBagConstraints();
 
             pack();
             setLocationRelativeTo(null);
@@ -647,7 +647,7 @@ public class Client implements Constants {
 
         }
 
-        //disposes all of the open frames
+        // disposes all of the open frames
         public void disposeAllFrames() {
             dispose();
             try {
@@ -664,7 +664,7 @@ public class Client implements Constants {
             return timer;
         }
 
-        //creates a fully functional message editor
+        // creates a fully functional message editor
         public void createMessageEditor(Message message) {
             JPanel editMessageContentPane;              // edit message content pane
             JLabel editMessageTitle;                    // edit message title
@@ -741,7 +741,7 @@ public class Client implements Constants {
             editMessageFrame.setVisible(true);
         }
 
-        //creates a chat panel with an "open chat" button and the chat's title
+        // creates a chat panel with an "open chat" button and the chat's title
         public void createIndividualChatPanel(Chat chat) {
             JPanel newChat = new JPanel();
             String chatTitle = chat.getName();
@@ -783,7 +783,8 @@ public class Client implements Constants {
             newChat.add(buttonPanel, BorderLayout.SOUTH);
             Border selectChatBorder = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
             newChat.setBorder(selectChatBorder);
-            newChat.setMinimumSize(new Dimension(100, 150));
+            //newChat.setMinimumSize(new Dimension(100, 150));
+            newChat.setPreferredSize(new Dimension(chatSelectorPanel.getWidth(), 80));
             chatOpen = true;
             chatSelectorPanel.add(newChat);
             chatSelectorPanel.revalidate();
@@ -791,7 +792,7 @@ public class Client implements Constants {
             validate();
         }
 
-        //creates a window that allows a user to edit their account information (NEEDS WORK)
+        // creates a window that allows a user to edit their account information (NEEDS WORK)
         public void createEditAccountWindow() {
             JPanel editAccountContentPane;      // holds the edit account content
             JLabel editAccountTitle;            // edit account title
@@ -917,7 +918,7 @@ public class Client implements Constants {
             editAccountFrame.setLocationRelativeTo(null);
         }
 
-        //creates a window that allows a user to add other users to the chat (NOT FUNCTIONAL)
+        // creates a window that allows a user to add other users to the chat (NOT FUNCTIONAL)
         public void createAddUsersWindow() {
             JPanel addUsersContentPanel;        // holds the add users content
             JLabel addUserTitle;                // add user title
@@ -973,7 +974,7 @@ public class Client implements Constants {
             addUsersWindow.setLocationRelativeTo(null);
         }
 
-        //user settings window
+        // user settings window
         public void createSettingsWindow() {
             JPanel userSettingsContentPane;     // holds the content that goes onto the settings window
             JLabel userSettingsLabel;           // user settings title
@@ -1019,7 +1020,7 @@ public class Client implements Constants {
             userSettingsWindow.add(userSettingsContentPane, BorderLayout.CENTER);
         }
 
-        //chat creator popup
+        // chat creator popup
         public void createCreateChatPopUp() {
             JPanel createChatNamePane;              // name panel on the create chat popup
             JLabel createChatTitle;                 // chat title label
@@ -1068,7 +1069,7 @@ public class Client implements Constants {
             createChatPopUp.add(createChatContentPane, BorderLayout.CENTER);
         }
 
-        //creates a chat, adds it to the user's account, and sets the current chat to the created chat
+        // creates a chat, adds it to the user's account, and sets the current chat to the created chat
         public void createChat(String chatName) {
             timer.restart();
             Chat chat = new Chat(account, chatName);
@@ -1094,6 +1095,7 @@ public class Client implements Constants {
             }
         }
 
+        // fetches the current chat
         public Chat fetchCurrentChat(Chat chat) {
             for (Chat c : account.getChats()) {
                 if (c.equals(chat)) {
@@ -1103,9 +1105,9 @@ public class Client implements Constants {
             return null;
         }
 
-        //panel that holds a user's sent message and a menu for message manipulation
+        // panel that holds a user's sent message and a menu for message manipulation
         public void createSendMessagePane(Message message) {
-            gbc.gridx = 1;
+            gbcChatPanel.gridx = 1;
 
             JPanel messageContent = new JPanel();
             messageContent.setBackground(Color.WHITE);
@@ -1146,14 +1148,14 @@ public class Client implements Constants {
             manipulateMessageMenuBar.add(manipulateMessageMenu);
             messageContent.add(manipulateMessageMenuBar);
 
-            gbc.gridy++;
-            chatPanel.add(messageContent, gbc);
+            gbcChatPanel.gridy++;
+            chatPanel.add(messageContent, gbcChatPanel);
             chatPanel.revalidate();
             validate();
 
         }
 
-        //sends a message to the server and builds a sendMessagePane
+        // sends a message to the server and builds a sendMessagePane
         public void sendMessage(Message message) {
             if (chatOpen) {
                 if (!sendMessage.getText().trim().equals("")) {
@@ -1169,9 +1171,9 @@ public class Client implements Constants {
             }
         }
 
-        //panel that holds a received message
+        // panel that holds a received message
         public void createReceiveMessagePane(Message message) {
-            gbc.gridx = 0;
+            gbcChatPanel.gridx = 0;
 
             JPanel messageContent = new JPanel();
             messageContent.setBackground(Color.WHITE);
@@ -1188,14 +1190,14 @@ public class Client implements Constants {
 
             messageContent.add(receivedMessage);
 
-            gbc.gridy++;
-            chatPanel.add(messageContent, gbc);
+            gbcChatPanel.gridy++;
+            chatPanel.add(messageContent, gbcChatPanel);
             chatPanel.revalidate();
             validate();
 
         }
 
-        //tells the server a message is deleted
+        // tells the server a message is deleted
         public void deleteMessage(Message message) {
             try {
                 timer.restart();
@@ -1208,12 +1210,12 @@ public class Client implements Constants {
 
         }
 
-        //builds the message editor and tells the server a message is edited
+        // builds the message editor and tells the server a message is edited
         public void editMessage(Message message) {
             createMessageEditor(message);
         }
 
-        //loads all of the messages from a chat into the right panel (Needs to be tested with receiving messages)
+        // loads all of the messages from a chat into the right panel (Needs to be tested with receiving messages)
         public void loadChat(Chat chat) {
             Vector<Message> allMessages = currentChat.getMessages();
             for (Message message : allMessages) {
@@ -1230,6 +1232,9 @@ public class Client implements Constants {
                 }
             });
 
+            chatLabel.setText(" " + currentChat.getName());
+            sendMessage.setEditable(true);
+
             chatLabelPanel.add(addUsersButton, BorderLayout.EAST);
             chatPanel.repaint();
             chatPanel.revalidate();
@@ -1237,7 +1242,7 @@ public class Client implements Constants {
 
         }
 
-        //Adds all of a user's chats onto the left panel (not functional)
+        // Adds all of a user's chats onto the left panel (not functional)
         public void addChats() {
             chatSelectorPanel.removeAll();
             Vector<Chat> userChats = account.getChats();
@@ -1248,7 +1253,7 @@ public class Client implements Constants {
             chatSelectorPanel.repaint();
         }
 
-        //Adds user to the chat and updates the gui
+        // Adds user to the chat and updates the gui
         public void addUser() {
             try {
                 if (addUsernameTextField.getText().equals(account.getUserName())) {
