@@ -9,7 +9,6 @@ import java.lang.reflect.*;
 
 public class MessageTest {
 
-
     @Test(timeout = 1000)
     public void testFields() {
         Field testingSender;
@@ -61,6 +60,7 @@ public class MessageTest {
             Assert.fail();
         }
     }
+
     @Test
     public void testGetSender() {
         Account acc = new Account("test", "1234");
@@ -81,8 +81,6 @@ public class MessageTest {
             System.out.println("The getSender method does not exist!");
             Assert.fail();
         }
-
-
     }
 
     @Test
@@ -191,6 +189,11 @@ public class MessageTest {
 
         Message equal = test;
         assertEquals(true, test.equals(equal)); //asserts that two references to the same object are equal
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Message test1 = new Message(acc, "hi", chat);
         assertEquals(false, test.equals(test1)); //asserts that two messages with same chat and account
                                                         // but different initialization times are not equal

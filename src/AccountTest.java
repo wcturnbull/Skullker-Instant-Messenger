@@ -1,9 +1,7 @@
 import org.junit.Assert;
 import org.junit.Test;
-import java.time.*;
 import static org.junit.Assert.*;
 import java.util.*;
-import static org.junit.Assert.*;
 import java.lang.reflect.*;
 public class AccountTest {
 
@@ -98,7 +96,6 @@ public class AccountTest {
     public void getPassword() {
         Method method;
         try {
-
             method = Account.class.getMethod("getPassword");
             if (Modifier.isPrivate(method.getModifiers())) {
                 Assert.fail();
@@ -330,6 +327,11 @@ public class AccountTest {
             System.out.println("The equals method does not exist");
         }
         Account acc = new Account("test", "1234");
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Account account = new Account("test", "1234");
         Account fake = acc;
         assertNotEquals(acc, account);

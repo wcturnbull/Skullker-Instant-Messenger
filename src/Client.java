@@ -11,6 +11,8 @@ import java.net.*;
 import java.util.Vector;
 
 /**
+ * Client class
+ *
  *
  * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
  *

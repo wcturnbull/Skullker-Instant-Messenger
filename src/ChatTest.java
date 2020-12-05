@@ -45,6 +45,7 @@ public class ChatTest {
             System.out.println("The name field is missing");
         }
     }
+
     @Test
     public void sendMessage() {
         Method method;
@@ -66,7 +67,6 @@ public class ChatTest {
         Message mess = new Message(acc, "hi", chat);
         chat.sendMessage(mess);
         assertTrue(chat.getMessages().contains(mess));
-
     }
 
     @Test
@@ -142,7 +142,6 @@ public class ChatTest {
         Vector<Account> vec = new Vector<>();
         vec.add(acc);
         assertEquals(vec, chat.getUsers());
-
     }
 
     @Test
@@ -337,6 +336,5 @@ public class ChatTest {
         Account acc = new Account("test", "1234");
         Chat chat = new Chat(acc, "Chatroom");
         assertEquals("Chatroom test 1234  \n()", chat.toString());
-
     }
 }
