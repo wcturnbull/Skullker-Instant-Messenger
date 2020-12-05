@@ -75,7 +75,29 @@ public class MessageTest {
             Assert.fail();
         }
     }
-
+    @Test (timeout = 1000)
+    public void testConstructor() {
+        Constructor<Message> constructor;
+        try {
+            Class[] classes = new Class[3];
+            classes[0] = Account.class;
+            classes[1] = String.class;
+            classes[2] = Chat.class;
+            constructor = Message.class.getConstructor(classes);
+            if (Modifier.isPrivate(constructor.getModifiers())) {
+                Assert.fail();
+            }
+        } catch (NoSuchMethodException e) {
+            System.out.println("Ensure that the constructor for the message class exists and has proper parameters");
+            Assert.fail();
+        }
+        Account acc = new Account("asdf", "1234");
+        Chat chat = new Chat(acc, "Testing");
+        Message test = new Message(acc, "hello", chat);
+        assertEquals(acc, test.getSender());
+        assertEquals(chat, test.getChat());
+        assertEquals("hello", test.getMessage());
+    }
     @Test
     public void testGetSender() {
         Account acc = new Account("test", "1234");

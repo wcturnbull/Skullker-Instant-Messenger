@@ -20,6 +20,7 @@ public class AccountTest {
             Assert.fail();
         }
     }
+
     @Test (timeout = 1000)
     public void testFields() {
         Field userName;
@@ -69,6 +70,25 @@ public class AccountTest {
             System.out.println("The field chats is missing");
             Assert.fail();
         }
+    }
+    @Test (timeout = 1000)
+    public void testConstructor() {
+        Constructor<Account> constructor;
+        try {
+            Class[] classes = new Class[2];
+            classes[0] = String.class;
+            classes[1] = String.class;
+            constructor = Account.class.getConstructor(classes);
+            if (Modifier.isPrivate(constructor.getModifiers())) {
+                Assert.fail();
+            }
+        } catch (NoSuchMethodException e) {
+            System.out.println("Ensure that the constructor exists and has the proper parameters");
+            Assert.fail();
+        }
+        Account acc = new Account("Testing", "1234");
+        assertEquals("Testing", acc.getUserName());
+        assertEquals("1234", acc.getPassword());
     }
     @Test
     public void getUserName() {

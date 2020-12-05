@@ -60,7 +60,26 @@ public class ChatTest {
             System.out.println("The name field is missing");
         }
     }
-
+    @Test (timeout = 1000)
+    public void testConstructor() {
+        Constructor<Chat> constructor;
+        try {
+            Class[] classes = new Class[2];
+            classes[0] = Account.class;
+            classes[1] = String.class;
+            constructor = Chat.class.getConstructor(classes);
+            if (Modifier.isPrivate(constructor.getModifiers())) {
+                Assert.fail();
+            }
+        } catch (NoSuchMethodException e) {
+            System.out.println("Ensure that the constructor exists and has the correct parameters");
+            Assert.fail();
+        }
+        Account acc = new Account("testing", "1234");
+        Chat chat = new Chat(acc, "TestChat");
+        assertEquals("1234", chat.getName());
+        assertTrue(chat.getUsers().contains(acc));
+    }
     @Test
     public void sendMessage() {
         Method method;
