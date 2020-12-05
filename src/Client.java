@@ -1079,9 +1079,6 @@ public class Client implements Constants {
             timer.restart();
             Chat chat = new Chat(account, chatName);
             currentChat = chat;
-            chatPanel.removeAll();
-            chatPanel.revalidate();
-            loadChat(currentChat);
             try {
                 oos.writeByte(CREATE_CHAT);
                 oos.writeObject(chat);
