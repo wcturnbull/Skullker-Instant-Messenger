@@ -5,7 +5,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.util.Vector;
@@ -22,15 +21,16 @@ import java.util.Vector;
 public class Client implements Constants {
 
     private Account account;
-    private Socket socket;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
-    private WelcomeGUI welcome;
-    private AppGUI app;
+    private final WelcomeGUI welcome;
+    private final AppGUI app;
+    private Image skullkerLogo;         // logo for app
+    private Image skullkerLogoIcon;     // logo with white background to be set as the icon image
 
     public Client() throws SocketException {
         try {
-            socket = new Socket("localhost", 0xBEEF);
+            Socket socket = new Socket("localhost", 0xBEEF);
             oos = new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
         } catch (SocketException exception) {
@@ -71,28 +71,18 @@ public class Client implements Constants {
         //Welcome panel fields
         public final JTextField userName;           //Sign in username input
         public final JPasswordField password;       //Sign in password input
-        private final JPanel mainPanel;             //main welcome panel
         private final JButton signInButton;         //sign in button
         private final JButton signUpButton;         //sign up button
-        private BufferedImage logo;                 //logo for app
-        private final JLabel logoLabel;             //allows the logo to show up
-        private final JPanel buttonPanel;           //panel that holds sign in/sign up buttons
-        private final JLabel userNameLabel;         //Username Label
-        private final JLabel passwordLabel;         //Password Label
-        private final JPanel welcomeContentPanel;   //panel that holds the username/password information
+
 
         //Registration panel fields
         private JFrame registrationFrame;                   //main frame for the registration popup
-        private JPanel registrationInformationPane;         //holds all of the registration content
-        private JLabel registrationLabel;                   //Title of the registration window
-        private JLabel userNameRegisterLabel;               //Username registration label
         private JTextField userNameRegisterTextField;       //Username registration text field
-        private JLabel passwordRegisterLabel;               //Password registration label
         private JPasswordField passwordRegisterTextField;   //Password registration text field
-        private JLabel confirmPasswordLabel;                //Confirm password label
         private JPasswordField confirmPasswordTextField;    //Confirm password text field
         private JButton registerButton;                     //Register button
 
+        //Action Listener for the Welcome screen
         ActionListener actionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -111,6 +101,7 @@ public class Client implements Constants {
             }
         };
 
+        //signs the user in
         public void signIn() {
             try {
                 try {
@@ -158,6 +149,7 @@ public class Client implements Constants {
             }
         }
 
+        //registers a user
         public void register() {
             try {
                 if (userNameRegisterTextField.getText().equals("") ||
@@ -209,8 +201,15 @@ public class Client implements Constants {
 
         //builds the registration popup window
         public void createRegistrationWindow() {
+            JPanel registrationInformationPane;         //holds all of the registration content
+            JLabel registrationLabel;                   //Title of the registration window
+            JLabel userNameRegisterLabel;               //Username registration label
+            JLabel passwordRegisterLabel;               //Password registration label
+            JLabel confirmPasswordLabel;                //Confirm password label
+
             registrationFrame = new JFrame("Register");
             registrationFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            registrationFrame.setIconImage(skullkerLogoIcon);
             registrationInformationPane = new JPanel();
             registrationInformationPane.setLayout(new GridBagLayout());
 
@@ -297,7 +296,40 @@ public class Client implements Constants {
             registrationFrame.setLocationRelativeTo(null);
         }
 
+        //builds the welcome screen
         public WelcomeGUI() {
+            final JPanel mainPanel;             //main welcome panel
+            final JLabel logoLabel;             //allows the logo to show up
+            final JPanel buttonPanel;           //panel that holds sign in/sign up buttons
+            final JLabel userNameLabel;         //Username Label
+            final JLabel passwordLabel;         //Password Label
+            final JPanel welcomeContentPanel;   //panel that holds the username/password information
+
+            if (skullkerLogo == null) {
+                try {
+                    skullkerLogo = ImageIO.read(new File("skullker.png"));
+                } catch (IOException ignored) {
+                    try {
+                        skullkerLogo = ImageIO.read(new File("../skullker.png"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            if (skullkerLogoIcon == null) {
+                try {
+                    skullkerLogoIcon = ImageIO.read(new File("skullker_with_background.jpg"));
+                } catch (IOException ignored) {
+                    try {
+                        skullkerLogoIcon = ImageIO.read(new File("../skullker_with_background.jpg"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            setIconImage(skullkerLogoIcon);
             mainPanel = new JPanel();
             welcomeContentPanel = new JPanel();
             signInButton = new JButton("Sign In");
@@ -328,23 +360,11 @@ public class Client implements Constants {
             });
             passwordLabel = new JLabel("Password: ", SwingConstants.CENTER);
 
-            if (logo == null) {
-                try {
-                    logo = ImageIO.read(new File("skullker.png"));
-                } catch (IOException e) {
-                    try {
-                        logo = ImageIO.read(new File("../skullker.png"));
-                    } catch (IOException ignored) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
             gbc.gridy = 0;
 
-            logoLabel = new JLabel(new ImageIcon(logo));
+            logoLabel = new JLabel(new ImageIcon(skullkerLogo));
             logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
             buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
@@ -393,81 +413,62 @@ public class Client implements Constants {
 
     public class AppGUI extends JFrame {
         //main app window
-        private final JSplitPane splitPane;             //splits the window
-        private final JPanel chatSelectorPanel;         //panel that holds all of the chats a user is in
-        private final JPanel chatPanel;                 //panel that holds the content of a chat
-        private final JScrollPane chatSelectorScroller; //scroller for the left panel
-        private final JScrollPane chatScroller;         //scroller for the right panel
-        private final JPanel selectedChat;              //main right panel
-        private final JPanel currentChats;              //main left panel
-        private final JPanel messagePanel;              //panel that allows a user to enter and send a message
-        private final JTextField sendMessage;           //text field for a user to enter their message
-        private final JButton sendButton;               //button that sends a message to the other user(s) in the chat
-        private final JPanel settingsPanel;             //panel that holds the settings button
-        private final JButton settingsButton;           //button that allows a user to edit/delete their account
-        private final JButton createChatPopupButton;    //button that allows a user to create a new chat
-        private final JLabel chatLabel;                 //label that shows the title/users in a selected chat
-        private final JButton addUsersButton;           //button to add users into a selected chat
-        private final JPanel chatLabelPanel;            //panel that holds the chatLabel and addUsers button
-        private final JScrollBar verticalChatScroller;  //Scroll bar for the chat
-        private GridBagConstraints gbc;                 //Grid bag Constraints for the chatPanel
+        private final JPanel chatSelectorPanel;         // panel that holds all of the chats a user is in
+        private final JPanel chatPanel;                 // panel that holds the content of a chat
+        private final JTextField sendMessage;           // text field for a user to enter their message
+        private final JButton sendButton;               // button that sends a message to the other user(s) in the chat
+        private final JButton settingsButton;           // button that allows a user to edit/delete their account
+        private final JButton createChatPopupButton;    // button that allows a user to create a new chat
+        private final JLabel chatLabel;                 // label that shows the title/users in a selected chat
+        private final JButton addUsersButton;           // button to add users into a selected chat
+        private final JPanel chatLabelPanel;            // panel that holds the chatLabel and addUsers button
+        private final JScrollBar verticalChatScroller;  // Scroll bar for the chat
+        private final GridBagConstraints gbc;           // Grid bag Constraints for the chatPanel
 
         //create chat window
-        private JFrame createChatPopUp;
-        private JPanel createChatContentPane;
-        private JPanel createChatNamePane;
-        private JLabel createChatTitle;
-        private JLabel createChatNameLabel;
-        private JTextField createChatNameTextField;
-        private JButton createChatButton;
+        private JFrame createChatPopUp;                 // main window for the create chat popup
+        private JTextField createChatNameTextField;     // create chat name text field
+        private JButton createChatButton;               // create chat button
 
         //user settings window
-        private JFrame userSettingsWindow;
-        private JPanel userSettingsContentPane;
-        private JLabel userSettingsLabel;
-        private JButton editAccountButton;
-        private JButton deleteAccountButton;
-        private JButton cancelButton;
+        private JFrame userSettingsWindow;              // user settings window
+        private JButton editAccountButton;              // edit account button
+        private JButton deleteAccountButton;            // delete account button
+        private JButton cancelButton;                   // user settings cancel button
 
         //edit account window
-        private JFrame editAccountFrame;
-        private JPanel editAccountContentPane;
-        private JLabel editAccountTitle;
-        private JLabel editUsernameLabel;
-        private JTextField editUsernameTextField;
-        private JButton editUsernameConfirmButton;
-        private JLabel editPasswordLabel;
-        private JTextField editPasswordTextField;
-        private JButton editPasswordConfirmButton;
-        private JButton doneEditingButton;
+        private JFrame editAccountFrame;                // edit account frame
+        private JTextField editUsernameTextField;       // edit username text field
+        private JTextField editPasswordTextField;       // edit password text field
 
         //add users window
-        private JFrame addUsersWindow;
-        private JPanel addUsersContentPanel;
-        private JLabel addUserTitle;
-        private JLabel addUsernameLabel;
-        private JTextField addUsernameTextField;
-        private JPanel addUsernamePanel;
-        private JButton addInputedUserButton;
+        private JFrame addUsersWindow;                  // add users window
+        private JTextField addUsernameTextField;        // add username text field
+        private JButton addInputtedUserButton;          // add inputted user button
 
         //message editing window
-        private JFrame editMessageFrame;
-        private JPanel editMessageContentPane;
-        private JLabel editMessageTitle;
-        private JTextArea editMessageTextArea;
-        private JScrollPane editMessageScrollPane;
-        private JButton editMessageDoneButton;
+        private JFrame editMessageFrame;                // edit message frame
+        private JTextArea editMessageTextArea;          // edit message text area
 
-        private final Timer timer;
+        private final Timer timer;                      // timer that refreshes the window
 
-        private Chat previousChat;
-        private Chat currentChat;
-        private Vector<Chat> previousChats;
-        private boolean chatOpen;
+        private Chat previousChat;                      // chat object that holds the previous chat
+        private Chat currentChat;                       // chat object that holds the current chat
+        private Vector<Chat> previousChats;             // Holds the previous chats
+        private boolean chatOpen;                       // returns true if there is a chat open
 
         public AppGUI() {
+            final JSplitPane splitPane;             // splits the main window
+            final JScrollPane chatSelectorScroller; // scroller for the left panel
+            final JScrollPane chatScroller;         // scroller for the right panel
+            final JPanel selectedChat;              // main right panel
+            final JPanel currentChats;              // main left panel
+            final JPanel messagePanel;              // panel that allows a user to enter and send a message
+            final JPanel settingsPanel;             // panel that holds the settings button
+
             chatOpen = false;
             setTitle("Skullker -- " + welcome.userName.getText());
+            setIconImage(skullkerLogoIcon);
 
             splitPane = new JSplitPane();
 
@@ -512,18 +513,18 @@ public class Client implements Constants {
             chatScroller = new JScrollPane(chatPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-            //setting up the split pane
+            // setting up the split pane
             setPreferredSize(new Dimension(600, 400));
 
             getContentPane().setLayout(new GridLayout());
             getContentPane().add(splitPane);
 
             splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-            splitPane.setDividerLocation(220);
+            splitPane.setDividerLocation(250);
             splitPane.setLeftComponent(currentChats);
             splitPane.setRightComponent(selectedChat);
 
-            //setting up the right side of the GUI
+            // setting up the right side of the GUI
             selectedChat.setLayout(new BorderLayout());
             verticalChatScroller = chatScroller.getVerticalScrollBar();
             verticalChatScroller.setUnitIncrement(5);
@@ -551,7 +552,7 @@ public class Client implements Constants {
             });
             messagePanel.add(sendButton);
 
-            //setting up the left side of the GUI
+            // setting up the left side of the GUI
             currentChats.setLayout(new BorderLayout());
             chatSelectorScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             chatSelectorScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -574,7 +575,7 @@ public class Client implements Constants {
             });
 
             previousChat = null;
-            previousChats = new Vector<Chat>();
+            previousChats = new Vector<>();
 
             timer = new Timer(100, new ActionListener() {
                 @Override
@@ -623,6 +624,7 @@ public class Client implements Constants {
                                 chatLabel.setText(" " + currentChat.getName());
                             }
                         }
+
                         // the following conditional only updates chatPanel if there is a change in currentChat
                         if (currentChat == null || !(previousChat.getMessages().equals(currentChat.getMessages()))) {
                             chatPanel.removeAll();
@@ -645,6 +647,7 @@ public class Client implements Constants {
 
         }
 
+        //disposes all of the open frames
         public void disposeAllFrames() {
             dispose();
             try {
@@ -653,8 +656,7 @@ public class Client implements Constants {
                 editAccountFrame.dispose();
                 addUsersWindow.dispose();
                 editMessageFrame.dispose();
-            } catch (NullPointerException e) {
-                return;
+            } catch (NullPointerException ignored) {
             }
         }
 
@@ -664,7 +666,13 @@ public class Client implements Constants {
 
         //creates a fully functional message editor
         public void createMessageEditor(Message message) {
+            JPanel editMessageContentPane;              // edit message content pane
+            JLabel editMessageTitle;                    // edit message title
+            JScrollPane editMessageScrollPane;          // edit message scroll pane
+            JButton editMessageDoneButton;              // done editing message button
+
             editMessageFrame = new JFrame("Message Editor");
+            editMessageFrame.setIconImage(skullkerLogoIcon);
             editMessageContentPane = new JPanel();
             editMessageTitle = new JLabel("Edit: ");
             editMessageTextArea = new JTextArea(message.getMessage());
@@ -735,7 +743,6 @@ public class Client implements Constants {
 
         //creates a chat panel with an "open chat" button and the chat's title
         public void createIndividualChatPanel(Chat chat) {
-            //currentChat = chat;
             JPanel newChat = new JPanel();
             String chatTitle = chat.getName();
             JLabel chatLabelLeftPanel = new JLabel(chatTitle, SwingConstants.CENTER);
@@ -786,7 +793,16 @@ public class Client implements Constants {
 
         //creates a window that allows a user to edit their account information (NEEDS WORK)
         public void createEditAccountWindow() {
+            JPanel editAccountContentPane;      // holds the edit account content
+            JLabel editAccountTitle;            // edit account title
+            JLabel editUsernameLabel;           // edit username label
+            JButton editUsernameConfirmButton;  // edit username confirm button
+            JLabel editPasswordLabel;           // edit password label
+            JButton editPasswordConfirmButton;  // edit password confirm button
+            JButton doneEditingButton;          // done editing button
+
             editAccountFrame = new JFrame("Edit Account");
+            editAccountFrame.setIconImage(skullkerLogoIcon);
             editAccountFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             editAccountContentPane = new JPanel();
             editAccountTitle = new JLabel("Edit Account:", SwingConstants.CENTER);
@@ -903,7 +919,13 @@ public class Client implements Constants {
 
         //creates a window that allows a user to add other users to the chat (NOT FUNCTIONAL)
         public void createAddUsersWindow() {
+            JPanel addUsersContentPanel;        // holds the add users content
+            JLabel addUserTitle;                // add user title
+            JLabel addUsernameLabel;            // username label
+            JPanel addUsernamePanel;            // username panel
+
             addUsersWindow = new JFrame("Add Users");
+            addUsersWindow.setIconImage(skullkerLogoIcon);
             addUsersWindow.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             addUsersContentPanel = new JPanel();
             addUserTitle = new JLabel("Add a user:");
@@ -922,8 +944,8 @@ public class Client implements Constants {
                 }
             });
 
-            addInputedUserButton = new JButton("Add User");
-            addInputedUserButton.addActionListener(new AppGUIListener());
+            addInputtedUserButton = new JButton("Add User");
+            addInputtedUserButton.addActionListener(new AppGUIListener());
 
 
             addUsersContentPanel.setLayout(new BoxLayout(addUsersContentPanel, BoxLayout.Y_AXIS));
@@ -939,7 +961,7 @@ public class Client implements Constants {
             addUsersContentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
             addUsersContentPanel.add(addUsernamePanel);
             addUsersContentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-            addUsersContentPanel.add(addInputedUserButton);
+            addUsersContentPanel.add(addInputtedUserButton);
             addUsersContentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
 
             addUsersWindow.add(addUsersContentPanel);
@@ -953,7 +975,11 @@ public class Client implements Constants {
 
         //user settings window
         public void createSettingsWindow() {
+            JPanel userSettingsContentPane;     // holds the content that goes onto the settings window
+            JLabel userSettingsLabel;           // user settings title
+
             userSettingsWindow = new JFrame("User Settings");
+            userSettingsWindow.setIconImage(skullkerLogoIcon);
             userSettingsContentPane = new JPanel();
             userSettingsLabel = new JLabel("User Settings", SwingConstants.CENTER);
             userSettingsLabel.setFont(userSettingsLabel.getFont().deriveFont(18f));
@@ -995,10 +1021,15 @@ public class Client implements Constants {
 
         //chat creator popup
         public void createCreateChatPopUp() {
-            createChatPopUp = new JFrame();
+            JPanel createChatNamePane;              // name panel on the create chat popup
+            JLabel createChatTitle;                 // chat title label
+            JLabel createChatNameLabel;             // chat name label
+
+            createChatPopUp = new JFrame("Create Chat");
+            createChatPopUp.setIconImage(skullkerLogoIcon);
             createChatTitle = new JLabel("Create Chat", SwingConstants.CENTER);
             createChatTitle.setFont(createChatTitle.getFont().deriveFont(20f));
-            createChatContentPane = new JPanel();
+            JPanel createChatContentPane = new JPanel();        //holds the content that goes onto the createChatPopUp
             createChatNameLabel = new JLabel("Chat Name: ");
             createChatNameTextField = new JTextField(15);
             createChatNameTextField.addKeyListener(new KeyAdapter() {@Override
@@ -1164,11 +1195,6 @@ public class Client implements Constants {
 
         }
 
-        //receives a message from the server and builds a receiveMessagePane
-        public void receiveMessage(Message message) {
-            createReceiveMessagePane(message);
-        }
-
         //tells the server a message is deleted
         public void deleteMessage(Message message) {
             try {
@@ -1222,6 +1248,7 @@ public class Client implements Constants {
             chatSelectorPanel.repaint();
         }
 
+        //Adds user to the chat and updates the gui
         public void addUser() {
             try {
                 if (addUsernameTextField.getText().equals(account.getUserName())) {
@@ -1302,7 +1329,7 @@ public class Client implements Constants {
                     timer.restart();
                     userSettingsWindow.dispose();
                 }
-                if (e.getSource() == addInputedUserButton) {
+                if (e.getSource() == addInputtedUserButton) {
                     timer.restart();
                     addUser();
                 }
