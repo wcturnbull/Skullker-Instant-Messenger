@@ -1,21 +1,8 @@
 import org.junit.Assert;
 import org.junit.Test;
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
->>>>>>> Stashed changes
-import org.junit.jupiter.params.provider.EnumSource;
-
-import java.lang.reflect.*;
-import java.lang.reflect.Constructor;
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
-=======
 import java.util.*;
 import static org.junit.Assert.*;
->>>>>>> a325d6c7718580d61886a28ae5821b8e0696821a
-
+import java.lang.reflect.*;
 public class MessageTest {
 
 
@@ -72,10 +59,11 @@ public class MessageTest {
     }
     @Test
     public void testGetSender() {
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
->>>>>>> Stashed changes
+        Account acc = new Account("test", "1234");
+        Object o = new Object();
+        Chat chat = new Chat(acc, "Chat");
+        Message test = new Message(acc, "hi", chat);
+        assertEquals(acc, test.getSender());
         Method testMethod;
         try {
             testMethod = Message.class.getMethod("getSender");
@@ -88,16 +76,6 @@ public class MessageTest {
             System.out.println("The getSender method does not exist!");
             Assert.fail();
         }
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> a325d6c7718580d61886a28ae5821b8e0696821a
->>>>>>> Stashed changes
-        Account acc = new Account("test", "1234");
-        Object o = new Object();
-        Chat chat = new Chat(acc, "Chat");
-        Message test = new Message(acc, "hi", chat);
-        assertEquals(acc, test.getSender());
     }
 
     @Test
