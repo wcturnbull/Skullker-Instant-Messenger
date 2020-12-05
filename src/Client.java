@@ -575,7 +575,6 @@ public class Client implements Constants {
                         }
                         previousChats = account.getChats();
 
-
                         setTitle("Skullker -- " + account.getUserName());
 
                         // updates previousChat and currentChat references

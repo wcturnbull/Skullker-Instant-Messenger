@@ -57,6 +57,7 @@ public class Message implements Serializable {
             Message message = (Message) o;
             return (this.message.equals(message.getMessage()) &&
                     this.sender.equals(message.getSender()) &&
+                    this.sender.matchesUsername(message.getSender()) &&
                     this.chat.equals(message.getChat()) &&
                     this.time.equals(message.getTime()));
         }

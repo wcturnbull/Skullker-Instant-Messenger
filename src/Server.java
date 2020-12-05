@@ -21,7 +21,6 @@ public class Server implements Constants {
 
     public Server() {
         RUN_SYNC = new Object();
-
         run = true;
 
         if (!(new File("data.txt").exists())) {
