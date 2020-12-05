@@ -425,6 +425,8 @@ public class Client implements Constants {
         private final JPanel chatLabelPanel;            // panel that holds the chatLabel and addUsers button
         private final JScrollBar verticalChatScroller;  // Scroll bar for the chat
         private final GridBagConstraints gbcChatPanel;  // Grid bag Constraints for the chatPanel
+        private final JScrollPane chatSelectorScroller;     // scroller for the left panel
+        private final JScrollPane chatScroller;             // scroller for the right panel
 
         //create chat window
         private JFrame createChatPopUp;                 // main window for the create chat popup
@@ -459,13 +461,11 @@ public class Client implements Constants {
         private boolean chatOpen;                       // returns true if there is a chat open
 
         public AppGUI() {
-            final JSplitPane splitPane;             // splits the main window
-            final JScrollPane chatSelectorScroller; // scroller for the left panel
-            final JScrollPane chatScroller;         // scroller for the right panel
-            final JPanel selectedChat;              // main right panel
-            final JPanel currentChats;              // main left panel
-            final JPanel messagePanel;              // panel that allows a user to enter and send a message
-            final JPanel settingsPanel;             // panel that holds the settings button
+            final JSplitPane splitPane;                 // splits the main window
+            final JPanel selectedChat;                  // main right panel
+            final JPanel currentChats;                  // main left panel
+            final JPanel messagePanel;                  // panel that allows a user to enter and send a message
+            final JPanel settingsPanel;                 // panel that holds the settings button
 
             chatOpen = false;
             setTitle("Skullker -- " + welcome.userName.getText());
@@ -1109,7 +1109,7 @@ public class Client implements Constants {
 
         // panel that holds a user's sent message and a menu for message manipulation
         public void createSendMessagePane(Message message) {
-            gbcChatPanel.gridx = 1;
+            gbcChatPanel.gridx = 2;
 
             JPanel messageContent = new JPanel();
             messageContent.setBackground(Color.WHITE);
@@ -1199,6 +1199,17 @@ public class Client implements Constants {
 
         }
 
+        public void createFillerMessagePane() {
+            gbcChatPanel.gridx = 1;
+            JTextField chatFillerPanel = new JTextField();      // fills the empty space between sent and received messages
+            chatFillerPanel.setEditable(false);
+            chatFillerPanel.setPreferredSize(new Dimension(chatScroller.getWidth() - 300, 0));
+            chatFillerPanel.setBackground(Color.WHITE);
+            chatPanel.add(chatFillerPanel, gbcChatPanel);
+            chatPanel.revalidate();
+            validate();
+        }
+
         // tells the server a message is deleted
         public void deleteMessage(Message message) {
             try {
@@ -1226,6 +1237,7 @@ public class Client implements Constants {
                 } else {
                     createReceiveMessagePane(message);
                 }
+                createFillerMessagePane();
             }
 
             SwingUtilities.invokeLater(new Runnable() {
@@ -1234,7 +1246,18 @@ public class Client implements Constants {
                 }
             });
 
-            chatLabel.setText(" " + currentChat.getName());
+            StringBuilder usersInChat = new StringBuilder(account.getUserName());
+            if (currentChat.getUsers().size() > 1) {
+                for (Account user : currentChat.getUsers()) {
+                    if (!user.getUserName().equals(account.getUserName())) {
+                        usersInChat.append(", ").append(user.getUserName());
+                    }
+                }
+                chatLabel.setText(" " + currentChat.getName() + " -- " + usersInChat);
+            } else {
+                chatLabel.setText(" " + currentChat.getName());
+            }
+
             sendMessage.setEditable(true);
 
             chatLabelPanel.add(addUsersButton, BorderLayout.EAST);
