@@ -476,7 +476,7 @@ public class Client implements Constants {
             chatSelectorPanel = new JPanel();
             settingsPanel = new JPanel();
 
-            settingsButton = new JButton("User Settings");
+            settingsButton = new JButton("Settings");
             settingsButton.addActionListener(new AppGUIListener());
 
             signOutButton = new JButton("Sign Out");
