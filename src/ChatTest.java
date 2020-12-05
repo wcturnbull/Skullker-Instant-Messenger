@@ -6,6 +6,21 @@ import java.lang.reflect.*;
 
 public class ChatTest {
 
+    @Test(timeout = 1000)
+    public void testClass() {
+        Class<?> clazz = Chat.class;
+        Class<?> superclasses;
+        superclasses = clazz.getSuperclass();
+        if (!superclasses.equals(Object.class)) {
+            Assert.fail();
+        }
+        try {
+            Class.forName("Chat");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ensure that the Chat class exists");
+            Assert.fail();
+        }
+    }
     @Test (timeout = 1000)
     public void testFields() {
         Field users;

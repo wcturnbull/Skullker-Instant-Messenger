@@ -10,6 +10,21 @@ import java.lang.reflect.*;
 public class MessageTest {
 
     @Test(timeout = 1000)
+    public void testClass() {
+        Class<?> clazz = Message.class;
+        Class<?> superclasses;
+        superclasses = clazz.getSuperclass();
+        if (!superclasses.equals(Object.class)) {
+            Assert.fail();
+        }
+        try {
+            Class.forName("Message");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ensure that the Message class exists");
+            Assert.fail();
+        }
+    }
+    @Test(timeout = 1000)
     public void testFields() {
         Field testingSender;
         Field testingMessage;
