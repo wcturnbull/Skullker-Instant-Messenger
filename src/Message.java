@@ -65,6 +65,6 @@ public class Message implements Serializable {
     }
 
     public String toString() {
-        return String.format(message);
+        return message;
     }
 }

@@ -225,7 +225,6 @@ public class AccountTest {
         vec.add(chat1);
         vec.add(chat2);
         assertEquals(vec, acc.getChats());
-
     }
 
     @Test
@@ -311,6 +310,23 @@ public class AccountTest {
         Account fake = new Account("test","1234");
         assertEquals(false, acc.matchesCredentials(account));
         assertTrue(acc.matchesCredentials(fake));
+    }
+
+    @Test
+    public void getSerial() {
+        Method method;
+        try {
+            method = Account.class.getMethod("getSerial", Account.class);
+            if (Modifier.isPrivate(method.getModifiers())) {
+                Assert.fail();
+            } else if (!method.getReturnType().equals(String.class)) {
+                Assert.fail();
+            }
+        } catch (NoSuchMethodException e) {
+            System.out.println("The getSerial method does not exist");
+        }
+        Account acc = new Account("test", "1234");
+        assertTrue(acc.getSerial().matches("\\w+ \\w+ \\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.[0-9]+$"));
     }
 
     @Test
