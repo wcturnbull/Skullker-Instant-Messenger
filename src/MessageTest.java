@@ -2,7 +2,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import java.util.*;
 import static org.junit.Assert.*;
+
 import java.lang.reflect.*;
+
+
+
 public class MessageTest {
 
 
@@ -64,6 +68,7 @@ public class MessageTest {
         Chat chat = new Chat(acc, "Chat");
         Message test = new Message(acc, "hi", chat);
         assertEquals(acc, test.getSender());
+
         Method testMethod;
         try {
             testMethod = Message.class.getMethod("getSender");
@@ -76,6 +81,8 @@ public class MessageTest {
             System.out.println("The getSender method does not exist!");
             Assert.fail();
         }
+
+
     }
 
     @Test
