@@ -1050,7 +1050,7 @@ public class Client implements Constants {
         //panel that holds a user's sent message and a menu for message manipulation
         public void createSendMessagePane(Message message) {
 
-            gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+            //gbc.anchor = GridBagConstraints.FIRST_LINE_END;
             gbc.gridx = 1;
 
             JPanel messageContent = new JPanel();
@@ -1092,11 +1092,11 @@ public class Client implements Constants {
             manipulateMessageMenuBar.add(manipulateMessageMenu);
             messageContent.add(manipulateMessageMenuBar);
 
+            gbc.gridy++;
             chatPanel.add(messageContent, gbc);
             chatPanel.revalidate();
             validate();
 
-            gbc.gridy++;
         }
 
         //sends a message to the server and builds a sendMessagePane
@@ -1117,8 +1117,8 @@ public class Client implements Constants {
 
         //panel that holds a received message
         public void createReceiveMessagePane(Message message) {
-            Insets receivedMessageInset = new Insets(5, 0, 0, 60);
-            gbc.anchor = GridBagConstraints.FIRST_LINE_END;
+            //Insets receivedMessageInset = new Insets(5, 0, 0, 60);
+            //gbc.anchor = GridBagConstraints.FIRST_LINE_END;
             gbc.gridx = 0;
             //gbc.insets = receivedMessageInset;
             JPanel messageContent = new JPanel();
@@ -1136,11 +1136,11 @@ public class Client implements Constants {
 
             messageContent.add(receivedMessage);
 
+            gbc.gridy++;
             chatPanel.add(messageContent, gbc);
             chatPanel.revalidate();
             validate();
 
-            gbc.gridy++;
         }
 
         //receives a message from the server and builds a receiveMessagePane
