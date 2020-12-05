@@ -28,16 +28,20 @@ public class Client implements Constants {
     private WelcomeGUI welcome;
     private AppGUI app;
 
-    public Client() {
-        welcome = new WelcomeGUI();
-        app = new AppGUI();
+    public Client() throws SocketException {
         try {
             socket = new Socket("localhost", 0xBEEF);
             oos = new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
+        } catch (SocketException exception) {
+            JOptionPane.showMessageDialog(null, "Connection Refused", "Skullker",
+                    JOptionPane.ERROR_MESSAGE);
+            throw exception;
         } catch (IOException exception) {
             exception.printStackTrace();
         }
+        welcome = new WelcomeGUI();
+        app = new AppGUI();
     }
 
     public WelcomeGUI getWelcomeGUI() {
@@ -49,7 +53,12 @@ public class Client implements Constants {
     }
 
     public static void main(String[] args) {
-        Client client = new Client();
+        Client client;
+        try {
+            client = new Client();
+        } catch (SocketException exception) {
+            return;
+        }
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -93,12 +102,7 @@ public class Client implements Constants {
                 }
                 //Sign Up Button
                 if (e.getSource() == signUpButton) {
-                    try {
-                        oos.writeByte(REGISTER_ACCOUNT);
-                        createRegistrationWindow(userName.getText(), String.valueOf(password.getPassword()));
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
+                    createRegistrationWindow();
                 }
                 //Register Button
                 if (e.getSource() == registerButton) {
@@ -114,8 +118,9 @@ public class Client implements Constants {
                     oos.writeObject(new Account(userName.getText(), String.valueOf(password.getPassword())));
                     oos.flush();
                 } catch (SocketException exception) {
-                    registrationFrame.dispose();
                     dispose();
+                    getAppGUI().disposeAllFrames();
+                    getAppGUI().getTimer().stop();
 
                     JOptionPane.showMessageDialog(null, "Server Closed", "Skullker",
                             JOptionPane.ERROR_MESSAGE);
@@ -141,6 +146,13 @@ public class Client implements Constants {
                     JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
                             JOptionPane.ERROR_MESSAGE);
                 }
+            } catch (SocketException exception) {
+                dispose();
+                getAppGUI().disposeAllFrames();
+                getAppGUI().getTimer().stop();
+
+                JOptionPane.showMessageDialog(null, "Server Closed", "Skullker",
+                        JOptionPane.ERROR_MESSAGE);
             } catch (IOException | ClassNotFoundException ioException) {
                 ioException.printStackTrace();
             }
@@ -159,6 +171,7 @@ public class Client implements Constants {
                     JOptionPane.showMessageDialog(null, "Passwords did not match",
                             "Skullker", JOptionPane.ERROR_MESSAGE);
                 } else {
+                    oos.writeByte(REGISTER_ACCOUNT);
                     Account newAccount = new Account(userNameRegisterTextField.getText(),
                             String.valueOf(passwordRegisterTextField.getPassword()));
                     oos.writeObject(newAccount);
@@ -181,13 +194,21 @@ public class Client implements Constants {
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 }
+            } catch (SocketException exception) {
+                registrationFrame.dispose();
+                dispose();
+                getAppGUI().disposeAllFrames();
+                getAppGUI().getTimer().stop();
+
+                JOptionPane.showMessageDialog(null, "Server Closed", "Skullker",
+                        JOptionPane.ERROR_MESSAGE);
             } catch (IOException | ClassNotFoundException exception) {
                 exception.printStackTrace();
             }
         }
 
         //builds the registration popup window
-        public void createRegistrationWindow(String userName, String password) {
+        public void createRegistrationWindow() {
             registrationFrame = new JFrame("Register");
             registrationFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             registrationInformationPane = new JPanel();
@@ -198,7 +219,7 @@ public class Client implements Constants {
             userNameRegisterLabel = new JLabel("Username: ", SwingConstants.RIGHT);
             passwordRegisterLabel = new JLabel("Password: ", SwingConstants.RIGHT);
             confirmPasswordLabel = new JLabel("Confirm Password: ", SwingConstants.RIGHT);
-            userNameRegisterTextField = new JTextField(userName, 15);
+            userNameRegisterTextField = new JTextField(userName.getText(), 15);
             userNameRegisterTextField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
@@ -207,7 +228,7 @@ public class Client implements Constants {
                     }
                 }
             });
-            passwordRegisterTextField = new JPasswordField(password, 15);
+            passwordRegisterTextField = new JPasswordField(String.valueOf(password.getPassword()), 15);
             passwordRegisterTextField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
