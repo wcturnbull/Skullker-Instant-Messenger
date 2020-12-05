@@ -294,8 +294,6 @@ public class AccountTest {
         Account fake = new Account("tEst","1234");
         assertTrue(acc.matchesUsername(account));
         assertFalse(acc.matchesUsername(fake));
-
-
     }
 
     @Test

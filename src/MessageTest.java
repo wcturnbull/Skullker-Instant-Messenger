@@ -1,5 +1,9 @@
 import org.junit.Assert;
 import org.junit.Test;
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+>>>>>>> Stashed changes
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.*;
@@ -7,6 +11,10 @@ import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
+=======
+import java.util.*;
+import static org.junit.Assert.*;
+>>>>>>> a325d6c7718580d61886a28ae5821b8e0696821a
 
 public class MessageTest {
 
@@ -64,6 +72,10 @@ public class MessageTest {
     }
     @Test
     public void testGetSender() {
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+>>>>>>> Stashed changes
         Method testMethod;
         try {
             testMethod = Message.class.getMethod("getSender");
@@ -76,6 +88,11 @@ public class MessageTest {
             System.out.println("The getSender method does not exist!");
             Assert.fail();
         }
+<<<<<<< Updated upstream
+=======
+=======
+>>>>>>> a325d6c7718580d61886a28ae5821b8e0696821a
+>>>>>>> Stashed changes
         Account acc = new Account("test", "1234");
         Object o = new Object();
         Chat chat = new Chat(acc, "Chat");
@@ -194,7 +211,6 @@ public class MessageTest {
                                                         // but different initialization times are not equal
         assertFalse(test.equals(acc)); //asserts that a message will return true when comparing to
                                                         // a different object entirely
-
     }
 
     @Test
@@ -220,7 +236,5 @@ public class MessageTest {
         assertEquals("", test.toString());//asserts that test returns a string type
         test.editMessage("hi");
         assertEquals("hi", test.toString());//asserts that test returns the correct string
-
-
     }
 }
