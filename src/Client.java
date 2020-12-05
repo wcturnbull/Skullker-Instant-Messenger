@@ -418,6 +418,7 @@ public class Client implements Constants {
         private final JTextField sendMessage;           // text field for a user to enter their message
         private final JButton sendButton;               // button that sends a message to the other user(s) in the chat
         private final JButton settingsButton;           // button that allows a user to edit/delete their account
+        private final JButton signOutButton;            // button that allows a user to sign out and return to the Welcome screen
         private final JButton createChatPopupButton;    // button that allows a user to create a new chat
         private final JLabel chatLabel;                 // label that shows the title/users in a selected chat
         private final JButton addUsersButton;           // button to add users into a selected chat
@@ -477,6 +478,9 @@ public class Client implements Constants {
 
             settingsButton = new JButton("User Settings");
             settingsButton.addActionListener(new AppGUIListener());
+
+            signOutButton = new JButton("Sign Out");
+            signOutButton.addActionListener(new AppGUIListener());
 
             createChatPopupButton = new JButton("Create New Chat");
             createChatPopupButton.addActionListener(new AppGUIListener());
@@ -560,6 +564,7 @@ public class Client implements Constants {
             currentChats.add(settingsPanel, BorderLayout.NORTH);
             currentChats.add(createChatPopupButton, BorderLayout.SOUTH);
             settingsPanel.add(settingsButton);
+            settingsPanel.add(signOutButton);
 
             gbcChatPanel = new GridBagConstraints();
 
@@ -1337,6 +1342,22 @@ public class Client implements Constants {
                 if (e.getSource() == addInputtedUserButton) {
                     timer.restart();
                     addUser();
+                }
+                if (e.getSource() == signOutButton) {
+                    timer.restart();
+                    int yes_no = JOptionPane.showConfirmDialog(null,
+                            "Are you sure you want to sign out?",
+                            "Skullker", JOptionPane.YES_NO_OPTION);
+                    if (yes_no == JOptionPane.YES_OPTION) {
+                        account = null;
+                        app.dispose();
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                welcome.setVisible(true);
+                            }
+                        });
+                    }
                 }
             }
         }
