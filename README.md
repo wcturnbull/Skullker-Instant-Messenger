@@ -215,13 +215,99 @@ This is the client-side part of the application which communicates with the `Ser
 
 | Method | Description |
 |-|-|
+| `public Client() throws SocketException` | Constructor for the `Client`, attempts to connect to the server on `localhost` & `0xBEEF`; also constructs a `WelcomeGUI` and `AppGUI` |
+| `public WelcomeGUI getWelcomeGUI()` | Accessor for the `Client`'s `WelcomeGUI` |
+| `public AppGUI getAppGUI()` | Accessor for the `Client`'s `AppGUI` |
 | `public static void main(String[] args)` | Constructs a `Client` object and begins running `Client`'s `WelcomeGUI` on `Swing`'s `invokeLater` `Thread` |
 
 ### Client.WelcomeGUI
 This is the welcome screen, from which the user can log in or register for a new `Account`. After the user gets their `Account`, `WelcomeGUI` is disposed and then an `AppGUI` is ran on `Swing`'s `invokeLater` `Thread`.
+| Instance field | Description |
+|-|-|
+| `private final JTextField userName` | Input text field for the username on the welcome screen |
+| `private final JPasswordField password` | Input password field for the password on the welcome screen |
+| `private final JButton signInButton` | Button for logging in |
+| `private final JButton signUpButton` | Button for registering |
+| `private JFrame registrationFrame` | Frame of the registration window |
+| `private JTextField userNameRegisterTextField` | Username text field in the registration window |
+| `private JPasswordField passwordRegisterTextField` | Password field in the registration window |
+| `private JPasswordField confirmPasswordTextField` | Password confirmation field in the registration window |
+| `private JButton registerButton` | Button for registering |
+| `private ActionListener actionListener` | Action listener for all buttons for `WelcomeGUI` |
+
+| Method | Description |
+|-|-|
+| `public void signIn()` | Server-client communication method for signing into an account |
+| `public void register()` | Server-client communication method for registering an account |
+| `public void createRegistrationWindow()` | Builds the registration window |
+| `public WelcomeGUI()` | Sets up the welcome screen's layout |
 
 ### Client.AppGUI
 This is the Skullker's main application screen, from which the user can do all the functionality outlined in the sections above.
+| Instance field | Description |
+|-|-|
+| `private final JPanel chatSelectorPanel` | Panel that holds all available chats |
+| `private final JPanel chatPanel` | Panel that holds the content of a chat |
+| `private final JTextField sendMessage` | Input field for entering messages |
+| `private final JButton sendButton` | Button for sending a message |
+| `private final JButton settingsButton` | Button for opening settings window |
+| `private final JButton signOutButton` | Button for signing out (somewhat buggy) |
+| `private final JButton createChatPopupButton` | Button which opens the window for creating a chat |
+| `private final JLabel chatLabel` | Label which shows a chat's title and members |
+| `private final JButton addUsersButton` | Button for adding a user to a chat |
+| `private final JPanel chatLabelPanel` | Panel that holds the chat label |
+| `private final JScrollBar verticalChatScroller` | Scrollbar for the chat window |
+| `private final GridBagConstraints gbcChatPanel` | Grid bag constraints for the chat panel |
+| `private final JScrollPane chatSelectorScroller` | Scroll pane for the chat list |
+| `private JFrame createChatPopUp` | Window for creating a chat window |
+| `private JTextField createChatNameTextField` | Text field for entering a name for a new chat |
+| `private JButton createChatButton` | Creates the window for creating a chat |
+| `private JFrame userSettingsWindow` | User settings window |
+| `private JButton editAccountButton` | Button for editing account credentials |
+| `private JButton deleteAccountButton` | Button for deleting user's account |
+| `private JButton cancelButton` | Button for canceling out of the settings window |
+| `private JFrame editAccountFrame` | Window for editing account credentials |
+| `private JTextField editUsernameTextField` | Text field for editing the username |
+| `private JTextField editPasswordTextField` | Text field for editing the password |
+| `private JFrame addUsersWindow` | Window for adding a user to a chat |
+| `private JTextField addUsernameTextField` | Text field for adding the given user to a chat |
+| `private JButton addInputtedUserButton` | Button for adding the given user to a chat |
+| `private JFrame editMessageFrame` | Window for editing a message |
+| `private JTextArea editMessageTextArea` | Text area field for the new message content |
+| `private final Timer timer` | Timer for automatic refreshes and queries to the server every .1 seconds |
+| `private Chat previousChat` | Reference holding the previous state of the chat |
+| `private Chat currentChat` | Reference holding the current state of the chat |
+| `private Vector<Chat> previousChats` | Reference holding the user's previous list of chats |
+| `private boolean chatOpen` | Boolean stating whether the user has a chat open currently |
+
+| Method | Description |
+|-|-|
+| `public AppGUI()` | Constructor that sets up all layouts and starts the timer. |
+| `public void disposeAllFrames()` | Disposes of all frames |
+| `public Timer getTimer()` | Accessor for the reference to the timer |
+| `public void createMessageEditor(Message message)` | Creates the message editor window |
+| `public void createIndividualChatPanel(Chat chat)` | Creates a panel for the chat list panel including the individual chat's title, a button for opening the chat, and a button for leaving the chat |
+| `public void createEditAccountWindow()` | Creates window for the user to edit their account |
+| `public void createAddUsersWindow()` | Creates window for the user to add users to a chat |
+| `public void createSettingsWindow()` | Creates the settings window |
+| `public void createCreateChatPopUp()` | Creates window for creating a chat |
+| `public void createChat(String chatName)` | Performs server-client communication for actually creating a chat |
+| `public Chat fetchCurrentChat(Chat chat)` | Fetches an updated reference for an equivalent chat from `Client`'s `account` instance field |
+| `public void createSendMessagePane(Message message)` | Creates panel for a message sent by the user in a chat's panel, including a dropdown menu of edit and delete buttons |
+| `public void sendMessage(Message message)` | Performs server-client communication for actually sending a message |
+| `public void createReceiveMessagePane(Message message)` | Creates panel for a message not sent by the user in a chat's panel |
+| `public void createFillerMessagePane()` | Creates an invisible message panel for aesthetic purposes |
+| `public void deleteMessage(Message message)` | Performs server-client communication for actually deleting a message |
+| `public void editMessage(Message message)` | Launches the message editor window |
+| `public void loadChat(Chat chat)` | Loads a chat by populating the chat panel with its messages, title, and members |
+| `public void addChats()` | Adds all the available chats of a user to their chat list panel |
+| `public void addUser()` | Performs server-client communication to add a user to a chat |
+
+### Client.AppGUI.AppGUIListener
+This is the `ActionListener` added to most buttons in the application GUI, which does an appropriate action depending on the button which called it.
+| Method | Description |
+|-|-|
+| `public void actionPerformed(ActionEvent e)` | Performs an appropriate action depending on `e.getSource()` |
 
 ## Test Classes
 To test the three classes that aren't covered in GUI testing, we implemented four different test classes for the `Account`, `Message`, `Chat`, `Server`, and `Client` classes:
