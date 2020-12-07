@@ -6,11 +6,11 @@ First, run one instance of `Server.java`. From there, you can run as many simult
 
 ### Known Bugs/Issues/Notes
 For the benefit of the graders, here is a small list of known issues or things that might seem like issues.
-- Deleting the owner `Account` of a `Chat` causes all members currently viewing that `Chat` to close their viewing of that `Chat`. This is not unintended behaviour, but is something that I thought graders should know.
+- Deleting the owner `Account` of a `Chat` causes all members currently viewing that `Chat` to close their viewing of that `Chat`. This is not unintended behavior, but is something that I thought graders should know.
 - Clients on the welcome screen GUI will only get an error message in the event that the server has closed after their attempt to send a log-in/registration query to the server. This is not unintended, but is important to note.
 - Signing out was the last optional feature added to our project; as such, it has some bugs with it that we have not fully seen/solved. For instance, signing out and logging back in to the main application GUI temporarily desyncs the client from the server, which only leads to issues if the server is subsequently safely closed, resulting in the "Server Closed" error message not appearing at the right time for the client, and in the server not terminating until the desynced client disconnects.
 
-In all other cases, `Server` and `Client` should and appear to function exactly as intended.
+In all other cases, `Server` and `Client` *should* and appear to function exactly as intended.
 
 ## How our application fills Project 5 Requirements
 Like our title suggests, we made our project for the third option of Project 5, the social network chat application. Because ours is a 3 person team, we were only required to finish 1/3 of the additional selection requirements for option 3; instead, we did all 3/3 selection requirements, in addition to some extraneous features.
