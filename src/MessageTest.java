@@ -265,8 +265,8 @@ public class MessageTest {
         Message test = new Message(acc, "", chat);
 
 
-        assertEquals("", test.toString());//asserts that test returns a string type
+        assertEquals("", test.toString()); //asserts that test returns a string type
         test.editMessage("hi");
-        assertEquals("hi", test.toString());//asserts that test returns the correct string
+        assertEquals("hi", test.toString()); //asserts that test returns the correct string
     }
 }
