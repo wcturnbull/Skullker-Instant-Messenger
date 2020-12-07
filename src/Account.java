@@ -24,38 +24,32 @@ public class Account implements Serializable {
     }
 
     // gets username of account.
-    public String getUserName() {
+    public synchronized String getUserName() {
         return userName;
     }
 
     // sets username of account.
-    public void setUserName(String userName) {
+    public synchronized void setUserName(String userName) {
         this.userName = userName;
     }
 
     // gets password of account.
-    public String getPassword() {
+    public synchronized String getPassword() {
         return password;
     }
 
     // sets password of account.
-    public void setPassword(String password) {
+    public synchronized void setPassword(String password) {
         this.password = password;
     }
 
-    // copies credentials of other account.
-    public void copy(Account other) {
-        this.userName = other.getUserName();
-        this.password = other.password;
-    }
-
     // adds chat to the user's list of chats.
-    public void joinChat(Chat chat) {
+    public synchronized void joinChat(Chat chat) {
         chats.add(chat);
     }
 
     // leaves a chat.
-    public void leaveChat(Chat chat) {
+    public synchronized void leaveChat(Chat chat) {
         for (int i = 0; i < chats.size(); i++) {
             if (chats.get(i).equals(chat)) {
                 chats.remove(i);
@@ -64,12 +58,12 @@ public class Account implements Serializable {
     }
 
     // accessor for the user's list of chats.
-    public Vector<Chat> getChats() {
+    public synchronized Vector<Chat> getChats() {
         return chats;
     }
 
     // gets updated reference for equivalent chat.
-    public Chat fetchChat(Chat chat) {
+    public synchronized Chat fetchChat(Chat chat) {
         for (Chat c : chats) {
             if (c.equals(chat)) {
                 return c;
@@ -79,7 +73,7 @@ public class Account implements Serializable {
     }
 
     // deletes the account.
-    public void delete() {
+    public synchronized void delete() {
         this.setUserName(this.userName + " (DELETED)");
         this.serial = "";
         for (Chat c : chats) {
@@ -98,7 +92,7 @@ public class Account implements Serializable {
     }
 
     // gets the serial code of the account.
-    public String getSerial() {
+    public synchronized String getSerial() {
         return serial;
     }
 

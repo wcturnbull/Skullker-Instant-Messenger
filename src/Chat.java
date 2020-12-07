@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 public class Chat implements Serializable {
     private Vector<Account> users;          // list of members
     private Vector<Message> messages;       // list of messages sent to the hcat
-    private String name;                    // name of the chat
-    private String time;                    // time of the chat's construction
+    private final String name;                    // name of the chat
+    private final String time;                    // time of the chat's construction
 
     public Chat(Account owner, String name) {
         users = new Vector<Account>();
@@ -25,23 +25,23 @@ public class Chat implements Serializable {
     }
 
     // sends a message to the chat.
-    public void sendMessage(Message message) {
+    public synchronized void sendMessage(Message message) {
         messages.add(message);
     }
 
     // gets all messages from the chat.
-    public Vector<Message> getMessages() {
+    public synchronized Vector<Message> getMessages() {
         return messages;
     }
 
     // adds user to the chat.
-    public void addUser(Account user) {
+    public synchronized void addUser(Account user) {
         users.add(user);
         user.joinChat(this);
     }
 
     // removes user from chat.
-    public void removeUser(Account user) {
+    public synchronized void removeUser(Account user) {
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).equals(user)) {
                 users.get(i).leaveChat(this);
@@ -52,7 +52,7 @@ public class Chat implements Serializable {
 
     // removes user from chat.
     // different from removeUser() because the user does not remove the chat from their list of chats.
-    public void deleteUser(Account user) {
+    public synchronized void deleteUser(Account user) {
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).equals(user)) {
                 users.remove(i);
@@ -66,7 +66,7 @@ public class Chat implements Serializable {
     }
 
     // gets members of the chat.
-    public Vector<Account> getUsers() {
+    public synchronized Vector<Account> getUsers() {
         return users;
     }
 
@@ -75,13 +75,8 @@ public class Chat implements Serializable {
         return name;
     }
 
-    // sets name of the chat.
-    public synchronized void setName(String name) {
-        this.name = name;
-    }
-
     // gets an updated reference to a message in the chat.
-    public Message fetchMessage(Message message) {
+    public synchronized Message fetchMessage(Message message) {
         for (Message m : messages) {
             if (m.equals(message)) {
                 return m;
@@ -96,7 +91,7 @@ public class Chat implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public synchronized boolean equals(Object o) {
         if (o == null) {
             return false;
         }

@@ -280,28 +280,6 @@ public class ChatTest {
     }
 
     @Test
-    public void setName() {
-        Method method;
-        try {
-            Class[] classes = new Class[1];
-            classes[0] = String.class;
-            method = Chat.class.getMethod("setName", classes);
-            if (Modifier.isPrivate(method.getModifiers())) {
-                Assert.fail();
-            } else if (!method.getReturnType().equals(Void.TYPE)) {
-                Assert.fail();
-            }
-        } catch (NoSuchMethodException e) {
-            System.out.println("The setName method does not exist");
-            Assert.fail();
-        }
-        Account acc = new Account("test", "1234");
-        Chat chat = new Chat(acc, "Chatroom1");
-        chat.setName("Chatroom2");
-        assertEquals("Chatroom2", chat.getName());
-    }
-
-    @Test
     public void fetchMessage() {
         Method method;
         try {

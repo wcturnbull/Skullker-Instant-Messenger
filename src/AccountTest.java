@@ -165,29 +165,6 @@ public class AccountTest {
     }
 
     @Test
-    public void copy() {
-        Method method;
-        try {
-            Class[] classes = new Class[1];
-            classes[0] = Account.class;
-            method = Account.class.getMethod("copy", classes);
-            if (Modifier.isPrivate(method.getModifiers())) {
-                Assert.fail();
-            } else if (!method.getReturnType().equals(Void.TYPE)) {
-                Assert.fail();
-            }
-        } catch (NoSuchMethodException e) {
-            System.out.println("The copy method does not exist");
-        }
-        Account acc = new Account("test", "1234");
-        Account copy = new Account("test1", "12345");
-        assertNotEquals(acc, copy);
-        copy.copy(acc);
-        assertEquals(acc.getUserName(), copy.getUserName());
-        assertEquals(acc.getPassword(), copy.getPassword());
-    }
-
-    @Test
     public void joinChat() {
         Method method;
         try {

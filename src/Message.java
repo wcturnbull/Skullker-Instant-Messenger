@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
  * @version 7 December 2020
  */
 public class Message implements Serializable {
-    private Account sender;         // author of the message
+    private final Account sender;         // author of the message
     private String text;            // string content of the message
-    private Chat chat;              // the chat the message is in
-    private String time;            // time of the message's construction
+    private final Chat chat;              // the chat the message is in
+    private final String time;            // time of the message's construction
 
     public Message(Account sender, String text, Chat chat) {
         this.sender = sender;
@@ -23,7 +23,7 @@ public class Message implements Serializable {
     }
 
     // gets the author of the message.
-    public synchronized Account getSender() {
+    public Account getSender() {
         return sender;
     }
 
@@ -38,7 +38,7 @@ public class Message implements Serializable {
     }
 
     // gets the chat the message is in.
-    public synchronized Chat getChat() {
+    public Chat getChat() {
         return chat;
     }
 
