@@ -234,7 +234,7 @@ public class ChatTest {
         Message mess = new Message(acc, "hi", chat);
         chat.sendMessage(mess);
         chat.removeMessage(mess);
-        assertEquals(0, chat.getMessages().size());//asserts that removeMessage works with a found message
+        assertEquals(0, chat.getMessages().size()); //asserts that removeMessage works with a found message
         chat.sendMessage(mess);
         chat.removeMessage(new Message(acc, "bye", chat));
         assertEquals(1, chat.getMessages().size()); //asserts that removemessage works when message is not found
@@ -311,7 +311,7 @@ public class ChatTest {
         chat.sendMessage(m2);
         chat.sendMessage(m3);
         assertEquals(m2, chat.fetchMessage(m2)); //checks the case where message is successfully found
-        assertNull(chat.fetchMessage(new Message(acc,"4", chat))); //checks case where message DNE
+        assertNull(chat.fetchMessage(new Message(acc, "4", chat))); //checks case where message DNE
     }
 
     @Test
