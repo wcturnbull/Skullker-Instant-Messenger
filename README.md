@@ -23,7 +23,7 @@ Like our title suggests, we made our project for the third option of Project 5, 
 - [x] **The client (to our knowledge) never crashes.** All possible user-related errors (such as pressing a button before it is functional) are handled either through the use of descriptive `JOptionPanes`, or by simply not allowing the user to interact with said GUI elements. 
 - [x] **Users can create, edit, and delete their accounts.** Our client GUI opens with a welcome screen in which the user can either register for an account with a unique username or log into a pre-existing account. In the main client GUI, the user has the option to open a "Settings" window, in which they can edit their user credentials or delete their account entirely.
 - [x] **Users are required to maintain unique usernames.** After an account is created with a given username, no other user can create an account with that same username or edit their username to become that username. That username becomes available again upon its corresponding account's deletion. 
-- [x] **Users can send messages to groups or individuals.** Users can create conversations which include any number of other users (including 0). Members of those chats can then send messages to those conversations.
+- [x] **Users can send, edit, and delete messages to groups or individuals.** Users can create conversations which include any number of other users (including 0). Members of those chats can then send messages and subsequently edit and delete their own messages in\ those conversations.
 
 ### Selection Requirements
 - [x] **Users can create conversations with groups and individuals.** As aforementioned, yes, the user can do this.
