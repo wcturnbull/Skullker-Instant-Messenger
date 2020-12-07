@@ -1,6 +1,7 @@
 # CS18000-Project-5
 
 Test Classes Description
+
 To test the three classes that aren't covered in the GUI testing we implemented three different test classes for the Account, Message, and Chat classes.
 Within each class there is a comprehensive list of test methods that ensure that all the methods work as intended for the program, all the methods exist with the correct modifier and return types, the instance variables exist with the correct modifier, and the constructors exist with the correct parameters and modifers.
 
