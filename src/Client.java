@@ -76,8 +76,8 @@ public class Client implements Constants {
      */
     public class WelcomeGUI extends JFrame {
         //Welcome panel fields
-        public final JTextField userName;           //Sign in username input
-        public final JPasswordField password;       //Sign in password input
+        private final JTextField userName;           //Sign in username input
+        private final JPasswordField password;       //Sign in password input
         private final JButton signInButton;         //sign in button
         private final JButton signUpButton;         //sign up button
 
