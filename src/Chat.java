@@ -61,7 +61,7 @@ public class Chat implements Serializable {
     }
 
     // deletes message.
-    public void removeMessage(Message message) {
+    public synchronized void removeMessage(Message message) {
         messages.remove(message);
     }
 
