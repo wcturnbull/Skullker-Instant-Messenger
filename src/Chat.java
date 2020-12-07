@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 public class Chat implements Serializable {
     private Vector<Account> users;          // list of members
     private Vector<Message> messages;       // list of messages sent to the hcat
-    private final String name;                    // name of the chat
-    private final String time;                    // time of the chat's construction
+    private final String name;              // name of the chat
+    private final String time;              // time of the chat's construction
 
     public Chat(Account owner, String name) {
         users = new Vector<Account>();
