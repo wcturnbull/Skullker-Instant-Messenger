@@ -3,6 +3,14 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import java.util.*;
 import java.lang.reflect.*;
+/**
+ * Test class for Account.
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+ *
+ * @author Neihl Wang
+ * @version 7 December 2020
+ */
 public class AccountTest {
 
     @Test(timeout = 1000)
