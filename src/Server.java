@@ -4,25 +4,26 @@ import java.util.Scanner;
 import java.util.Vector;
 
 /**
+ * Server that serves each user and keeps track of necessary data.
  *
  * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
  *
- * @author Wes Turnbull, Evan Wang CS18000, 001
+ * @author Evan Wang CS18000
  * @version 7 December 2020
  */
 public class Server implements Constants {
-    private Vector<Chat> chats;
-    private Vector<Account> users;
+    private Vector<Chat> chats;         // list of chats with members
+    private Vector<Account> users;      // list of active users
 
-    // multi-thread gatekeepers
-    private final Object RUN_SYNC;
+    private final Object runSync;       // multi-thread gatekeeper
 
-    private boolean run;
+    private boolean run;                // if run is true, the server is not terminated
 
     public Server() {
-        RUN_SYNC = new Object();
+        runSync = new Object();
         run = true;
 
+        // reads data from data.txt if it exists; otherwise, initializes lists
         if (!(new File("data.txt").exists())) {
             chats = new Vector<Chat>();
             users = new Vector<Account>();
@@ -34,20 +35,25 @@ public class Server implements Constants {
                 e.printStackTrace();
             }
         }
+
+        // launches ServerThread
         ServerThread serverThread = new ServerThread();
         serverThread.start();
 
         System.out.println("Deploying server thread...");
     }
 
+    // adds a chat to the list of chats.
     public void addChat(Chat chat) {
         chats.add(chat);
     }
 
+    // sends a message to the given chat in the list of chats.
     public void writeMessage(Message message) {
         fetchChat(message.getChat()).sendMessage(message);
     }
 
+    // fetches an updated reference to an equivalent chat in the list of chats.
     public Chat fetchChat(Chat clientChat) {
         for (Chat chat : chats) {
             if (chat.equals(clientChat)) {
@@ -57,6 +63,7 @@ public class Server implements Constants {
         return null;
     }
 
+    // fetches an updated reference to an equivalent user in the list of users.
     public Account fetchAccount(Account acc) {
         for (Account a : users) {
             if (a.matchesCredentials(acc)) {
@@ -66,6 +73,7 @@ public class Server implements Constants {
         return null;
     }
 
+    // fetches an updated reference to a user with the same username in the list of users.
     public Account matchUsernames(Account acc) {
         for (Account a : users) {
             if (a.matchesUsername(acc)) {
@@ -75,6 +83,7 @@ public class Server implements Constants {
         return null;
     }
 
+    // fetches an updated reference to a user with the same credentials in the list of users.
     public Account matchCredentials(Account acc) {
         for (Account a : users) {
             if (a.matchesCredentials(acc)) {
@@ -84,6 +93,7 @@ public class Server implements Constants {
         return null;
     }
 
+    // deletes the given account from the list of users.
     public void deleteAccount(Account account) {
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).matchesCredentials(account)) {
@@ -94,6 +104,7 @@ public class Server implements Constants {
         }
     }
 
+    // removes a chat from the list of chats if it is no longer usable (i.e. it has no members).
     public void sanitize() {
         for (int i = 0; i < chats.size(); i++) {
             if (chats.get(i).getUsers().size() < 1) {
@@ -102,19 +113,25 @@ public class Server implements Constants {
         }
     }
 
+    /**
+     * Thread that is responsible for serving a user's queries.
+     *
+     * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+     *
+     * @author Evan Wang CS18000
+     * @version 7 December 2020
+     */
     class ClientThread extends Thread {
-        private final Socket socket;
-        private ObjectInputStream ois;
-        private ObjectOutputStream oos;
-        private Account client;
+        private final Socket socket;        // socket belonging to the user
+        private ObjectInputStream ois;      // input stream for socket
+        private ObjectOutputStream oos;     // output stream for socket
+        private Account client;             // associated Account for the user
 
         public ClientThread(Socket socket) {
             this.socket = socket;
             try {
-
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 ois = new ObjectInputStream(socket.getInputStream());
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -123,11 +140,11 @@ public class Server implements Constants {
         @Override
         public void run() {
             System.out.println("Client thread deployed!");
-            byte choice = 0;
+            byte choice = 0;                // the query constant sent to the server.
             while (run) {
                 try {
                     choice = ois.readByte();
-                    if (choice == LOG_IN) {
+                    if (choice == LOG_IN) { // logging in.
                         Account acc = fetchAccount((Account) ois.readObject());
                         if (acc == null) {
                             oos.writeByte(DENIED);
@@ -138,7 +155,7 @@ public class Server implements Constants {
                             oos.writeObject(acc);
                         }
                         oos.flush();
-                    } else if (choice == REGISTER_ACCOUNT) {
+                    } else if (choice == REGISTER_ACCOUNT) { // creating a new account.
                         Account newAcc = (Account) ois.readObject();
                         if (matchUsernames(newAcc) == null) {
                             oos.writeByte(CONTINUE);
@@ -149,11 +166,11 @@ public class Server implements Constants {
                             oos.writeByte(DENIED);
                         }
                         oos.flush();
-                    } else if (choice == DELETE_ACCOUNT) {
+                    } else if (choice == DELETE_ACCOUNT) { // deleting an account.
                         deleteAccount(client);
                         System.out.println(client.getUserName() + " was deleted.");
                         client = null;
-                    } else if (choice == EDIT_USERNAME) {
+                    } else if (choice == EDIT_USERNAME) { // editing an account's username.
                         Account acc = (Account) ois.readObject();
                         if (matchUsernames(acc) == null) {
                             oos.writeByte(CONTINUE);
@@ -162,14 +179,14 @@ public class Server implements Constants {
                             oos.writeByte(DENIED);
                         }
                         oos.flush();
-                    } else if (choice == EDIT_PASSWORD) {
+                    } else if (choice == EDIT_PASSWORD) { // editing an account's password.
                         Account acc = (Account) ois.readObject();
                         client.setPassword(acc.getPassword());
-                    } else if (choice == SEND_MESSAGE) {
+                    } else if (choice == SEND_MESSAGE) { // sending a message.
                         Message message = (Message) ois.readObject();
                         writeMessage(new Message(client, message.getMessage(),
                                 fetchChat(message.getChat())));
-                    } else if (choice == CREATE_CHAT) {
+                    } else if (choice == CREATE_CHAT) { // creating a chat
                         Chat chat = new Chat(client, ((Chat) ois.readObject()).getName());
                         if (fetchChat(chat) == null) {
                             oos.writeByte(CONTINUE);
@@ -179,7 +196,7 @@ public class Server implements Constants {
                             oos.writeByte(DENIED);
                         }
                         oos.flush();
-                    } else if (choice == ADD_USER_TO_CHAT) {
+                    } else if (choice == ADD_USER_TO_CHAT) { // adding a user to a chat.
                         Chat chat = (Chat) ois.readObject();
                         Account acc = matchUsernames((Account) ois.readObject());
                         if (acc == null || fetchChat(chat).getUsers().contains(acc)) {
@@ -189,17 +206,18 @@ public class Server implements Constants {
                             fetchChat(chat).addUser(acc);
                         }
                         oos.flush();
-                    } else if (choice == LEAVE_CHAT) {
+                    } else if (choice == LEAVE_CHAT) { // leaving a chat.
                         Chat chat = (Chat) ois.readObject();
                         fetchChat(chat).removeUser(client);
-                    } else if (choice == EDIT_MESSAGE) {
+                    } else if (choice == EDIT_MESSAGE) { // editing a message.
                         Message message = (Message) ois.readObject();
                         String newText = (String) ois.readObject();
                         fetchChat(message.getChat()).fetchMessage(message).editMessage(newText);
-                    } else if (choice == DELETE_MESSAGE) {
+                    } else if (choice == DELETE_MESSAGE) { // deleting a message.
                         Message message = (Message) ois.readObject();
                         fetchChat(message.getChat()).removeMessage(message);
                     }
+                    // sending updated Account object so long as the account is not null
                     if (client != null) {
                         oos.writeObject(client);
                         oos.flush();
@@ -224,8 +242,16 @@ public class Server implements Constants {
         }
     }
 
+    /**
+     * Thread responsible for accepting new connections to the server.
+     *
+     * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+     *
+     * @author Wes Turnbull, Evan Wang CS18000, 001
+     * @version 7 December 2020
+     */
     class ServerThread extends Thread {
-        private ServerSocket serverSocket;
+        private ServerSocket serverSocket;      // server's ServerSocket
 
         public ServerThread() {
             System.out.println("Server thread deployed!");
@@ -238,8 +264,9 @@ public class Server implements Constants {
 
         @Override
         public void run() {
+            // starts an executioner thread
             new ExecutionerThread().start();
-            while (run) {
+            while (run) { // accepts new connections so long as the server is running
                 try {
                     Socket socket = serverSocket.accept();
                     System.out.println("Client accepted!");
@@ -254,8 +281,17 @@ public class Server implements Constants {
             }
         }
 
+        /**
+         * Thread responsible for terminating the Server safely when
+         * the maintainer of the Server enters anything into the terminal.
+         *
+         * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+         *
+         * @author Wes Turnbull, Evan Wang CS18000, 001
+         * @version 7 December 2020
+         */
         class ExecutionerThread extends Thread {
-            private Scanner in;
+            private Scanner in;     // input for the maintainer of the server
 
             public ExecutionerThread() {
                 in = new Scanner(System.in);
@@ -263,9 +299,11 @@ public class Server implements Constants {
 
             @Override
             public void run() {
+                // this method blocks at in.nextLine() until the maintainer enters anything.
                 System.out.println("Respond to this prompt when you desire to close the server.");
                 in.nextLine();
-                synchronized (RUN_SYNC) {
+                // closes the ServerSocket once something is entered into terminal.
+                synchronized (runSync) {
                     run = false;
                     try {
                         serverSocket.close();
@@ -273,6 +311,7 @@ public class Server implements Constants {
                         e.printStackTrace();
                     }
                 }
+                // writes current data to data.txt.
                 try (ObjectOutputStream foos = new ObjectOutputStream(new FileOutputStream("data.txt"))) {
                     foos.writeObject(chats);
                     foos.writeObject(users);

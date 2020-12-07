@@ -1364,7 +1364,7 @@ public class Client implements Constants {
                     addUser();
                 }
                 if (e.getSource() == signOutButton) {
-                    timer.restart();
+                    timer.stop();
                     int yes_no = JOptionPane.showConfirmDialog(null,
                             "Are you sure you want to sign out?",
                             "Skullker", JOptionPane.YES_NO_OPTION);
