@@ -84,7 +84,7 @@ public class ChatTest {
         }
         Account acc = new Account("testing", "1234");
         Chat chat = new Chat(acc, "TestChat");
-        assertEquals("1234", chat.getName());
+        assertEquals("TestChat", chat.getName());
         assertTrue(chat.getUsers().contains(acc));
     }
     @Test

@@ -49,14 +49,14 @@ public class MessageTest {
             Assert.fail();
         }
         try {
-            testingMessage = Message.class.getDeclaredField("message");
+            testingMessage = Message.class.getDeclaredField("text");
             if (!Modifier.isPrivate(testingMessage.getModifiers())) {
                 Assert.fail();
             } else if (!testingMessage.getType().equals(String.class)) {
                 Assert.fail();
             }
         } catch (NoSuchFieldException e) {
-            System.out.println("The message field does not exist");
+            System.out.println("The text field does not exist");
             Assert.fail();
         }
         try {
