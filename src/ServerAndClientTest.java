@@ -1,17 +1,26 @@
 import org.junit.Assert;
 import org.junit.Test;
+import java.awt.*;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.*;
 import java.lang.reflect.*;
-public class RunLocalTest {
+
+/**
+ * Test for Server and Client
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+ *
+ * @author Evan Wang CS18000
+ * @version 7 December 2020
+ */
+public class ServerAndClientTest {
 
     @Test (timeout = 1000)
-    public void testServerFields() {
+    public void testServerFields() {    // tests Server instance fields
         Field chats;
         Field users;
-        Field RUN_SYNC;
+        Field runSync;
         Field run;
         try {
             chats = Server.class.getDeclaredField("chats");
@@ -35,14 +44,14 @@ public class RunLocalTest {
             System.out.println("The users field is missing");
         }
         try {
-            RUN_SYNC = Server.class.getDeclaredField("RUN_SYNC");
-            if (Modifier.isPublic(RUN_SYNC.getModifiers())) {
+            runSync = Server.class.getDeclaredField("runSync");
+            if (Modifier.isPublic(runSync.getModifiers())) {
                 Assert.fail();
-            } else if (!RUN_SYNC.getType().equals(Object.class)) {
+            } else if (!runSync.getType().equals(Object.class)) {
                 Assert.fail();
             }
         } catch (NoSuchFieldException e) {
-            System.out.println("The field RUN_SYNC is missing");
+            System.out.println("The field runSync is missing");
             Assert.fail();
         }
         try {
@@ -59,13 +68,14 @@ public class RunLocalTest {
     }
 
     @Test
-    public void testClientFields() {
+    public void testClientFields() {    // tests Client instance fields
         Field account;
-        Field socket;
         Field oos;
         Field ois;
         Field welcome;
         Field app;
+        Field skullkerLogo;
+        Field skullkerLogoIcon;
         try {
             account = Client.class.getDeclaredField("account");
             if (Modifier.isPublic(account.getModifiers())) {
@@ -78,14 +88,24 @@ public class RunLocalTest {
             Assert.fail();
         }
         try {
-            socket = Client.class.getDeclaredField("socket");
-            if (Modifier.isPublic(socket.getModifiers())) {
+            skullkerLogo = Client.class.getDeclaredField("skullkerLogo");
+            if (Modifier.isPublic(skullkerLogo.getModifiers())) {
                 Assert.fail();
-            } else if (!socket.getType().equals(Socket.class)) {
+            } else if (!skullkerLogo.getType().equals(Image.class)) {
                 Assert.fail();
             }
         } catch (NoSuchFieldException e) {
-            System.out.println("The socket field is missing");
+            System.out.println("The skullkerLogo field is missing");
+        }
+        try {
+            skullkerLogoIcon = Client.class.getDeclaredField("skullkerLogoIcon");
+            if (Modifier.isPublic(skullkerLogoIcon.getModifiers())) {
+                Assert.fail();
+            } else if (!skullkerLogoIcon.getType().equals(Image.class)) {
+                Assert.fail();
+            }
+        } catch (NoSuchFieldException e) {
+            System.out.println("The skullkerLogoIcon field is missing");
         }
         try {
             oos = Client.class.getDeclaredField("oos");
@@ -129,6 +149,68 @@ public class RunLocalTest {
             }
         } catch (NoSuchFieldException e) {
             System.out.println("The app field is missing");
+            Assert.fail();
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testServerClass() {     // tests Server inherits from correct superclass
+        Class<?> clazz = Server.class;
+        Class<?> superclasses;
+        superclasses = clazz.getSuperclass();
+        if (!superclasses.equals(Object.class)) {
+            Assert.fail();
+        }
+        try {
+            Class.forName("Server");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ensure that the Server class exists");
+            Assert.fail();
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testClientClass() {     // tests Client inherits from correct superclass
+        Class<?> clazz = Client.class;
+        Class<?> superclasses;
+        superclasses = clazz.getSuperclass();
+        if (!superclasses.equals(Object.class)) {
+            Assert.fail();
+        }
+        try {
+            Class.forName("Client");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ensure that the Client class exists");
+            Assert.fail();
+        }
+    }
+
+    @Test (timeout = 1000)
+    public void testServerConstructor() {       // tests Server constructor
+        Constructor<Server> constructor;
+        try {
+            Class[] classes = new Class[0];
+            constructor = Server.class.getConstructor(classes);
+            if (Modifier.isPrivate(constructor.getModifiers())) {
+                Assert.fail();
+            }
+        } catch (NoSuchMethodException e) {
+            System.out.println("Ensure that the constructor for the Server class exists and has proper parameters");
+            Assert.fail();
+        }
+    }
+
+    @Test (timeout = 1000)
+    public void testClientConstructor() {       // tests Client constructor
+        Constructor<Client> constructor;
+        try {
+            Class[] classes = new Class[0];
+            constructor = Client.class.getConstructor(classes);
+            if (Modifier.isPrivate(constructor.getModifiers())) {
+                Assert.fail();
+            }
+        } catch (NoSuchMethodException e) {
+            System.out.println("Ensure that the constructor for the Server class exists and has proper parameters");
             Assert.fail();
         }
     }
