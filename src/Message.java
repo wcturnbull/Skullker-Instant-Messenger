@@ -33,8 +33,8 @@ public class Message implements Serializable {
     }
 
     // edits the string content of the message.
-    public synchronized void editMessage(String text) {
-        this.text = text;
+    public synchronized void editMessage(String newText) {
+        this.text = newText;
     }
 
     // gets the chat the message is in.
