@@ -90,7 +90,7 @@ public class Client implements Constants {
         private JButton registerButton;                     //Register button
 
         //Action Listener for the Welcome screen
-        ActionListener actionListener = new ActionListener() {
+        private ActionListener actionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //Sign In Button
