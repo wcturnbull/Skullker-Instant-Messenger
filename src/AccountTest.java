@@ -132,7 +132,7 @@ public class AccountTest {
         }
         Account acc = new Account("test", "1234");
         acc.setUserName("test2");
-        assertEquals("test2",acc.getUserName());
+        assertEquals("test2", acc.getUserName());
     }
 
     @Test
@@ -307,7 +307,7 @@ public class AccountTest {
         }
         Account acc = new Account("test", "1234");
         Account account = new Account("test", "12345");
-        Account fake = new Account("tEst","1234");
+        Account fake = new Account("tEst", "1234");
         assertTrue(acc.matchesUsername(account));
         assertFalse(acc.matchesUsername(fake));
     }
@@ -327,7 +327,7 @@ public class AccountTest {
         }
         Account acc = new Account("test", "1234");
         Account account = new Account("test", "12345");
-        Account fake = new Account("test","1234");
+        Account fake = new Account("test", "1234");
         assertEquals(false, acc.matchesCredentials(account));
         assertTrue(acc.matchesCredentials(fake));
     }
