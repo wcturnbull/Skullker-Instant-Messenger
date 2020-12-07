@@ -48,7 +48,7 @@ public class Message implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public synchronized boolean equals(Object o) {
         if (o == null) {
             return false;
         }
@@ -68,7 +68,7 @@ public class Message implements Serializable {
         return false;
     }
 
-    public String toString() {
+    public synchronized String toString() {
         return text;
     }
 }
