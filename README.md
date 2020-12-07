@@ -310,7 +310,7 @@ This is the `ActionListener` added to most buttons in the application GUI, which
 | `public void actionPerformed(ActionEvent e)` | Performs an appropriate action depending on `e.getSource()` |
 
 ## Test Classes
-To test the three classes that aren't covered in GUI testing, we implemented four different test classes for the `Account`, `Message`, `Chat`, `Server`, and `Client` classes:
+To test the five outer classes that aren't covered in GUI testing, we implemented four different test classes for the `Account`, `Message`, `Chat`, `Server`, and `Client` classes:
 - `AccountTest`: Tests each of `Account`'s methods (including the constructor), its superclasses, and its instance fields.
 - `MessageTest`: Tests each of `Message`'s methods (including the constructor), its superclasses, and its instance fields.
 - `ChatTest`: Tests each of `Chat`'s methods (including the constructor), its superclasses, and its instance fields.
