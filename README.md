@@ -114,7 +114,35 @@ This ADT represents the `Account`s that users can create.
 | `public synchronized boolean equals(Object o)` | Checks the `Object` and the `Account` for equality |
 | `public synchronized String toString()` | Accessor for a `String` representation of the `Account` |
 
+## Interfaces
+Our project only used one interface, `Constants`, which is implemented by both `Server` and `Client`.
+
+### Constants
+This interface is a constant interface pattern that defines hexadecimal `byte` values which correspond to different queries the `Client` and the `Server` can send to one another. Appropriately, only `Server` and `Client` implement this interface. The `byte` values follows a sort of lexicon:
+- `0x1` is the hexadecimal prefix for queries dealing with `Message`s
+- `0x2` is the hexadecimal prefix for queries dealing with `Account`s
+- `0x3` is the hexadecimal prefix for queries dealing with `Chat`s
+- `0x` is the hexademical prefix for generic queries not about any specific class.
+
+| Fields | Description |
+|-|-|
+| `byte SEND_MESSAGE = 0x1a` | Constant for a `Client` query to send a `Message` |
+| `byte DELETE_MESSAGE = 0x1d` | Constant for a `Client` query to delete a `Message` |
+| `byte EDIT_MESSAGE = 0x1e` | Constant for a `Client` query to edit a `Message` |
+| `byte REGISTER_ACCOUNT = 0x2a` | Constant for a `Client` query to register for an `Account` |
+| `byte LOG_IN = 0x2b` | Constant for a `Client` query to log into an `Account` |
+| `byte DELETE_ACCOUNT = 0x2d | Constant for a `Client` query to delete their `Account` |
+| `byte EDIT_USERNAME = 0x21` | Constant for a `Client` query to edit their `Account`'s username |
+| `byte EDIT_PASSWORD = 0x22` | Constant for a `Client` query to edit their `Account`'s password |
+| `byte ADD_USER_TO_CHAT = 0x3a` | Constant for a `Client` query to add a user to a `Chat` |
+| `byte CREATE_CHAT = 0x3c` | Constant for a `Client` query to create a `Chat` |
+| `byte LEAVE_CHAT = 0x3d` | Constant for a `Client` query to leave (delete) a `Chat` |
+| `byte REQUEST_DATA = 0x0` | Constant for a `Client` query for their updated `Account` |
+| `byte CONTINUE = 0xc` | Constant for a `Server` positive response to a `Client` query |
+| `byte DENIED = 0xd` | Constant for a `Server` negative response to a `Client` query |
+
 ## Main Classes
+These classes are the ones actually ran by users when they want to use Skullker.
 
 ### Server
 This class is responsible for preserving user data, accepting new client connections, and handling client queries to the server.
@@ -135,7 +163,8 @@ This class is responsible for preserving user data, accepting new client connect
 | `public Account matchUsernames(Account acc)` | Fetches an `Account` that has the same username as the given `Account` |
 | `public Account matchCredentials(Account acc)` | Fetches an `Account` that has the same credentials as the given `Account` |
 | `public void deleteAccount(Account account)` | Deletes the given account from `users` |
-| `public void sanitize()` | Removes non-active `Chat`s from `chats`.
+| `public void sanitize()` | Removes non-active `Chat`s from `chats` |
+| `public static void main(String[] args)` | Constructs a `Server` object |
 
 ### Server.ServerThread
 This `Thread` is responsible for accepting new clients' connections.
@@ -184,14 +213,24 @@ This is the client-side part of the application which communicates with the `Ser
 | `private Image skullkerLogo` | Our logo |
 | `private Image skullkerLogoIcon` | The logo used for the GUIs' icon |
 
-### Client.WelcomeGUI
+| Method | Description |
+|-|-|
+| `public static void main(String[] args)` | Constructs a `Client` object and begins running `Client`'s `WelcomeGUI` on `Swing`'s `invokeLater` `Thread` |
 
+### Client.WelcomeGUI
+This is the welcome screen, from which the user can log in or register for a new `Account`. After the user gets their `Account`, `WelcomeGUI` is disposed and then an `AppGUI` is ran on `Swing`'s `invokeLater` `Thread`.
 
 ### Client.AppGUI
+This is the Skullker's main application screen, from which the user can do all the functionality outlined in the sections above.
 
 ## Test Classes
-
-To test the three classes that aren't covered in the GUI testing, we implemented three different test classes for the Account, Message, and Chat classes.
+To test the three classes that aren't covered in GUI testing, we implemented four different test classes for the `Account`, `Message`, `Chat`, `Server`, and `Client` classes:
+- `AccountTest`: Tests each of `Account`'s methods (including the constructor), its superclasses, and its instance fields.
+- `MessageTest`: Tests each of `Message`'s methods (including the constructor), its superclasses, and its instance fields.
+- `ChatTest`: Tests each of `Chat`'s methods (including the constructor), its superclasses, and its instance fields.
+- `ServerAndClientTest`: Tests `Server`'s and `Client`'s instance fields, superclasses, and constructors.
 Within each class there is a comprehensive list of test methods that ensure that all the methods work as intended for the program, all the methods exist with the correct modifier and return types, the instance variables exist with the correct modifier, and the constructors exist with the correct parameters and modifers.
 
-All tests were created with JUnit4 as the mainframe, we used the standard assertEquals/assertTrue methods for most of the testing in regards to actually making sure the methods work as intended. The rest of the work was done utilizing java.lang.reflect which enabled us to grab certain data that previously would have been very tough to verify such as getting methods, modifiers, and fields. With this information it was simple enough to use the methods provided by java.lang.reflect to create a whole and comprehensive test class for each of the three classes that could not be tested through the GUI.
+All tests were created with JUnit4 as the mainframe, we used the standard assertEquals/assertTrue methods for most of the testing in regards to actually making sure the methods work as intended. The rest of the work was done utilizing java.lang.reflect which enabled us to grab certain data that previously would have been very tough to verify such as getting methods, modifiers, and fields. With this information, it was simple enough to use the methods provided by java.lang.reflect to create a whole and comprehensive test class for each of the three classes that could not be tested through the GUI.
+
+For classes and methods which had to be tested through the GUI, we implemented each feature one at a time and tested them in combination with past features.
