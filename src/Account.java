@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class Account implements Serializable {
     private String userName;        // username of account
     private String password;        // password of account
-    private final String serial;    // serial code of the account
+    private String serial;          // serial code of the account
     private Vector<Chat> chats;     // list of chats the user is in
 
     public Account(String userName, String password) {
