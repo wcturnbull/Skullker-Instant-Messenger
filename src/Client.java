@@ -10,8 +10,7 @@ import java.net.*;
 import java.util.Vector;
 
 /**
- * Client class
- *
+ * Client class that handles all of the client interactions and GUIs
  *
  * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
  *
@@ -67,6 +66,14 @@ public class Client implements Constants {
         });
     }
 
+    /**
+     * WelcomeGUI class creates the WelcomeGUI and handles the sign in/sign up
+     *
+     * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+     *
+     * @author Wes Turnbull, Evan Wang CS18000, 001
+     * @version 7 December 2020
+     */
     public class WelcomeGUI extends JFrame {
         //Welcome panel fields
         public final JTextField userName;           //Sign in username input
@@ -158,8 +165,8 @@ public class Client implements Constants {
                         String.valueOf(passwordRegisterTextField.getPassword()).indexOf(' ') >= 0) {
                     JOptionPane.showMessageDialog(null, "Invalid Account", "Skullker",
                             JOptionPane.ERROR_MESSAGE);
-                } else if (!String.valueOf(passwordRegisterTextField.getPassword()).
-                        equals(String.valueOf(confirmPasswordTextField.getPassword()))) {
+                } else if (!String.valueOf(passwordRegisterTextField.getPassword()).equals(
+                        String.valueOf(confirmPasswordTextField.getPassword()))) {
                     JOptionPane.showMessageDialog(null, "Passwords did not match",
                             "Skullker", JOptionPane.ERROR_MESSAGE);
                 } else {
@@ -411,6 +418,14 @@ public class Client implements Constants {
         }
     }
 
+    /**
+     * AppGUI class creates the App's GUI and handles the chat functionality
+     *
+     * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+     *
+     * @author Wes Turnbull, Evan Wang CS18000, 001
+     * @version 7 December 2020
+     */
     public class AppGUI extends JFrame {
         //main app window
         private final JPanel chatSelectorPanel;         // panel that holds all of the chats a user is in
@@ -418,7 +433,7 @@ public class Client implements Constants {
         private final JTextField sendMessage;           // text field for a user to enter their message
         private final JButton sendButton;               // button that sends a message to the other user(s) in the chat
         private final JButton settingsButton;           // button that allows a user to edit/delete their account
-        private final JButton signOutButton;            // button that allows a user to sign out and return to the Welcome screen
+        private final JButton signOutButton;            // button that allows a user to sign out
         private final JButton createChatPopupButton;    // button that allows a user to create a new chat
         private final JLabel chatLabel;                 // label that shows the title/users in a selected chat
         private final JButton addUsersButton;           // button to add users into a selected chat
@@ -545,7 +560,8 @@ public class Client implements Constants {
             messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.X_AXIS));
             messagePanel.add(sendMessage);
             sendMessage.setEditable(false);
-            sendMessage.addKeyListener(new KeyAdapter() {@Override
+            sendMessage.addKeyListener(new KeyAdapter() {
+                @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         Message newMessage = new Message(account, sendMessage.getText().trim(), currentChat);
@@ -661,7 +677,8 @@ public class Client implements Constants {
                 editAccountFrame.dispose();
                 addUsersWindow.dispose();
                 editMessageFrame.dispose();
-            } catch (NullPointerException ignored) {
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
         }
 
@@ -1038,7 +1055,8 @@ public class Client implements Constants {
             JPanel createChatContentPane = new JPanel();        //holds the content that goes onto the createChatPopUp
             createChatNameLabel = new JLabel("Chat Name: ");
             createChatNameTextField = new JTextField(15);
-            createChatNameTextField.addKeyListener(new KeyAdapter() {@Override
+            createChatNameTextField.addKeyListener(new KeyAdapter() {
+                @Override
                 public void keyPressed(KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         if (createChatNameTextField.getText().equals("")) {
@@ -1201,7 +1219,7 @@ public class Client implements Constants {
 
         public void createFillerMessagePane() {
             gbcChatPanel.gridx = 1;
-            JTextField chatFillerPanel = new JTextField();      // fills the empty space between sent and received messages
+            JTextField chatFillerPanel = new JTextField();      // fixes the spacing in the chatPanel
             chatFillerPanel.setEditable(false);
             chatFillerPanel.setPreferredSize(new Dimension(chatScroller.getWidth() - 300, 0));
             chatFillerPanel.setBackground(Color.WHITE);
@@ -1304,6 +1322,14 @@ public class Client implements Constants {
             }
         }
 
+        /**
+         * ActionListener that handles all of the button's and their functionality
+         *
+         * <p>Purdue University -- CS18000 -- Fall 2020 -- Project 5</p>
+         *
+         * @author Wes Turnbull, Evan Wang CS18000, 001
+         * @version 7 December 2020
+         */
         class AppGUIListener implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1332,10 +1358,10 @@ public class Client implements Constants {
                 }
                 if (e.getSource() == deleteAccountButton) {
                     timer.restart();
-                    int yes_no = JOptionPane.showConfirmDialog(null,
+                    int yesNo = JOptionPane.showConfirmDialog(null,
                             "Are you sure you would like to delete your account?",
                             "Skullker", JOptionPane.YES_NO_OPTION);
-                    if (yes_no == JOptionPane.YES_OPTION) {
+                    if (yesNo == JOptionPane.YES_OPTION) {
                         try {
                             timer.restart();
                             chatSelectorPanel.removeAll();
@@ -1365,10 +1391,10 @@ public class Client implements Constants {
                 }
                 if (e.getSource() == signOutButton) {
                     timer.stop();
-                    int yes_no = JOptionPane.showConfirmDialog(null,
+                    int yesNo = JOptionPane.showConfirmDialog(null,
                             "Are you sure you want to sign out?",
                             "Skullker", JOptionPane.YES_NO_OPTION);
-                    if (yes_no == JOptionPane.YES_OPTION) {
+                    if (yesNo == JOptionPane.YES_OPTION) {
                         account = null;
                         app.dispose();
                         SwingUtilities.invokeLater(new Runnable() {
