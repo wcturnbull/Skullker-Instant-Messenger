@@ -9,7 +9,7 @@
  *      Chat    - 0x3
  * Generic constants that are used in multiple contexts are given the prefix, 0x.
  *
- * @author Wes Turnbull, Evan Wang CS18000, 001
+ * @author Evan Wang CS18000
  * @version 7 December 2020
  */
 public interface Constants {
